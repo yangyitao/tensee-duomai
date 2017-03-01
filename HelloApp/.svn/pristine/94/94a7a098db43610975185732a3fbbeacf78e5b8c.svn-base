@@ -1,0 +1,208 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>附件信息</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div id="main">
+        <div data-role="80" class="aui-card aui-input-form aui-input-flow" style="margin-bottom: 0px; margin-top: 15px">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">工作时间</span>
+                <input id="WorkDate" type="text" class="aui-input" tapmode placeholder="请选择参加工作时间!" readonly="readonly" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">过往病史</span>
+                <input id="SickNote" type="text" class="aui-input aui-important" placeholder="请填写过往病史!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">招聘渠道</span>
+                <select id="Recruitment" class="aui-input aui-important" placeholder="请选择招聘渠道!">
+                </select>
+            </div>
+            <div id="divOtherRecruitment" class="aui-input-row" style="display: none">
+                <span class="aui-input-addon">其他渠道</span>
+                <input id="OtherRecruitment" type="text" class="aui-input aui-important" placeholder="请填写其他渠道!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">上装尺码</span>
+                <select id="ClothesSize" class="aui-input aui-important" placeholder="请选择上装尺码!">
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">下装尺码</span>
+                <select id="TrousersSize" class="aui-input aui-important" placeholder="请选择下装尺码!">
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">鞋子尺码</span>
+                <select id="ShoeSize" class="aui-input aui-important" placeholder="请选择鞋子尺码!">
+                </select>
+            </div>
+        </div>
+        <div id="divFooter" style="height: 60px;"></div>
+        <footer class="aui-nav" id="footer" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7;">
+            <div id="btnSave" class="aui-btn aui-btn-block aui-btn-warning" style="height: 45px; width: 100%; line-height: 0.9;">
+                保存修改
+            </div>
+        </footer>
+    </div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script src="../../../script/honesty.flow.js"></script>
+<script src="../../../script/honesty.valid.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        $(function () {
+            LoadData();
+            $("#WorkDate").tap(function () {
+                $honesty.DateTimeSelect({
+                    Type: "Date",
+                    LevelNum: 2,
+                    ControlID: $(this).attr("id"),
+                    ControlValue: $(this).val()
+                });
+            });
+
+            $("#Recruitment").change(function () {
+                if ($("#Recruitment").val() == "08") {
+                    $("#divOtherRecruitment").show();
+                }
+                else {
+                    $("#divOtherRecruitment").hide();
+                }
+            });
+
+            $("#btnSave").tap(function () {
+                if (CheckInput()) {
+                    try {
+                        var _options = {
+                            PostData: {
+                                Params: {
+                                    result: "ModifyEmpFile",
+                                    EmpID: GetSession("UserID"),
+                                    Recruitment: $("#Recruitment").val(),
+                                    OtherRecruitment: ($("#Recruitment").val() == "08" ? $("#OtherRecruitment").val() : ""),
+                                    SickNote: $("#SickNote").val(),
+                                    WorkDate: $("#WorkDate").val(),
+                                    ClothesSize: $("#ClothesSize").val(),
+                                    TrousersSize: $("#TrousersSize").val(),
+                                    ShoeSize: $("#ShoeSize").val()
+                                },
+                                ProcName: "proc_SOM_HR_EmpModifyInfo",
+                                DataType: "Bool",
+                                ExecType: "PROC",
+                                Mode: "MSSQL"
+                            }
+                        };
+                        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                            if (_result.Data == "True") {
+                                $honesty.CloseWin();
+                            }
+                            else {
+                                $honesty.ShowMsg({ title: "警告", msg: "保存出现异常!" });
+                            }
+                        });
+                    }
+                    catch (e) {
+                        alert(e);
+                    }
+                }
+            });
+        });
+    }
+
+    function LoadData() {
+        InitClothes({ Con_ID: "ClothesSize" });
+        InitTrousers({ Con_ID: "TrousersSize" });
+        InitShoe({ Con_ID: "ShoeSize" });
+        InitRecruitment({ Con_ID: "Recruitment" });
+        var _options = {
+            PostData: {
+                Params: {
+                    result: "InitModifyEmpInfo",
+                    EmpID: GetSession("UserID")
+                },
+                ProcName: "proc_SOM_HR_EmpModifyInfo",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        if (item.Sex == "") {
+                            $honesty.ShowMsg({
+                                title: "警告", msg: "个人资料不完整，请先维护个人资料!", callback: function () {
+                                    $honesty.CloseWin();
+                                    return false;
+                                }
+                            });
+                        }
+                        else {
+                            if (item.Recruitment != "") {
+                                $("#Recruitment").val(item.Recruitment);
+                                if (item.Recruitment == "08") {
+                                    $("#divOtherRecruitment").show();
+                                    $("#OtherRecruitment").val(item.OtherRecruitment);
+                                }
+                            }
+                            $("#WorkDate").val(item.WorkDate);
+                            $("#SickNote").val(item.SickNote);
+                            InitClothes({ Con_ID: "ClothesSize", Sex: item.Sex });
+                            InitTrousers({ Con_ID: "TrousersSize", Sex: item.Sex });
+                            InitShoe({ Con_ID: "ShoeSize", Sex: item.Sex });
+                            if (item.ClothesSize != "") { $("#ClothesSize").val(item.ClothesSize) };
+                            if (item.TrousersSize != "") { $("#TrousersSize").val(item.TrousersSize) };
+                            if (item.ShoeSize != "") { $("#ShoeSize").val(item.ShoeSize) };
+                        }
+                    });
+                }
+                else {
+                    $honesty.ShowMsg({
+                        title: "警告", msg: "个人资料不完整，请先维护个人资料!", callback: function () {
+                            $honesty.CloseWin();
+                            return false;
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    function CheckInput() {
+        if ($("#WorkDate").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请选择参加工作时间!" });
+            return false;
+        }
+        if ($("#SickNote").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请填写过往病史!" });
+            return false;
+        }
+        if ($("#Recruitment").val() == "08" && $("#OtherRecruitment").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "选择其他招聘渠道请填写明细!" });
+            return false;
+        }
+        if ($("#ClothesSize").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请选择上装尺码!" });
+            return false;
+        }
+        if ($("#TrousersSize").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请选择裤子尺码!" });
+            return false;
+        }
+        if ($("#ShoeSize").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请选择鞋子尺码!" });
+            return false;
+        }
+        return true;
+    }
+</script>
+</html>

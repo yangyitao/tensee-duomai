@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>title</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-list-view-cell
+        {
+            padding: 5px 12px;
+        }
+
+        .aui-input-row
+        {
+            padding-left: 7px;
+        }
+
+        .aui-img-body
+        {
+            font-size: 12px;
+        }
+
+            .aui-img-body p
+            {
+                font-size: 10px;
+            }
+    </style>
+</head>
+<body>
+    <div class="aui-content" style="overflow: auto;">
+        <div class="aui-form">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">日期</span>
+                <input type="text" class="aui-input" id="txtDate" readonly="true" />
+            </div>
+        </div>
+        <ul class="aui-list-view" id="content">
+        </ul>
+    </div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _Date = $honesty.NowDate();
+    var _IsLeader = "0";
+    var _OrganizeID;
+    var _ShopCode;
+    var _UserID = GetSession("UserID");
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _ShopCode = api.pageParam.ShopCode;
+            $("#txtDate").val(_Date.Format("yyyy-MM-dd"));
+            LoadData();
+            $("#txtDate").tap(function () {
+                $honesty.DateTimeSelect({
+                    LevelNum: 2,
+                    Type: "Date",
+                    ControlID: "txtDate",
+                    ControlValue: $("#txtDate").val(),
+                    onchange: function (ret) {
+                        if (ret) {
+                            LoadData();
+                        }
+                    }
+                });
+            });
+            _OrganizeID = api.pageParam.OrganizeID;
+            if ( _OrganizeID.toUpperCase() == GetSession("OrganizeID").toUpperCase() && GetSession("IsLeader") != "0") {
+                _IsLeader = "1";
+            }          
+        });
+    };
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "SelectList",
+                    ShopCode: _ShopCode,
+                    BeginDate: $("#txtDate").val()
+                },
+                ProcName: "proc_SOM_ISR_Promotion",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    var content = "";
+                    $.each(_result.Data, function (i, item) {
+                        content += "<li class='aui-list-view-cell' data-ID=" + item.ID + "><div class='aui-img-body aui-pull-left'><div>" + item.ActivityContent + "</div>" +
+                        "<p>" + item.BeginDate + "至" + item.EndDate + "</p></div></li>"
+                    })
+                    $("#content").html(content);
+                    $("li").tap(function () {
+                        $honesty.OpenWin({
+                            name: "Sale_PromotionSale_PromotionEdit",
+                            url: "Sale/PromotionSale/PromotionEdit.html",
+                            title: "促销总结",
+                            LevelNum: 2,
+                            pageParam: {
+                                IsLeader: _IsLeader,
+                                ID: $(this).attr("data-ID"),
+                                ShopCode: _ShopCode
+                            }
+                        });
+                    });
+                }
+            }
+        })
+    }
+</script>
+</html>

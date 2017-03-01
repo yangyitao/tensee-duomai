@@ -1,0 +1,163 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>月销售计划报表主页面</title>
+    <link href="../../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <!--<div class="aui-tab" id="divTab" style="overflow: auto; min-width: 550px">
+        <ul id="TopBar" class="aui-tab-nav">
+            <li data-index="0" class="active">本月目标</li>
+            <li data-index="1">货品目标</li>
+            <li data-index="2">VIP目标</li>
+            <li data-index="3">员工目标</li>
+            <li data-index="4">措施总结</li>
+            <li data-index="5">工作计划</li>
+            <li data-index="6">月度总结</li>
+        </ul>
+    </div>-->
+
+</body>
+</html>
+<script src="../../../../script/zepto.js"></script>
+<script src="../../../../script/api.js"></script>
+<script src="../../../../script/honesty.base.js"></script>
+
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+
+            var navigationBar = api.require('navigationBar');
+            navigationBar.open({
+                y: 0,
+                w: api.frameWidth,
+                h: 45,
+                itemSize: {
+                    w: (api.frameWidth / 7 > 90 ? api.frameWidth / 7 : 90)
+                },
+                bg: '#ffffff',
+                items: [{
+                    title: '本月目标',
+                    bg: '#ffffff',
+                    bgSelected: 'widget://image/NavBarSelected.png'
+                }, {
+                    title: '货品目标',
+                    bg: '#ffffff',
+                    bgSelected: 'widget://image/NavBarSelected.png'
+                }, {
+                    title: 'VIP目标',
+                    bg: '#ffffff',
+                    bgSelected: 'widget://image/NavBarSelected.png'
+                }, {
+                    title: '员工目标',
+                    bg: '#ffffff',
+                    bgSelected: 'widget://image/NavBarSelected.png'
+                }, {
+                    title: '措施总结',
+                    bg: '#ffffff',
+                    bgSelected: 'widget://image/NavBarSelected.png'
+                }, {
+                    title: '工作计划',
+                    bg: '#ffffff',
+                    bgSelected: 'widget://image/NavBarSelected.png'
+                }, {
+                    title: '月度总结',
+                    bg: '#ffffff',
+                    bgSelected: 'widget://image/NavBarSelected.png'
+                }],
+                font: {
+                    color: '#000',
+                    size: 16,
+                    colorSelected: '#1abc9c'
+                },
+                fixedOn: api.frameName,
+                selectedIndex: 0,
+            }, function (ret, err) {
+                if (ret) {
+                    api.setFrameGroupIndex({
+                        name: 'MonthSalForm_Tab',
+                        index: ret.index,
+                        scroll: true
+                    });
+                }
+            });
+
+
+            var h = $honesty.RangeTop(45);
+
+            api.openFrameGroup({
+                name: 'MonthSalForm_Tab',
+                scrollEnabled: true,
+                rect: { x: 0, y: 45 + h, w: 'auto', h: 'auto' },
+                index: 0,
+                preload: 0,
+                frames:
+                [{
+                    name: 'Sale_MonthSale_MonthSaleForm_TargetForm',
+                    url: 'TargetForm.html',
+                    bounces: false,
+                    pageParam: {
+                        MonthID: api.pageParam.MonthID
+                    }
+                }, {
+                    name: 'Sale_MonthSale_MonthSaleForm_GoodsForm',
+                    url: 'GoodsForm.html',
+                    bounces: false,
+                    pageParam: {
+                        MonthID: api.pageParam.MonthID
+                    }
+                }, {
+                    name: 'Sale_MonthSale_MonthSaleForm_VipForm',
+                    url: 'VipForm.html',
+                    bounces: false,
+                    pageParam: {
+                        MonthID: api.pageParam.MonthID
+                    }
+                }, {
+                    name: 'Sale_MonthSale_MonthSaleForm_EmployeeForm',
+                    url: 'EmployeeForm.html',
+                    bounces: false,
+                    pageParam: {
+                        MonthID: api.pageParam.MonthID
+                    }
+                },
+                {
+                    name: 'Sale_MonthSale_MonthSaleForm_PlanSummaryForm',
+                    url: 'PlanSummaryForm.html',
+                    bounces: false,
+                    pageParam: {
+                        MonthID: api.pageParam.MonthID
+                    }
+                },
+                {
+                    name: 'Sale_MonthSale_MonthSaleForm_WorkPlanForm',
+                    url: 'WorkPlanForm.html',
+                    bounces: false,
+                    pageParam: {
+                        MonthID: api.pageParam.MonthID
+                    }
+                },
+                {
+                    name: 'Sale_MonthSale_MonthSaleForm_MonthSaleSummaryForm',
+                    url: 'MonthSaleSummaryForm.html',
+                    bounces: false,
+                    pageParam: {
+                        MonthID: api.pageParam.MonthID
+                    }
+                }]
+            },
+             function (ret, err) {
+                 navigationBar.config({
+                     key: 'selectedIndex',
+                     value: ret.index
+                 });
+
+             });
+        });
+
+    }
+</script>

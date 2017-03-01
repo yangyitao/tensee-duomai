@@ -1,0 +1,122 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>竞品动态选择</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div style="height: 10px;"></div>
+    <div class="aui-content aui-card">
+        <div class="aui-form">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">年份</span>
+                <div class="aui-counter aui-warning aui-info aui-pull-left " style="margin-left: 10px;">
+                    <div id="btnYearMinus" class="aui-counter-minus"></div>
+                    <input id="txtYear" class="aui-counter-input" type="text" value="" style="width: 60px; text-align: center" readonly="true">
+                    <div id="btnYearPlus" class="aui-counter-plus"></div>
+                </div>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">月份</span>
+
+                <div class="aui-counter aui-warning aui-info aui-pull-left " style="margin-left: 10px;">
+                    <div id="btnMonthMinus" class="aui-counter-minus"></div>
+                    <select id="ddlMonth" class="aui-input" style="width: 60px; text-align: center; border: 1px solid #e6e4e3; border-style: solid none;">
+                        <option value="1">1月</option>
+                        <option value="2">2月</option>
+                        <option value="3">3月</option>
+                        <option value="4">4月</option>
+                        <option value="5">5月</option>
+                        <option value="6">6月</option>
+                        <option value="7">7月</option>
+                        <option value="8">8月</option>
+                        <option value="9">9月</option>
+                        <option value="10">10月</option>
+                        <option value="11">11月</option>
+                        <option value="12">12月</option>
+                    </select>
+                    <div id="btnMonthPlus" class="aui-counter-plus"></div>
+                </div>
+
+            </div>
+            <div class="aui-btn-row">
+                <div id="btnSearch" class="aui-btn aui-btn-block aui-btn-info">
+                    查询
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _Date, _OrganizeID;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _Date = $honesty.NowDate();
+            _OrganizeID = api.pageParam.OrganizeID;
+
+            //初始化年份
+            $("#txtYear").val(_Date.getFullYear());
+
+            //初始化月份
+            $("#ddlMonth").val(_Date.getMonth() + 1);
+
+
+            //年份减少按钮点击
+            $("#btnYearMinus").tap(function () {
+                $("#txtYear").val(Number($("#txtYear").val()) - 1);
+            });
+            //年份增加按钮点击
+            $("#btnYearPlus").tap(function () {
+                $("#txtYear").val(Number($("#txtYear").val()) + 1);
+            });
+
+
+            //月份减少按钮点击
+            $("#btnMonthMinus").tap(function () {
+                if ($("#ddlMonth").val() == "1") {
+                    $("#txtYear").val(Number($("#txtYear").val()) - 1);
+                    $("#ddlMonth").val("12");
+                }
+                else {
+                    $("#ddlMonth").val(Number($("#ddlMonth").val()) - 1);
+                }
+            });
+            //月份增加按钮点击
+            $("#btnMonthPlus").tap(function () {
+                if ($("#ddlMonth").val() == "12") {
+                    $("#txtYear").val(Number($("#txtYear").val()) + 1);
+                    $("#ddlMonth").val("1");
+                }
+                else {
+                    $("#ddlMonth").val(Number($("#ddlMonth").val()) + 1);
+                }
+            });
+
+            //查询按钮点击
+            $("#btnSearch").tap(function () {
+                $honesty.OpenWin({
+                    name: "Brand_BrandDynamic_BrandDynamicList",
+                    url: "Brand/BrandDynamic/BrandDynamicList.html",
+                    title: "竞品动态",
+                    LevelNum: 2,
+                    pageParam: {
+                        OrganizeID: _OrganizeID,
+                        Year: $("#txtYear").val(),
+                        Month: $("#ddlMonth").val()
+                    }
+                });
+            });
+
+
+        });
+
+    }
+</script>
+</html>

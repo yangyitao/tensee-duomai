@@ -1,0 +1,123 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>销售模块</title>
+    <link href="../../css/aui.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <div class="aui-content">
+        <p id="pSale" class="aui-padded-10 aui-text-center" style="display: none">销售模块</p>
+        <ul class="aui-grid-sixteen" id="ulSale">
+        </ul>
+        <p id="pHR" class="aui-padded-10 aui-text-center" style="display: none">人力资源模块</p>
+        <ul class="aui-grid-sixteen" id="ulHR">
+        </ul>
+    </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            LoadData();
+
+            //下拉刷新
+            api.setRefreshHeaderInfo({
+                visible: true,
+                loadingImg: 'widget://image/refresh.png',
+                bgColor: '#fff',
+                textColor: '#000',
+                textDown: '下拉刷新...',
+                textUp: '松开刷新...',
+                showTime: true
+            }, function (ret, err) {
+                LoadData();
+                api.refreshHeaderLoadDone();
+            });
+        });
+
+    }
+
+    //数据加载函数
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: { "Result": "GetBusinessFirstMenu", "UserID": GetSession("UserID") },
+                ProcName: "proc_SOM_Others_APPMenu",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    var saleMenu = "", hrMenu = "";
+                    var saleNum = 0, hrNum = 0;
+                    $.each(_result.Data, function (i, item) {
+                        if (item.AppRole == "1") {
+                            saleMenu += "<li  class='aui-col-xs-3 aui-text-center' tapmode onclick=\"OpenMenu(\'" + item.ModuleName + "\')\">" +
+                                        "<span class='aui-iconfont " + item.AppIcoClass + "'></span><p>" + item.Title + "</p></li>";
+                            saleNum++;
+                        }
+                        else {
+                            hrMenu += "<li  class='aui-col-xs-3 aui-text-center' tapmode onclick=\"OpenMenu(\'" + item.ModuleName + "\')\">" +
+                                      "<span class='aui-iconfont " + item.AppIcoClass + "'></span><p>" + item.Title + "</p></li>";
+                            hrNum++;
+                        }
+                    });
+
+                    var emptyNum = 4 - saleNum % 4;
+                    if (emptyNum != 4) {
+                        for (var i = 0; i < emptyNum; i++) {
+                            saleMenu += "<li class='aui-col-xs-3 aui-text-center'><span class='aui-iconfont'>&nbsp;</span><p>&nbsp;</p></li>";
+                        }
+                    }
+                    emptyNum = 4 - hrNum % 4;
+                    if (emptyNum != 4) {
+                        for (var i = 0; i < emptyNum; i++) {
+                            hrMenu += "<li class='aui-col-xs-3 aui-text-center'><span class='aui-iconfont'>&nbsp;</span><p>&nbsp;</p></li>";
+                        }
+                    }
+                    if (saleMenu != "") {
+                        $("#pSale").css("display", "");
+                    }
+                    if (hrMenu != "") {
+                        $("#pHR").css("display", "");
+                    }
+                    $("#ulSale").html(saleMenu);
+                    $("#ulHR").html(hrMenu);
+                    api.parseTapmode();
+                }
+            }
+
+        });
+    }
+
+    //打开二级菜单
+    function OpenMenu(moduleName) {
+        api.openFrame({
+            name: 'Menu',
+            url: 'Menu.html',
+            bounces: false,
+            pageParam: {
+                DataRole: moduleName
+            },
+            rect: {
+                x: 0,
+                y: 0,
+                w: 'auto',
+                h: 'auto'
+            }
+        });
+        api.bringFrameToFront({
+            from: 'Menu'
+        });
+    }
+</script>
+</html>

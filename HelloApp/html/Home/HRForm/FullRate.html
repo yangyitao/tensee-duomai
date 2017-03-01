@@ -1,0 +1,645 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>满编率</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-nav {
+            height: 40px;
+        }
+
+            .aui-nav .aui-bar-tab {
+                height: 40px;
+            }
+
+        .aui-bar-tab li {
+            height: 40px;
+            line-height: 40px;
+        }
+
+        .aui-nav .aui-bar-tab li.active {
+            color: #fff;
+            background: #16a085;
+        }
+
+        .aui-tab-nav {
+            font-size: 14px;
+            height: 40px;
+        }
+
+            .aui-tab-nav li {
+                height: 40px;
+                line-height: 40px;
+            }
+    </style>
+</head>
+<body>
+    <div class="aui-tab" id="divTab">
+        <ul id="TopBar" class="aui-tab-nav">
+            <li data-power="Regional" class="active" data-role="big">大区</li>
+            <li data-power="Province" data-role="big">省份</li>
+            <li data-power="City" data-role="small">城市</li>
+            <li data-power="Area" data-role="small">区域</li>
+        </ul>
+    </div>
+    <div id="main" style="width: 100%; height: 100%;"></div>
+    <footer class="aui-nav" id="footer">
+        <ul class="aui-bar-tab" id="BottomBar">
+            <li data-type="All" class="active">总体</li>
+            <li data-type="Post">岗位</li>
+        </ul>
+    </footer>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script src="../../../script/echarts.min.js"></script>
+<script type="text/javascript">
+    var _Data = null,//大区数据
+        _DataExclude = null;//除了大区数据
+    var arrColor = ["rgb(147,185,67)", "rgb(147,185,67)", "rgb(147,185,67)", "rgb(147,185,67)", "rgb(147,185,67)",
+                    "rgb(147,185,67)", "rgb(147,185,67)", "rgb(147,185,67)", "rgb(147,185,67)", "rgb(147,185,67)",
+                    "rgb(147,185,67)", "rgb(147,185,67)", "rgb(147,185,67)", "rgb(147,185,67)", "rgb(147,185,67)",
+                    "rgb(147,185,67)", "rgb(147,185,67)", "rgb(147,185,67)", "rgb(147,185,67)", "rgb(147,185,67)",
+                    "rgb(147,185,67)"];
+    var arrPostColor = ['rgb(197,59,56)', 'rgb(120,86,123)', 'rgb(52,172,204)', 'rgb(176,70,0)', 'rgb(28,67,115)',
+                        'rgb(221,139,69)', '#9BCA63', '#FAD860', '#F3A43B', '#60C0DD',
+                        '#D7504B', '#C6E579', '#F4E001', '#F0805A', '#26C0C0']
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            $("#main").height(api.frameHeight - 80);
+
+            if (GetSession("Form_HRPower").toString().indexOf("AllProvince") >= 0) {
+                $("[data-role='small']").hide();
+            }
+            else {
+                $("[data-role='big']").hide();
+                $("[data-role='small']").each(function () {
+                    $("#TopBar").find(".active").removeClass("active");
+                    $(this).addClass("active");
+                    return false;
+                });
+            }
+
+            LoadData();
+
+            $("#TopBar").find("li").tap(function () {
+                $("#TopBar").find(".active").removeClass("active");
+                $(this).addClass("active");
+                LoadData();
+            });
+
+            $("#BottomBar").find("li").tap(function () {
+                $("#BottomBar").find(".active").removeClass("active");
+                $(this).addClass("active");
+                LoadData();
+            });
+        });
+
+    }
+
+    function LoadData() {
+        if ($("#TopBar").find(".active").data("power") == "Regional") {
+            if (_Data == null) {
+                var _options = {
+                    PostData: {
+                        Params: {
+                            result: "GetFullRate"
+                        },
+                        ProcName: "proc_Index_HRForm",
+                        DataType: "DataTable",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    }
+                };
+                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                    if (_result.Code == "1") {
+                        if (_result.Data.length > 0) {
+                            _Data = _result.Data;
+                            ChangeType();
+                        }
+                    }
+                    else {
+                        $honesty.CloseWin();
+                    }
+                });
+            }
+            else {
+                ChangeType();
+            }
+        }
+        else {
+            if (_DataExclude == null) {
+                var _options = {
+                    PostData: {
+                        Params: {
+                            result: "GetFullRate1",
+                            UserID: GetSession("UserID")
+                        },
+                        ProcName: "proc_Index_HRForm",
+                        DataType: "DataTable",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    }
+                };
+                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                    if (_result.Code == "1") {
+                        if (_result.Data.length > 0) {
+                            _DataExclude = _result.Data;
+                            ChangeType();
+                        }
+                    }
+                    else {
+                        $honesty.CloseWin();
+                    }
+                });
+            }
+            else {
+                ChangeType();
+            }
+        }
+    }
+
+    function ChangeType() {
+        var _default = {};
+        var arrCategory = new Array();
+        var arrPost = new Array();
+        var arrExist = new Array();
+        var arrAll = new Array();
+        var arrRate = new Array();
+        var _Power = $("#TopBar").find(".active").data("power");
+        var _Type = $("#BottomBar").find(".active").data("type");
+
+        var _Post = "", _Class = "";
+        var exist = 0, all = 0;
+        switch (_Power) {
+            case "Regional":
+                if (_Type == "All") {
+                    $.each(_Data, function (i, item) {
+                        if ($.inArray(item.Regional, arrCategory) < 0) {
+                            arrCategory.push(item.Regional);
+                            arrExist.push(0);
+                            arrAll.push(0);
+                        }
+                        var _Index = $.inArray(item.Regional, arrCategory);
+                        arrExist[_Index] = arrExist[_Index] + Number(item.Existingpeople);
+                        arrAll[_Index] = arrAll[_Index] + Number(item.OZpeople);
+                    });
+
+                    for (var i = 0; i < arrAll.length; i++) {
+                        arrRate.push((Number(arrExist[i]) / Number(arrAll[i]) * 100).toFixed(0));
+                    }
+                    _default = {
+                        tooltip: {
+                            trigger: 'axis', axisPointer: { type: 'shadow' }, textStyle: { fontSize: 12 },
+                            formatter: function (params, ticket, callback) {
+                                if (params.length > 1) {
+                                    var name = "";
+                                    var arrData = new Array();
+                                    $.each(params, function (i, item) {
+                                        if (name == "") {
+                                            name = item.name;
+                                        }
+                                        arrData.push(item.value);
+                                    });
+                                    var res = name + '<br/>';
+                                    res += '编制:' + arrData[0] + '<br/>';
+                                    res += '在岗:' + arrData[1] + '<br/>';
+                                    res += '满编率:' + arrData[2] + '%<br/>';
+                                    setTimeout(function () { callback(ticket, res); }, 10);
+                                }
+                                else {
+                                    setTimeout(function () { callback(ticket, params.name + ":" + params.value + "%"); }, 10);
+                                }
+                                return 'loading';
+                            },
+                        },
+                        legend: { data: ['编制', '在岗', '满编率'], textStyle: { fontSize: 12 }, selectedMode: false, itemGap: 5 },
+                        grid: { left: '1%', right: '1%', bottom: '10', top: '30', containLabel: true },
+                        xAxis: { type: 'category', data: arrCategory },
+                        yAxis: [{ type: 'value' }, { type: 'value', axisLabel: { formatter: '{value} %' }, splitLine: { show: false } }],
+                        series: [
+                            { name: '编制', type: 'bar', data: arrAll, itemStyle: { normal: { color: '#009dd9' } }, label: { normal: { show: true, position: 'top', textStyle: { color: '#000' } } } },
+                            { name: '在岗', type: 'bar', data: arrExist, itemStyle: { normal: { color: '#ffc100' } }, label: { normal: { show: true, position: 'top', textStyle: { color: '#000' } } } },
+                            {
+                                name: '满编率', type: 'line', yAxisIndex: 1, data: arrRate, itemStyle: { normal: { color: '#ff8717' } }, lineStyle: { normal: { width: 2 } }, label: { normal: { show: true, position: 'bottom', textStyle: { color: '#996600' }, formatter: '{c} %' } },
+                                markLine: { symbol: 'none', data: [{ type: 'average', name: '平均值' }], lineStyle: { normal: { width: 2, color: '#e74c3c' } }, label: { normal: { formatter: '{c} %' } }, }
+                            },
+
+                        ]
+                    };
+                }
+                else {
+                    $.each(_Data, function (i, item) {
+                        if ($.inArray(item.Title, arrPost) < 0) {
+                            arrPost.push(item.Title);
+                            arrExist.push({ name: item.Title, type: 'bar', stack: '在岗', data: [], itemStyle: { normal: { color: '#ffc100' } }, label: { normal: { show: true, position: 'top', textStyle: { color: '#000' } } } });
+                            arrAll.push({ name: item.Title, type: 'bar', stack: '编制', data: [], itemStyle: { normal: { color: '#009dd9' } }, label: { normal: { show: true, position: 'top', textStyle: { color: '#000' } } } });
+                            arrRate.push({
+                                name: item.Title,
+                                type: 'line',
+                                yAxisIndex: 1,
+                                stack: '满编率',
+                                data: [],
+                                itemStyle: { normal: { color: '#ff8717' } },
+                                lineStyle: { normal: { width: 2 } },
+                                label: { normal: { show: true, position: 'bottom', textStyle: { color: '#996600' }, formatter: '{c}%' } },
+                                markLine: {
+                                    symbol: 'none',
+                                    data: [
+                                        { type: 'average', name: '平均值' }
+                                    ],
+                                    lineStyle: { normal: { width: 2, color: '#e74c3c' } },
+                                    label: { normal: { formatter: '{c} %' } },
+                                }
+                            });
+                        }
+                    });
+                    $.each(_Data, function (i, item) {
+                        if ($.inArray(item.Regional, arrCategory) < 0) {
+                            arrCategory.push(item.Regional);
+                            for (var i = 0; i < arrAll.length; i++) {
+                                arrExist[i].data.push(0);
+                                arrAll[i].data.push(0);
+                            }
+                        }
+                        var post_Index = $.inArray(item.Title, arrPost);
+                        var category_Index = $.inArray(item.Regional, arrCategory);
+                        arrExist[post_Index].data[category_Index] = arrExist[post_Index].data[category_Index] + Number(item.Existingpeople);
+                        arrAll[post_Index].data[category_Index] = arrAll[post_Index].data[category_Index] + Number(item.OZpeople);
+                    });
+                    for (var i = 0; i < arrExist.length; i++) {
+                        arrAll.push(arrExist[i]);
+                        for (var j = 0; j < arrExist[i].data.length; j++) {
+                            arrRate[i].data.push((Number(arrExist[i].data[j]) / Number(arrAll[i].data[j]) * 100).toFixed(0));
+                        }
+                        arrAll.push(arrRate[i]);
+                    }
+
+                    _default = {
+                        tooltip: {
+                            trigger: 'axis', textStyle: { fontSize: 12 }, axisPointer: { type: 'shadow' },
+                            formatter: function (params, ticket, callback) {
+                                if (params.length > 1) {
+                                    var name = "";
+                                    var arrData = new Array();
+                                    $.each(params, function (i, item) {
+                                        if (name == "") {
+                                            name = item.name;
+                                        }
+                                        arrData.push(item.value);
+                                    });
+                                    var res = name + '<br/>';
+                                    res += '编制:' + arrData[0] + '<br/>';
+                                    res += '在岗:' + arrData[1] + '<br/>';
+                                    res += '满编率:' + arrData[2] + '%<br/>';
+                                    setTimeout(function () { callback(ticket, res); }, 10);
+                                }
+                                else {
+                                    setTimeout(function () { callback(ticket, params.name + ":" + params.value + "%"); }, 10);
+                                }
+                                return 'loading';
+                            },
+                        },
+                        legend: { data: arrPost, selectedMode: 'single', textStyle: { fontSize: 10 }, bottom: 1, itemGap: 5 },
+                        grid: { left: '1%', right: '1%', bottom: '65', top: '15', containLabel: true },
+                        xAxis: { type: 'category', data: arrCategory },
+                        yAxis: [{ type: 'value' }, { type: 'value', axisLabel: { formatter: '{value} %' }, splitLine: { show: false } }],
+                        series: arrAll
+                    };
+                }
+                break;
+            case "Province":
+                if (_Type == "All") {
+                    $.each(_DataExclude, function (i, item) {
+                        if ($.inArray(item.Province, arrCategory) < 0) {
+                            arrCategory.push(item.Province);
+                            arrExist.push(0);
+                            arrAll.push(0);
+                        }
+                        var _Index = $.inArray(item.Province, arrCategory);
+                        arrExist[_Index] = arrExist[_Index] + Number(item.Existingpeople);
+                        arrAll[_Index] = arrAll[_Index] + Number(item.OZpeople);
+                    });
+
+                    for (var i = 0; i < arrAll.length; i++) {
+                        arrRate.push({ value: (Number(arrExist[i]) / Number(arrAll[i]) * 100).toFixed(0), ShowInfo: "编制:" + arrAll[i] + "<br>在岗:" + arrExist[i], label: { normal: { show: true, position: arrAll.length > 6 ? 'insideRight' : 'insideTop', textStyle: { color: '#fff', fontSize: 11 }, formatter: '{c}%' } }, itemStyle: { normal: { color: arrColor[i] } } });
+                    }
+
+                    _default = {
+                        tooltip: {
+                            trigger: 'axis', textStyle: { fontSize: 12 }, axisPointer: { type: 'shadow' },
+                            formatter: function (params, ticket, callback) {
+                                var res = "";
+                                $.each(params, function (i, item) {
+                                    res += item.name + "<br>" + item.data.ShowInfo + "<br>满编率:" + item.data.value + "%";
+                                });
+
+                                setTimeout(function () { callback(ticket, res); }, 10);
+                                return 'loading';
+                            }
+                        },
+                        grid: { left: '1%', right: '4.5%', bottom: '10', top: '10', containLabel: true },
+                        yAxis: { type: 'category', data: arrCategory, axisLabel: { interval: 0 } },
+                        xAxis: { type: 'value', axisLabel: { formatter: '{value}%' } },
+                        series: [{ name: '满编率', type: 'bar', data: arrRate, }]
+                    };
+                    if (arrCategory.length <= 6) {
+                        _default.yAxis = { type: 'value', axisLabel: { formatter: '{value}%' } };
+                        _default.xAxis = { type: 'category', data: arrCategory, axisLabel: { interval: 0 } };
+                    }
+
+                }
+                else {
+                    var _ColorNum = 0;
+                    $.each(_DataExclude, function (i, item) {
+                        if ($.inArray(item.Title, arrPost) < 0) {
+                            arrPost.push(item.Title);
+                            arrExist.push(new Array());
+                            arrAll.push(new Array());
+                            arrRate.push({
+                                name: item.Title,
+                                type: 'bar',
+                                stack: '满编率',
+                                data: [],
+                                itemStyle: { normal: { color: arrPostColor[_ColorNum] } },
+                                label: { normal: { show: true, position: 'right', textStyle: { color: '#000' }, formatter: '{c}%' } },
+                            });
+                            _ColorNum++;
+                        }
+                    });
+                    $.each(_DataExclude, function (i, item) {
+                        if ($.inArray(item.Province, arrCategory) < 0) {
+                            arrCategory.push(item.Province);
+                            for (var i = 0; i < arrAll.length; i++) {
+                                arrExist[i].push(0);
+                                arrAll[i].push(0);
+                            }
+                        }
+
+                        var post_Index = $.inArray(item.Title, arrPost);
+                        var category_Index = $.inArray(item.Province, arrCategory);
+
+                        arrExist[post_Index][category_Index] = arrExist[post_Index][category_Index] + Number(item.Existingpeople);
+                        arrAll[post_Index][category_Index] = arrAll[post_Index][category_Index] + Number(item.OZpeople);
+
+                    });
+
+                    for (var i = 0; i < arrExist.length; i++) {
+                        for (var j = 0; j < arrExist[i].length; j++) {
+                            arrRate[i].data.push({ value: arrAll[i][j] == "0" ? 0 : (Number(arrExist[i][j]) / Number(arrAll[i][j]) * 100).toFixed(0), ShowInfo: "编制:" + arrAll[i][j] + "<br>在岗:" + arrExist[i][j] });
+                        }
+                        if (arrCategory.length <= 6) {
+                            arrRate[i].label.normal.position = 'top';
+                        }
+                    }
+                    _default = {
+                        tooltip: {
+                            trigger: 'axis', textStyle: { fontSize: 12 }, axisPointer: { type: 'shadow' },
+                            formatter: function (params, ticket, callback) {
+                                var res = "";
+                                $.each(params, function (i, item) {
+                                    res += item.name + "<br>" + item.data.ShowInfo + "<br>满编率:" + item.data.value + "%";
+                                });
+                                setTimeout(function () { callback(ticket, res); }, 10);
+                                return 'loading';
+                            },
+                        },
+                        legend: { data: arrPost, selectedMode: 'single', textStyle: { fontSize: 10 }, bottom: 1, itemGap: 5 },
+                        grid: { left: '1%', right: '35', bottom: '65', top: '15', containLabel: true },
+                        yAxis: { type: 'category', data: arrCategory, axisLabel: { textStyle: { fontSize: 11, color: '#333' }, interval: 0 } },
+                        xAxis: { type: 'value', axisLabel: { formatter: '{value}%' } },
+                        series: arrRate
+                    };
+                    if (arrCategory.length <= 6) {
+                        _default.yAxis = { type: 'value', axisLabel: { formatter: '{value}%' } };
+                        _default.xAxis = { type: 'category', data: arrCategory, axisLabel: { textStyle: { fontSize: 11, color: '#333' }, interval: 0 } };
+                        _default.grid.right = '10';
+                    }
+                }
+                break;
+            case "City":
+                if (_Type == "All") {
+                    $.each(_DataExclude, function (i, item) {
+                        if ($.inArray(item.City, arrCategory) < 0) {
+                            arrCategory.push(item.City);
+                            arrExist.push(0);
+                            arrAll.push(0);
+                        }
+                        var _Index = $.inArray(item.City, arrCategory);
+                        arrExist[_Index] = arrExist[_Index] + Number(item.Existingpeople);
+                        arrAll[_Index] = arrAll[_Index] + Number(item.OZpeople);
+                    });
+
+                    for (var i = 0; i < arrAll.length; i++) {
+                        arrRate.push({ value: (Number(arrExist[i]) / Number(arrAll[i]) * 100).toFixed(0), ShowInfo: "编制:" + arrAll[i] + "<br>在岗:" + arrExist[i], label: { normal: { show: true, position: arrAll.length > 6 ? 'insideRight' : 'insideTop', textStyle: { color: '#fff', fontSize: 11 }, formatter: '{c}%' } }, itemStyle: { normal: { color: arrColor[i] } } });
+                    }
+                    _default = {
+                        tooltip: {
+                            trigger: 'axis', textStyle: { fontSize: 12 }, axisPointer: { type: 'shadow' },
+                            formatter: function (params, ticket, callback) {
+                                var res = "";
+                                $.each(params, function (i, item) {
+                                    res += item.name + "<br>" + item.data.ShowInfo + "<br>满编率:" + item.data.value + "%";
+                                });
+                                setTimeout(function () { callback(ticket, res); }, 10);
+                                return 'loading';
+                            }
+                        },
+                        grid: { left: '1%', right: '4.5%', bottom: '10', top: '10', containLabel: true },
+                        yAxis: { type: 'category', data: arrCategory, axisLabel: { interval: 0 } },
+                        xAxis: { type: 'value', axisLabel: { formatter: '{value}%' } },
+                        series: [{ name: '满编率', type: 'bar', data: arrRate }]
+                    };
+                    if (arrCategory.length <= 6) {
+                        _default.yAxis = { type: 'value', axisLabel: { formatter: '{value}%' } };
+                        _default.xAxis = { type: 'category', data: arrCategory, axisLabel: { interval: 0 } };
+                    }
+                }
+                else {
+                    var _ColorNum = 0;
+                    $.each(_DataExclude, function (i, item) {
+                        if ($.inArray(item.Title, arrPost) < 0) {
+                            arrPost.push(item.Title);
+                            arrExist.push(new Array());
+                            arrAll.push(new Array());
+                            arrRate.push({
+                                name: item.Title,
+                                type: 'bar',
+                                stack: '满编率',
+                                data: [],
+                                itemStyle: { normal: { color: arrPostColor[_ColorNum] } },
+                                label: { normal: { show: true, position: 'right', textStyle: { color: '#000' }, formatter: '{c}%' } },
+                            });
+                            _ColorNum++;
+                        }
+                    });
+                    $.each(_DataExclude, function (i, item) {
+                        if ($.inArray(item.City, arrCategory) < 0) {
+                            arrCategory.push(item.City);
+                            for (var i = 0; i < arrAll.length; i++) {
+                                arrExist[i].push(0);
+                                arrAll[i].push(0);
+                            }
+                        }
+
+                        var post_Index = $.inArray(item.Title, arrPost);
+                        var category_Index = $.inArray(item.City, arrCategory);
+                        arrExist[post_Index][category_Index] = arrExist[post_Index][category_Index] + Number(item.Existingpeople);
+                        arrAll[post_Index][category_Index] = arrAll[post_Index][category_Index] + Number(item.OZpeople);
+
+                    });
+
+                    for (var i = 0; i < arrExist.length; i++) {
+                        for (var j = 0; j < arrExist[i].length; j++) {
+                            arrRate[i].data.push({ value: arrAll[i][j] == "0" ? 0 : (Number(arrExist[i][j]) / Number(arrAll[i][j]) * 100).toFixed(0), ShowInfo: "编制:" + arrAll[i][j] + "<br>在岗:" + arrExist[i][j] });
+                        }
+                        if (arrCategory.length <= 6) {
+                            arrRate[i].label.normal.position = 'top';
+                        }
+                    }
+                    _default = {
+                        tooltip: {
+                            trigger: 'axis', textStyle: { fontSize: 12 }, axisPointer: { type: 'shadow' },
+                            formatter: function (params, ticket, callback) {
+                                var res = "";
+                                $.each(params, function (i, item) {
+                                    res += item.name + "<br>" + item.data.ShowInfo + "<br>满编率:" + item.data.value + "%";
+                                });
+                                setTimeout(function () { callback(ticket, res); }, 10);
+                                return 'loading';
+                            }
+                        },
+                        legend: { data: arrPost, selectedMode: 'single', textStyle: { fontSize: 10 }, bottom: 1, itemGap: 5 },
+                        grid: { left: '1%', right: '35', bottom: '65', top: '15', containLabel: true },
+                        yAxis: { type: 'category', data: arrCategory, axisLabel: { textStyle: { fontSize: 11, color: '#333' }, interval: 0 } },
+                        xAxis: { type: 'value', axisLabel: { formatter: '{value}%' } },
+                        series: arrRate
+                    };
+                    if (arrCategory.length <= 6) {
+                        _default.xAxis = { type: 'category', data: arrCategory, axisLabel: { textStyle: { fontSize: 11, color: '#333' }, interval: 0 } };
+                        _default.yAxis = { type: 'value', axisLabel: { formatter: '{value}%' } };
+                        _default.grid.right = '10';
+                    }
+                }
+                break;
+            case "Area":
+                if (_Type == "All") {
+                    $.each(_DataExclude, function (i, item) {
+                        if ($.inArray(item.AreaName, arrCategory) < 0) {
+                            arrCategory.push(item.AreaName);
+                            arrExist.push(0);
+                            arrAll.push(0);
+                        }
+                        var _Index = $.inArray(item.AreaName, arrCategory);
+                        arrExist[_Index] = arrExist[_Index] + Number(item.Existingpeople);
+                        arrAll[_Index] = arrAll[_Index] + Number(item.OZpeople);
+                    });
+
+                    for (var i = 0; i < arrAll.length; i++) {
+                        arrRate.push({ value: (Number(arrExist[i]) / Number(arrAll[i]) * 100).toFixed(0), ShowInfo: "编制:" + arrAll[i] + "<br>在岗:" + arrExist[i], label: { normal: { show: true, position: arrAll.length > 6 ? 'insideRight' : 'insideTop', textStyle: { color: '#fff', fontSize: 11 }, formatter: '{c}%' } }, itemStyle: { normal: { color: arrColor[i] } } });
+                    }
+                    _default = {
+                        tooltip: {
+                            trigger: 'axis', textStyle: { fontSize: 12 }, axisPointer: { type: 'shadow' },
+                            formatter: function (params, ticket, callback) {
+                                var res = "";
+                                $.each(params, function (i, item) {
+                                    res += item.name + "<br>" + item.data.ShowInfo + "<br>满编率:" + item.data.value + "%";
+                                });
+                                setTimeout(function () { callback(ticket, res); }, 10);
+                                return 'loading';
+                            }
+                        },
+                        grid: { left: '1%', right: '4.5%', bottom: '10', top: '10', containLabel: true },
+                        yAxis: { type: 'category', data: arrCategory, axisLabel: { interval: 0 } },
+                        xAxis: { type: 'value', axisLabel: { formatter: '{value}%' } },
+                        series: [{ name: '满编率', type: 'bar', data: arrRate }]
+                    };
+
+                    if (arrCategory.length <= 6) {
+                        _default.xAxis = { type: 'category', data: arrCategory, axisLabel: { interval: 0 } };
+                        _default.yAxis = { type: 'value', axisLabel: { formatter: '{value}%' } };
+                    }
+                }
+                else {
+                    var _ColorNum = 0;
+                    $.each(_DataExclude, function (i, item) {
+                        if ($.inArray(item.Title, arrPost) < 0) {
+                            arrPost.push(item.Title);
+                            arrExist.push(new Array());
+                            arrAll.push(new Array());
+                            arrRate.push({
+                                name: item.Title,
+                                type: 'bar',
+                                stack: '满编率',
+                                data: [],
+                                itemStyle: { normal: { color: arrPostColor[_ColorNum] } },
+                                label: { normal: { show: true, position: 'right', textStyle: { color: '#000' }, formatter: '{c}%' } },
+                            });
+                            _ColorNum++;
+                        }
+                    });
+                    $.each(_DataExclude, function (i, item) {
+                        if ($.inArray(item.AreaName, arrCategory) < 0) {
+                            arrCategory.push(item.AreaName);
+                            for (var i = 0; i < arrAll.length; i++) {
+                                arrExist[i].push(0);
+                                arrAll[i].push(0);
+                            }
+                        }
+
+                        var post_Index = $.inArray(item.Title, arrPost);
+                        var category_Index = $.inArray(item.AreaName, arrCategory);
+                        arrExist[post_Index][category_Index] = arrExist[post_Index][category_Index] + Number(item.Existingpeople);
+                        arrAll[post_Index][category_Index] = arrAll[post_Index][category_Index] + Number(item.OZpeople);
+
+                    });
+
+                    for (var i = 0; i < arrExist.length; i++) {
+                        for (var j = 0; j < arrExist[i].length; j++) {
+                            arrRate[i].data.push({ value: arrAll[i][j] == "0" ? 0 : (Number(arrExist[i][j]) / Number(arrAll[i][j]) * 100).toFixed(0), ShowInfo: "编制:" + arrAll[i][j] + "<br>在岗:" + arrExist[i][j] });
+                        }
+                        if (arrCategory.length <= 6) {
+                            arrRate[i].label.normal.position = 'top';
+                        }
+                    }
+                    _default = {
+                        tooltip: {
+                            trigger: 'axis', textStyle: { fontSize: 12 }, axisPointer: { type: 'shadow' },
+                            formatter: function (params, ticket, callback) {
+                                var res = "";
+                                $.each(params, function (i, item) {
+                                    res += item.name + "<br>" + item.data.ShowInfo + "<br>满编率:" + item.data.value + "%";
+                                });
+                                setTimeout(function () { callback(ticket, res); }, 10);
+                                return 'loading';
+                            }
+                        },
+                        legend: { data: arrPost, selectedMode: 'single', textStyle: { fontSize: 10 }, bottom: 1, itemGap: 5 },
+                        grid: { left: '1%', right: '35', bottom: '65', top: '15', containLabel: true },
+                        yAxis: { type: 'category', data: arrCategory, axisLabel: { textStyle: { fontSize: 11, color: '#333' }, interval: 0 } },
+                        xAxis: { type: 'value', axisLabel: { formatter: '{value}%' } },
+                        series: arrRate
+                    };
+                    if (arrCategory.length <= 6) {
+                        _default.xAxis = { type: 'category', data: arrCategory, axisLabel: { textStyle: { fontSize: 11, color: '#333' }, interval: 0 } };
+                        _default.yAxis = { type: 'value', axisLabel: { formatter: '{value}%' } };
+                        _default.grid.right = '10';
+                    }
+                }
+                break;
+            default:
+
+        }
+
+        // 基于准备好的dom，初始化echarts实例
+        myChart = echarts.init(document.getElementById('main'));
+        myChart.setOption(_default);
+    }
+</script>
+</html>

@@ -1,0 +1,215 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>目标总结（周计划报表）</title>
+    <link href="../../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .form {
+            width: 100%;
+            text-align: center;
+            font-size: 14px;
+            border-collapse: collapse;
+        }
+
+            .form td, .form th {
+                border-bottom: 1px solid rgba(216, 216, 216, 0.1);
+                height: 35px;
+                letter-spacing: 0.4px;
+            }
+
+            .form th {
+                font-weight: 400;
+            }
+
+            .form td {
+                color: #8f8f94;
+            }
+
+                .form td:first-child {
+                    color: #000;
+                }
+    </style>
+</head>
+<body>
+    <div class="aui-content">
+        <ul class="aui-list-view" style="margin-bottom: 0">
+            <li class="aui-list-view-cell" style="padding: 3px;">
+                <table class="form">
+                    <tr>
+                        <th style="width: 80px;"></th>
+                        <th>周目标计划</th>
+                        <th>周实际完成</th>
+                        <th>周完成比率</th>
+                    </tr>
+                    <tr>
+                        <td>星期一</td>
+                        <td id="MondaySale1"></td>
+                        <td id="MondaySale2">0</td>
+                        <td id="MondaySale3"></td>
+                    </tr>
+                    <tr>
+                        <td>星期二</td>
+                        <td id="TuesdaySale1"></td>
+                        <td id="TuesdaySale2">0</td>
+                        <td id="TuesdaySale3"></td>
+                    </tr>
+                    <tr>
+                        <td>星期三</td>
+                        <td id="WednesdaySale1"></td>
+                        <td id="WednesdaySale2">0</td>
+                        <td id="WednesdaySale3"></td>
+                    </tr>
+
+                    <tr>
+                        <td>星期四</td>
+                        <td id="ThursdaySale1"></td>
+                        <td id="ThursdaySale2">0</td>
+                        <td id="ThursdaySale3"></td>
+                    </tr>
+                    <tr>
+                        <td>星期五</td>
+                        <td id="FridaySale1"></td>
+                        <td id="FridaySale2">0</td>
+                        <td id="FridaySale3"></td>
+                    </tr>
+                    <tr>
+                        <td>星期六</td>
+                        <td id="SaturdaySale1"></td>
+                        <td id="SaturdaySale2">0</td>
+                        <td id="SaturdaySale3"></td>
+                    </tr>
+                    <tr>
+                        <td>星期日</td>
+                        <td id="SundaySale1"></td>
+                        <td id="SundaySale2">0</td>
+                        <td id="SundaySale3"></td>
+                    </tr>
+                    <tr>
+                        <td>合计</td>
+                        <td id="SumSale1"></td>
+                        <td id="SumSale2">0</td>
+                        <td id="SumSale3"></td>
+                    </tr>
+                    <tr>
+                        <td>同比增长</td>
+                        <td id="YearOnYear1"></td>
+                        <td id="YearOnYear2">0%</td>
+                        <td id="YearOnYear3"></td>
+                    </tr>
+                    <tr>
+                        <td>环比增长</td>
+                        <td id="QuarterOnQuarter1"></td>
+                        <td id="QuarterOnQuarter2">0%</td>
+                        <td id="QuarterOnQuarter3"></td>
+                    </tr>
+                    <tr>
+                        <td>单数</td>
+                        <td id="OrderNum1"></td>
+                        <td id="OrderNum2">0</td>
+                        <td id="OrderNum3"></td>
+                    </tr>
+                    <tr>
+                        <td>件数</td>
+                        <td id="ClothesNum1"></td>
+                        <td id="ClothesNum2">0</td>
+                        <td id="ClothesNum3"></td>
+                    </tr>
+                    <tr>
+                        <td>正价占比</td>
+                        <td id="PriceProportion1"></td>
+                        <td id="PriceProportion2">0%</td>
+                        <td id="PriceProportion3"></td>
+                    </tr>
+                    <tr>
+                        <td>活动占比</td>
+                        <td id="ActivityProportion1"></td>
+                        <td id="ActivityProportion2">0%</td>
+                        <td id="ActivityProportion3"></td>
+                    </tr>
+                </table>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>
+<script src="../../../../script/zepto.js"></script>
+<script src="../../../../script/api.js"></script>
+<script src="../../../../script/honesty.base.js"></script>
+
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            LoadData();
+
+            //下拉刷新
+            api.setRefreshHeaderInfo({
+                visible: true,
+                loadingImg: 'widget://image/refresh.png',
+                bgColor: '#fff',
+                textColor: '#000',
+                textDown: '下拉刷新...',
+                textUp: '松开刷新...',
+                showTime: true
+            }, function (ret, err) {
+                LoadData();
+                api.refreshHeaderLoadDone();
+            });
+        });
+    }
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "FormWeekTarget",
+                    WeekID: api.pageParam.WeekID
+                },
+                ProcName: "proc_SOM_ISR_WeekSale",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        $("#MondaySale" + item.ID).html(item.MondaySale);
+                        $("#TuesdaySale" + item.ID).html(item.TuesdaySale);
+                        $("#WednesdaySale" + item.ID).html(item.WednesdaySale);
+                        $("#ThursdaySale" + item.ID).html(item.ThursdaySale);
+                        $("#FridaySale" + item.ID).html(item.FridaySale);
+                        $("#SaturdaySale" + item.ID).html(item.SaturdaySale);
+                        $("#SundaySale" + item.ID).html(item.SundaySale);
+                        $("#SumSale" + item.ID).html(item.SumSale);
+                        $("#YearOnYear" + item.ID).html(item.YearOnYear + "%");
+                        $("#QuarterOnQuarter" + item.ID).html(item.QuarterOnQuarter + "%");
+                        $("#OrderNum" + item.ID).html(item.OrderNum);
+                        $("#ClothesNum" + item.ID).html(item.ClothesNum);
+                        $("#PriceProportion" + item.ID).html(item.PriceProportion + "%");
+                        $("#ActivityProportion" + item.ID).html(item.ActivityProportion + "%");
+                    });
+                    $("#MondaySale3").html(($("#MondaySale1").html() == "0" ? "0" : (Number($("#MondaySale2").html()) / Number($("#MondaySale1").html()) * 100).toFixed(0)) + "%");
+                    $("#TuesdaySale3").html(($("#TuesdaySale1").html() == "0" ? "0" : (Number($("#TuesdaySale2").html()) / Number($("#TuesdaySale1").html()) * 100).toFixed(0)) + "%");
+                    $("#WednesdaySale3").html(($("#WednesdaySale1").html() == "0" ? "0" : (Number($("#WednesdaySale2").html()) / Number($("#WednesdaySale1").html()) * 100).toFixed(0)) + "%");
+                    $("#ThursdaySale3").html(($("#ThursdaySale1").html() == "0" ? "0" : (Number($("#ThursdaySale2").html()) / Number($("#ThursdaySale1").html()) * 100).toFixed(0)) + "%");
+                    $("#FridaySale3").html(($("#FridaySale1").html() == "0" ? "0" : (Number($("#FridaySale2").html()) / Number($("#FridaySale1").html()) * 100).toFixed(0)) + "%");
+                    $("#SaturdaySale3").html(($("#SaturdaySale1").html() == "0" ? "0" : (Number($("#SaturdaySale2").html()) / Number($("#SaturdaySale1").html()) * 100).toFixed(0)) + "%");
+                    $("#SundaySale3").html(($("#SundaySale1").html() == "0" ? "0" : (Number($("#SundaySale2").html()) / Number($("#SundaySale1").html()) * 100).toFixed(0)) + "%");
+                    $("#SundaySale3").html(($("#SundaySale1").html() == "0" ? "0" : (Number($("#SundaySale2").html()) / Number($("#SundaySale1").html()) * 100).toFixed(0)) + "%");
+                    $("#SumSale3").html(($("#SumSale1").html() == "0" ? "0" : (Number($("#SumSale2").html()) / Number($("#SumSale1").html()) * 100).toFixed(0)) + "%");
+                    $("#YearOnYear3").html(($("#YearOnYear1").html() == "0%" ? "0" : (Number($("#YearOnYear2").html().replace("%", "")) / Number($("#YearOnYear1").html().replace("%", "")) * 100).toFixed(0)) + "%");
+                    $("#QuarterOnQuarter3").html(($("#QuarterOnQuarter1").html() == "0%" ? "0" : (Number($("#QuarterOnQuarter2").html().replace("%", "")) / Number($("#QuarterOnQuarter1").html().replace("%", "")) * 100).toFixed(0)) + "%");
+                    $("#OrderNum3").html(($("#OrderNum1").html() == "0" ? "0" : (Number($("#OrderNum2").html()) / Number($("#OrderNum1").html()) * 100).toFixed(0)) + "%");
+                    $("#ClothesNum3").html(($("#ClothesNum1").html() == "0" ? "0" : (Number($("#ClothesNum2").html()) / Number($("#ClothesNum1").html()) * 100).toFixed(0)) + "%");
+                    $("#PriceProportion3").html(($("#PriceProportion1").html() == "0%" ? "0" : (Number($("#PriceProportion2").html().replace("%", "")) / Number($("#PriceProportion1").html().replace("%", "")) * 100).toFixed(0)) + "%");
+                    $("#ActivityProportion3").html(($("#ActivityProportion1").html() == "0%" ? "0" : (Number($("#ActivityProportion2").html().replace("%", "")) / Number($("#ActivityProportion1").html().replace("%", "")) * 100).toFixed(0)) + "%");
+                }
+
+            }
+        });
+    }
+</script>

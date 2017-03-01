@@ -1,0 +1,143 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>店铺定位</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-input-row:last-child:after {
+            border-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="aui-content">
+        <div class="aui-form aui-input-form" id="divMonthTarget">
+            <div class="aui-input-row">
+                <span class="aui-input-addon" style="width: 80px;">查看年份</span>
+                <select class="aui-input" id="ddlShopYear">
+                </select>
+            </div>
+        </div>
+        <ul class="aui-list-view aui-in">
+            <!--<li class="aui-list-view-cell">
+                <select class="aui-list-view-cell" id="ddlShopYear">
+                </select>
+                <p>查看年份</p>
+            </li>-->
+            <li class="aui-list-view-cell">
+                <label id="ShopName"></label>
+                <p>店铺名称</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="ShopCode"></label>
+                <p>店铺仓号</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="Regional"></label>
+                <p>区域</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="City"></label>
+                <p>城市</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="txtShopNature"></label>
+                <p>店铺性质</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="txtYear"></label>
+                <p>维护年份</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="txtBrandlevel"></label>
+                <p>品牌销售级别</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="txtSaleslevel"></label>
+                <p>大区销售级别</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="txtImagelevel"></label>
+                <p>形象级别</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="txtItemlevel"></label>
+                <p>货品级别</p>
+            </li>
+        </ul>
+
+    </div>
+    <div style="height: 10px"></div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            var _YearContent = "";
+            var _options = {
+                PostData: {
+                    Params: {
+                        Result: "LoadYear",
+                        OrganizeID: api.pageParam.OrganizeID
+                    },
+                    ProcName: "proc_SOM_ISR_ShopPositioning",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        $.each(_result.Data, function (i, item) {
+                            _YearContent += "<option value='" + item.Year + "'>" + item.Year + "</option>";
+                        });
+                    }
+                }
+                $("#ddlShopYear").html(_YearContent);
+
+            })
+
+
+            var _options = {
+                PostData: {
+                    Params: {
+                        Result: "LoadPositioning",
+                        OrganizeID: api.pageParam.OrganizeID,
+                        Year: $("#ddlShopYear").val()
+                    },
+                    ProcName: "proc_SOM_ISR_ShopPositioning",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        $.each(_result.Data, function (i, item) {
+                            $("#ShopName").html(item.Name == "" ? "未维护" : item.Name);
+                            $("#ShopCode").html(item.ShopCode == "" ? "未维护" : item.ShopCode);
+                            $("#Regional").html(item.Regional == "" ? "未维护" : item.Regional);
+                            $("#City").html(item.City == "" ? "未维护" : item.City);
+                            $("#txtShopNature").html(item.NatureText == "" ? "未维护" : item.NatureText);
+                            $("#txtYear").html(item.Year == "" ? "未维护" : item.Year);
+                            $("#txtBrandlevel").html(item.Brandlevel == "" ? "未维护" : item.Brandlevel);
+                            $("#txtSaleslevel").html(item.Saleslevel == "" ? "未维护" : item.Saleslevel);
+                            $("#txtImagelevel").html(item.Imagelevel == "" ? "未维护" : item.Imagelevel);
+                            $("#txtItemlevel").html(item.Itemlevel == "" ? "未维护" : item.Itemlevel);
+                        })
+                    }
+                }
+
+            });
+        });
+    }
+</script>
+</html>

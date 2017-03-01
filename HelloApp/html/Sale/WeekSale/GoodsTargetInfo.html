@@ -1,0 +1,260 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>货品目标详细信息（周计划）</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-input-row .aui-input-addon {
+            width: 80px;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="aui-content">
+        <p class="aui-padded-5 aui-text-center" id="pTitle">货品目标</p>
+        <div class="aui-form aui-input-form" id="divGoodsTarget">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">大类</span>
+                <select id="ddlBClass" class="aui-input" >
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">子类</span>
+                <select id="ddlMClass" class="aui-input">
+                    <option value="">请选择</option>
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">目标计划</span>
+                <input id="txtTarget" type="text" class="aui-input" placeholder="请输入正整数" />
+            </div>
+        </div>
+    </div>
+    <div id="divFooter" style="height:40px; display:none" ></div>
+    <footer class="aui-nav" id="footer" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7; display: none">
+        <div id="btnSave" class="aui-btn aui-btn-block aui-btn-info" style="height: 45px; width: 100%; line-height: 0.9;">
+            保存
+        </div>
+    </footer>
+</body>
+</html>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script src="../../../script/honesty.valid.js"></script>
+<script type="text/javascript">
+    var _WeekID, _IsSend, _ID, _Index, _MClassExist;
+    apiready = function () {
+        api.parseTapmode();
+
+        $(function () {
+            _WeekID = api.pageParam.WeekID;
+            _IsSend = api.pageParam.IsSend;
+            _Index = api.pageParam.Index == undefined ? "-1" : api.pageParam.Index;
+            _ID = api.pageParam.ID || new $honesty.GUID().NewGUID();
+
+            if (_IsSend == "True") {
+                $("input.aui-input").attr("readonly", "readonly");
+                $("select.aui-input").attr("disabled", "disabled");
+                $("#divGoodsTarget").addClass("aui-input-disabled");
+            }
+            else {
+                $("#footer").css("display", "");
+                $("#divFooter").css("display", "");
+            }
+            LoadData()
+        });
+
+        //大类改变函数
+        $("#ddlBClass").change(function () {
+            ChangeClass(_MClassExist);
+        });
+
+        //保存函数点击
+        $("#btnSave").tap(function () {
+            if (CheckInfo()) {
+                var _options = {
+                    PostData: {
+                        Params: {
+                            Result: "MaintainInfo",
+                            WeekID: _WeekID,
+                            ID: _ID,
+                            ClassCode: $("#ddlBClass").val(),
+                            MClassID: $("#ddlMClass").find("option:selected").attr("name"),
+                            MClassCode: $("#ddlMClass").val(),
+                            TargetSale: $("#txtTarget").val().trim(),
+                            CreateUserID: GetSession("UserID"),
+                            CreateName: GetSession("UserName")
+                        },
+                        ProcName: "proc_SOM_ISR_WS_GoodsTarget",
+                        DataType: "Bool",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    }
+                };
+                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                    if (_result.Code == "1") {
+                        if (_result.Data == "True") {
+                            $honesty.ShowMsg({
+                                title: "提示",
+                                msg: "保存成功",
+                                callback: function () {
+                                    api.sendEvent({
+                                        name: 'Sale_WeekSale_GoodsTargetInfo',
+                                        extra: {
+                                            ID: _ID,
+                                            Title: $("#ddlMClass").find("option:selected").text(),
+                                            Target: $("#txtTarget").val(),
+                                            Index: _Index
+                                        }
+                                    });
+                                    $honesty.CloseWin();
+                                }
+                            })
+                        }
+                        else {
+                            $honesty.ShowMsg({ title: "错误", msg: "保存失败" });
+                        }
+                    }
+                });
+
+
+
+            }
+        });
+
+    }
+
+    //验证函数
+    function CheckInfo() {
+        if ($("#ddlBClass").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请选择大类！" });
+            return false;
+        }
+        else if ($("#ddlMClass").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请选择子类！" });
+            return false
+        }
+        else if ($("#txtTarget").val().trim() == "") {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "目标计划不能为空！",
+                callback: function () {
+                    $("#txtTarget").focus();
+                }
+            });
+            return false;
+        }
+        else if (valid_int($("#txtTarget").val().trim())) {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "输入的目标计划不为整数，请重新填写",
+                callback: function () {
+                    $("#txtTarget").focus();
+                }
+            });
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
+
+    //数据加载函数
+    function LoadData() {
+        _MClassExist = "";
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "ClassInfo"
+                },
+                ProcName: "proc_SOM_ISR_MS_GoodsTarget",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    var _Content = "<option value=''>请选择</option>";
+                    $.each(_result.Data, function (i, item) {
+                        _Content += "<option value='" + item.ID + "'>" + item.Title + "</option>";
+                    });
+                    $("#ddlBClass").html(_Content);
+                }
+
+                _options = {
+                    PostData: {
+                        Params: {
+                            Result: "SelectInfo",
+                            ID: _ID
+                        },
+                        ProcName: "proc_SOM_ISR_WS_GoodsTarget",
+                        DataType: "DataTable",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    }
+                };
+
+                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                    if (_result.Code == "1") {
+                        if (_result.Data.length > 0) {
+                            $.each(_result.Data, function (i, item) {
+                                $("#ddlBClass").val(item.ClassCode);
+                                _MClassExist = item.MClassCode;
+                                ChangeClass(_MClassExist, item.MClassCode);
+                                $("#txtTarget").val(item.TargetSale);
+                            });
+                        }
+                    }
+                    else {
+                        $("#footer").css("display", "none");
+                    }
+
+                });
+            }
+
+        });
+    }
+
+    //大类改变带动子类数据改变函数
+    function ChangeClass(code, value) {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "MClassInfo",
+                    WeekID: _WeekID,
+                    ClassCode: $("#ddlBClass").val(),
+                    MClassCode: code
+                },
+                ProcName: "proc_SOM_ISR_WS_GoodsTarget",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+
+        var _Content = "<option value=''>请选择</option>";
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        _Content += "<option value='" + item.ID + "' name='" + item.MClassID + "'>" + item.Title + "</option>"
+                    });
+                }
+            }
+            $("#ddlMClass").html(_Content);
+            $("#ddlMClass").val((value) || "");
+        });
+
+    }
+
+
+</script>

@@ -1,0 +1,449 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>签到</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+    <style type="text/css">
+        .aui-list-view-cell {
+            padding: 5px;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+    </style>
+</head>
+<body>
+    <div class="aui-content" style="margin-bottom: 0px">
+        <ul class="aui-list-view" style="margin-bottom: 0px">
+            <li class="aui-list-view-cell aui-img">
+                <img class="aui-img-object aui-pull-left" src="../../res/img/weixin.png" style="border-radius: 50%;">
+                <div class="aui-img-body">
+                    <table>
+                        <tr>
+                            <td id="UserName"></td>
+                            <td id="SignNum" rowspan="2" style="color: #f1c40f; font-size: 40px; vertical-align: bottom; text-decoration: underline; padding: 0 5px">0</td>
+                        </tr>
+                        <tr style="color: #808080; font-size: 14px;">
+                            <td>今日您已完成签到</td>
+                            <td>次</td>
+                        </tr>
+                    </table>
+                </div>
+            </li>
+            <li class="aui-list-view-cell">
+                <div class="aui-pull-left">
+                    <div class="aui-iconfont aui-icon-calendar aui-text-warning">
+                        <label style="color: #808080"><span id="lbWeek"></span>:<span id="lbDate" style="font-weight: 100"></span></label>
+                    </div>
+                </div>
+                <div class="aui-counter aui-pull-right">
+                    <div class="aui-iconfont aui-icon-time aui-text-warning">
+                        <label style="color: #808080">当前时间:<span id="lbTime" style="font-weight: 100"></span></label>
+                    </div>
+                </div>
+            </li>
+            <li class="aui-list-view-cell">
+                <div id="container" class="aui-pull-left" style="width: 100%; height: 200px; zoom: 0.5;"></div>
+            </li>
+            <li class="aui-list-view-cell" id="liAddressInfo"></li>
+        </ul>
+    </div>
+    <div class="aui-tab aui-tab-warning">
+        <ul class="aui-list-view" style="margin-bottom: 0px">
+            <li class="aui-list-view-cell">
+                <div style="float: left">
+                    <input name="SignType" value="1" class="aui-radio aui-radio-warning" type="radio" checked="checked">
+                    <div class="aui-checkbox-name">签到</div>
+                </div>
+                <div style="float: left">
+                    <input name="SignType" value="2" class="aui-radio aui-radio-warning" type="radio">
+                    <div class="aui-checkbox-name">签退</div>
+                </div>
+            </li>
+        </ul>
+        <ul id="TopBar" class="aui-tab-nav">
+            <li data-power="Shop" class="active" data-value="1">店铺</li>
+            <li data-power="NotShop" data-value="0">非店铺</li>
+        </ul>
+    </div>
+    <div id="divShopSign" class="aui-content" style="margin-bottom: 0px">
+        <ul class="aui-list-view" style="margin-bottom: 0px">
+
+            <li class="aui-list-view-cell" style="padding: 10px 10px;">
+                <a class="aui-ellipsis-1" style="font-size: 14px" id="ShopInfo">正在获取店铺...</a>
+
+            </li>
+        </ul>
+    </div>
+    <div id="divNotShopSign" class="aui-content" style="margin-bottom: 0px; display: none">
+        <ul class="aui-list-view" style="margin-bottom: 0px">
+            <li class="aui-list-view-cell" style="padding: 10px 10px;">
+                <a class="aui-ellipsis-1" style="font-size: 14px" id="AddressInfo">正在获取地址...</a>
+
+            </li>
+        </ul>
+    </div>
+    <p class="aui-padded-5 aui-text-center">备注说明</p>
+    <div class="aui-form aui-input-form">
+        <div class="aui-input-row" style="padding: 3px;">
+            <textarea id="Remark" class="aui-input" style="height: 100px; border: 1px solid #c8c7cc; overflow-y: auto"></textarea>
+        </div>
+    </div>
+    <div style="height: 110px;"></div>
+    <footer id="footer" class="aui-nav" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7; display: none">
+        <div id="btnSign" class="aui-btn aui-btn-block aui-btn-warning aui-iconfont aui-icon-location" style="height: 45px; width: 100%; line-height: 0.9;">
+            签到
+        </div>
+    </footer>
+</body>
+<script src="../../script/api.js"></script>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _Province, _City, _District, _Address, _Lon = 0, _Lat;
+    var _ShopList = null, _AddressList = null;
+    var _ShopLon, _ShopLat, _ShopAddress, _ShopDistinct, _ShopName, _ShopOrganizeID,
+        _AddrLon, _AddrLat, _AddrAddress, _AddrDistinct, _AddrName;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            $("#UserName").html(GetSession("UserName"));
+            var _Date = $honesty.NowDate();
+            $("#lbDate").html(_Date.Format("yyyy.MM.dd"));
+            $("#lbTime").html(_Date.Format("hh:mm"));
+            switch (_Date.getDay()) {
+                case 0:
+                    $("#lbWeek").html("星期日");
+                    break;
+                case 1:
+                    $("#lbWeek").html("星期一");
+                    break;
+                case 2:
+                    $("#lbWeek").html("星期二");
+                    break;
+                case 3:
+                    $("#lbWeek").html("星期三");
+                    break;
+                case 4:
+                    $("#lbWeek").html("星期四");
+                    break;
+                case 5:
+                    $("#lbWeek").html("星期五");
+                    break;
+                case 6:
+                    $("#lbWeek").html("星期六");
+                    break;
+                default:
+            }
+
+            var _options = {
+                PostData: {
+                    Params: {
+                        Result: "GetSignNum",
+                        UserID: GetSession("UserID")
+                    },
+                    ProcName: "proc_SOM_ISR_SignGPS",
+                    DataType: "Text",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    $("#SignNum").html(_result.Data);
+                }
+                else {
+                    $honesty.ShowMsg({ title: "错误", msg: "获取签到次数失败" });
+                }
+            });
+
+            $("#TopBar").children("li").tap(function () {
+                $("#TopBar").children("li").removeClass("active");
+                $(this).addClass("active");
+                if ($(this).data("power") == "Shop") {
+                    $("#divShopSign").show();
+                    $("#divNotShopSign").hide();
+                }
+                else {
+                    $("#divShopSign").hide();
+                    $("#divNotShopSign").show();
+                }
+            });
+
+            $("#ShopInfo").tap(function () {
+                if (_ShopList.length > 0) {
+                    $honesty.OpenWin({
+                        name: "Sign_ShopList",
+                        url: "Sign/ShopList.html",
+                        title: "附近店铺选择",
+                        pageParam: {
+                            ShopList: _ShopList
+                        }
+                    });
+                }
+            });
+
+            $("#AddressInfo").tap(function () {
+                if (_AddressList.length > 0) {
+                    $honesty.OpenWin({
+                        name: "Sign_AddressList",
+                        url: "Sign/AddressList.html",
+                        title: "附近地址选择",
+                        pageParam: {
+                            AddressList: _AddressList
+                        }
+                    });
+                }
+            });
+
+            $("#btnSign").tap(function () {
+                if (_Lon == 0) {
+                    $honesty.ShowMsg({
+                        title: "错误", msg: "获取位置失败，请重新点击签到", callback: function () {
+                            $honesty.CloseWin();
+                        }
+                    })
+                }
+                else if ($("#TopBar").find(".active").data("value") == "1" && isNaN(_ShopLon)) {
+                    $honesty.ShowMsg({ title: "警告", msg: "附近没有店铺，不可签到" })
+                }
+                else if ($("#TopBar").find(".active").data("value") == "0" && isNaN(_AddrLon)) {
+                    $honesty.ShowMsg({ title: "警告", msg: "获取附近地址失败，不可签到" })
+                }
+                else if ($("#Remark").val().trim() == "") {
+                    $honesty.ShowMsg({ title: "警告", msg: "请先填写备注" })
+                }
+                else {
+                    var signType = 0;
+                    $("[name='SignType']").each(function () {
+                        if ($(this).is(":checked")) {
+                            signType = $(this).val();
+                        }
+                    });
+                    var _options = {
+                        PostData: {
+                            Params: {
+                                Result: "SignInfo",
+                                UserID: GetSession("UserID"),
+                                UserName: GetSession("UserName"),
+                                IsShop: $("#TopBar").find(".active").data("value"),
+                                SignType: signType,
+                                Province: _Province,
+                                City: _City,
+                                District: _District,
+                                Address: _Address,
+                                lon: _Lon,
+                                lat: _Lat,
+                                Remark: $("#Remark").val().trim(),
+                                Selectlon: ($("#TopBar").find(".active").data("value") == "1" ? _ShopLon : _AddrLon),
+                                Selectlat: ($("#TopBar").find(".active").data("value") == "1" ? _ShopLat : _AddrLat),
+                                SelectAddress: ($("#TopBar").find(".active").data("value") == "1" ? _ShopAddress : _AddrAddress),
+                                Distinct: ($("#TopBar").find(".active").data("value") == "1" ? _ShopDistinct : _AddrDistinct),
+                                SelectName: ($("#TopBar").find(".active").data("value") == "1" ? _ShopName : _AddrName),
+                                OrganizeID: ($("#TopBar").find(".active").data("value") == "1" ? _ShopOrganizeID : "00000000-0000-0000-0000-000000000000"),
+                            },
+                            ProcName: "proc_SOM_ISR_SignGPS",
+                            DataType: "Bool",
+                            ExecType: "PROC",
+                            Mode: "MSSQL"
+                        }
+                    };
+
+                    $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                        if (_result.Code == "1") {
+                            if (_result.Data == "True") {
+                                $honesty.ShowMsg({
+                                    title: "提示", msg: "签到成功", callback: function () {
+                                        $honesty.CloseWin();
+                                    }
+                                })
+                            }
+                            else {
+                                $honesty.ShowMsg({ title: "错误", msg: "签到失败" });
+                            }
+                        }
+                    });
+                }
+            });
+
+
+            api.addEventListener({
+                name: 'Sign_ShopList'
+            }, function (ret) {
+                if (ret && ret.value) {
+                    _ShopLat = ret.value.lat;
+                    _ShopLon = ret.value.lon;
+                    _ShopAddress = ret.value.shopAddress;
+                    _ShopDistinct = ret.value.distinct;
+                    _ShopName = ret.value.shopName;
+                    _ShopOrganizeID = ret.value.organizeID;
+                    $("#ShopInfo").html(ret.value.shopName + '<span class="aui-badge" style="top:18px;">' + ret.value.distinct + 'm</span><p style="color:#3175af">点击选取店铺</p>');
+                }
+            });
+
+            api.addEventListener({
+                name: 'Sign_AddressList'
+            }, function (ret) {
+                if (ret && ret.value) {
+                    _AddrLat = ret.value.lat;
+                    _AddrLon = ret.value.lon;
+                    _AddrAddress = ret.value.addrAddress;
+                    _AddrDistinct = ret.value.distinct;
+                    _AddrName = ret.value.addrName;
+                    $("#AddressInfo").html(ret.value.addrName + '<p style="font-size:13px;">' + ret.value.addrAddress + '</p><span class="aui-badge" style="top:18px;">' + ret.value.distinct + 'm</span><p style="color:#3175af">点击选择地址</p>');
+                }
+            });
+
+        });
+    }
+    window.onload = loadScript;
+    function IniInfo() {
+        api.showProgress({
+            animationType: 'fade',
+            title: "请稍等",
+            text: "正在加载位置...",
+        });
+        var baiduLocation = api.require('baiduLocation');
+        baiduLocation.startLocation({
+            accuracy: '100m',
+            filter: 1,
+            autoStop: true
+        }, function (ret, err) {
+            var sta = ret.status;
+            _Lat = ret.latitude;
+            _Lon = ret.longitude;
+            if (sta) {
+                var map = new BMap.Map("container");
+                map.centerAndZoom(new BMap.Point(116.331398, 39.897445), 17);
+                map.disableDragging();
+                map.disablePinchToZoom();
+                map.clearOverlays();
+                $.ajax({
+                    type: "GET",
+                    url: "http://api.map.baidu.com/geocoder/v2/?ak=uFL9R4RZ35RIaVmXrazY4oiU2QDjcFSs&location=" + _Lat + "," + _Lon + "&output=json&pois=1",
+                    dataType: "text",
+                    async: false,
+                    success: function (rData) {
+                        rData = JSON.parse(rData);
+                        if (rData.status == "0") {
+                            _Province = rData.result.addressComponent.province;
+                            _City = rData.result.addressComponent.city;
+                            _District = rData.result.addressComponent.district;
+                            _Address = rData.result.formatted_address;
+                            $("#liAddressInfo").html("<p>地址:" + _Province + "-" + _City + "-" + _District + "</p>");
+                            _AddressList = rData.result.pois;
+
+                            //对距离进行排序
+                            var temp;
+                            for (var i = 0; i < _AddressList.length; i++) {
+                                for (var j = i + 1; j < _AddressList.length; j++) {
+                                    if (Number(_AddressList[i].distance) > Number(_AddressList[j].distance)) {
+                                        temp = _AddressList[i];
+                                        _AddressList[i] = _AddressList[j];
+                                        _AddressList[j] = temp;
+                                    }
+                                }
+                            }
+                            if (_AddressList.length > 0) {
+                                $.each(_AddressList, function (i, item) {
+                                    $("#AddressInfo").html(item.name + '<p style="font-size:13px;">' + item.addr + '</p><span class="aui-badge" style="top:18px;">' + item.distance + 'm</span><p style="color:#3175af">点击选择地址</p>');
+                                    _AddrLat = item.point.y;
+                                    _AddrLon = item.point.x;
+                                    _AddrAddress = item.addr;
+                                    _AddrDistinct = item.distance;
+                                    _AddrName = item.name;
+                                    return false;
+                                });
+                            }
+                            else {
+                                $("#AddressInfo").html("获取不到附近位置");
+                            }
+                        }
+                    },
+                    error: function (XMLHttpRequest, textStatus, thrownError) {
+                        api.hideProgress();
+                        $honesty.ShowMsg({
+                            title: "错误", msg: "获取附近位置失败,请重新点击签到", callback: function () {
+                                $honesty.CloseWin();
+                            }
+                        })
+                    }
+
+                });
+
+                var _options = {
+                    PostData: {
+                        Params: {
+                            Result: "GetShopListNearBy",
+                            lon: _Lon,
+                            lat: _Lat
+                        },
+                        ProcName: "proc_SOM_ISR_SignGPS",
+                        DataType: "DataTable",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    },
+                    async: false,
+                    Loading: {
+                        Show: false
+                    },
+                };
+                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                    if (_result.Code == "1") {
+                        if (_result.Data.length > 0) {
+                            _ShopList = _result.Data;
+                            $.each(_ShopList, function (i, item) {
+                                $("#ShopInfo").html(item.ShopName + '<span class="aui-badge" style="top:18px;">' + item.Distinct + 'm</span><p style="color:#3175af">点击选取店铺</p>');
+                                _ShopLat = item.lat;
+                                _ShopLon = item.lon;
+                                _ShopAddress = item.ShopAddress;
+                                _ShopDistinct = item.Distinct;
+                                _ShopName = item.ShopName;
+                                _ShopOrganizeID = item.OrganizeID;
+                                return false;
+                            });
+                        }
+                        else {
+                            $("#ShopInfo").html("附近没有店铺");
+                        }
+
+                    }
+                    else {
+                        api.hideProgress();
+                        $honesty.ShowMsg({
+                            title: "错误", msg: "获取附近店铺失败,请重新点击签到", callback: function () {
+                                $honesty.CloseWin();
+                            }
+                        })
+                    }
+                });
+
+                var new_point = new BMap.Point(_Lon, _Lat);
+                var marker = new BMap.Marker(new_point);  // 创建标注
+                map.addOverlay(marker);              // 将标注添加到地图中
+                map.panTo(new_point);
+                $("#footer").show();
+                api.hideProgress();
+
+            } else {
+                $honesty.ShowMsg({ title: "错误", msg: "未能获取到您的位置信息，请打开定位服务权限，若已经打开请，重新打开签到页面" });
+                $("#footer").hide();
+                api.hideProgress();
+            }
+        });
+    }
+
+    function loadScript() {
+        setTimeout(function () {
+            var script = document.createElement("script");
+            script.src = "http://api.map.baidu.com/api?v=2.0&ak=uFL9R4RZ35RIaVmXrazY4oiU2QDjcFSs&callback=IniInfo";//此为v2.0版本的引用方式  
+            document.body.appendChild(script);
+        }, 100);
+
+    }
+</script>
+</html>

@@ -1,0 +1,162 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>组织架构选择</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="aui-searchbar-wrap" id="divSearchBlock">
+        <div id="divSearch" class="aui-searchbar aui-border-radius">
+            <i class="aui-iconfont aui-icon-search"></i>
+            <div class="aui-searchbar-text">请输入搜索内容</div>
+        </div>
+    </div>
+    <div class="aui-content">
+        <ul class="aui-list-view aui-in">
+            <li class="aui-list-view-cell">
+                <i class="aui-iconfont aui-icon-shop" style="background-color:#000"></i>广西柳州鱼峰路银泰城专柜
+            </li>
+            <li class="aui-list-view-cell">
+                <i class="aui-iconfont aui-icon-shop aui-bg-warning"></i>广西柳州星河大厦专卖店
+            </li>
+            <li class="aui-list-view-cell">
+                <i class="aui-iconfont aui-icon-shop aui-bg-warning"></i>单行列表标题效果
+            </li>
+            <li class="aui-list-view-cell">
+                <i class="aui-iconfont aui-icon-shop aui-bg-warning"></i>单行列表标题效果
+            </li>
+        </ul>
+    </div>
+</body>
+<script src="../../script/api.js"></script>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script type="text/javascript">
+
+    var _Condition = "";
+    apiready = function () {
+        api.parseTapmode();
+
+        $("#divSearch").tap(function () {
+            var UISearchBar = api.require('UISearchBar');
+            UISearchBar.open({
+                placeholder: '请输入搜索内容',
+                historyCount: 10,
+                showRecordBtn: false,
+                texts: {
+                    cancelText: '取消',
+                    clearText: '清除搜索记录'
+                },
+                styles: {
+                    navBar: {
+                        bgColor: '#FFFFFF',
+                        borderColor: '#ccc'
+                    },
+                    searchBox: {
+                        bgImg: '',
+                        color: '#000',
+                        height: 35
+                    },
+                    cancel: {
+                        bg: 'rgba(0,0,0,0)',
+                        color: '#696969',
+                        size: 14
+                    },
+                    list: {
+                        color: '#696969',
+                        bgColor: '#FFFFFF',
+                        borderColor: '#eee',
+                        size: 14
+                    },
+                    clear: {
+                        color: '#000000',
+                        borderColor: '#ccc',
+                        size: 14
+                    }
+                }
+            }, function (ret, err) {
+                if (ret) {
+                    if (ret.eventType == "search" || ret.eventType == "history") {
+
+                    }
+                }
+                else {
+                    $honesty.ShowToast({ msg: "搜索错误，请重新进行搜索" });
+                }
+            });
+        });
+    }
+
+    //加载数据函数
+    function LoadData(options) {
+        var _opts = {};
+        var defaults = {
+            control: null,//调用的控件编号
+            more: true,//是否多选
+            model: true,//true:选择部门  false:选择人员 
+            shop: false,//是否只加载店铺
+            root: true,//限定大区
+            isowner: false,//限定为只加载自己管辖的组织架构
+            callok: function () { },//确认回调函数
+        };
+        _opts = $.extend(defaults, options);
+
+        var ParentID = "00000000-0000-0000-0000-000000000000";
+        var OID = "00000000-0000-0000-0000-000000000000";
+        var rootid = "99999999-9999-9999-9999-999999999999";
+        var _AreaName = GetSession("AreaName");
+        if (_opts.root) {
+            switch (_AreaName) {
+                case "华南":
+                    ParentID = rootid = "b03abf91-67be-4b22-b2c8-0de0598876fc";
+                    break;
+                case "华东":
+                    ParentID = rootid = "377735cb-eb28-4b0a-a8e1-f9e3bdcad863";
+                    break;
+                case "北方":
+                    ParentID = rootid = "ce8ef2f7-44b6-45a0-9f33-d5f6fc493922";
+                    break;
+                case "西北":
+                    ParentID = rootid = "214d0b66-663e-4170-8d14-a49de334c05f";
+                    break;
+                case "成都":
+                    ParentID = rootid = "b298e965-9069-404a-a7bf-342d38b844a0";
+                    break;
+            }
+        }
+
+        if (_opts.isowner) {
+            rootid = GetSession("OrganizeID") != null ? GetSession("OrganizeID").toLowerCase() : "99999999-9999-9999-9999-999999999999";
+            ParentID = GetSession("OrganizeID") != null ? GetSession("OrganizeID").toLowerCase() : "00000000-0000-0000-0000-000000000000";
+        }
+        if ($("#" + _opts.control).attr("rootid") != "" && $("#" + _opts.control).attr("rootid") != undefined) {
+            rootid = GetOrganizeID() != null ? GetOrganizeID().toLowerCase() : "99999999-9999-9999-9999-999999999999";
+            //
+            //ParentID = ExecText({ "result": "GetParentID", "ID": rootid }, "proc_HC_Organize");
+        }
+        var Depth = 0;
+        var _SelectID = {
+            text: new Array(),//文本值数组  编号;文本
+            id: new Array(),//编号
+            strid: "",
+            strtext: "",
+        };
+    }
+
+    //行项目点击函数
+    function SelectItem(shopCode, organizeID) {
+        $honesty.OpenWin({
+            title: api.pageParam.JumpTitle,
+            name: api.pageParam.JumpName,
+            url: api.pageParam.JumpUrl,
+            pageParam: {
+                OrganizeID: organizeID,
+                ShopCode: shopCode
+            }
+        });
+    }
+</script>
+</html>

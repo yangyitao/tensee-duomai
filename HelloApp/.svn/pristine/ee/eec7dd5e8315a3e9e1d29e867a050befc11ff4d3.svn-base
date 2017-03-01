@@ -1,0 +1,251 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>销售分析（日计划报表）</title>
+    <link href="../../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .form {
+            width: 100%;
+            text-align: center;
+            font-size: 14px;
+            border-collapse: collapse;
+        }
+
+            .form td, .form th {
+                border-bottom: 1px solid rgba(216, 216, 216, 0.1);
+                height: 35px;
+                letter-spacing: 0.4px;
+            }
+
+            .form th {
+                font-weight: 400;
+            }
+
+            .form td {
+                color: #8f8f94;
+            }
+
+                .form td:first-child {
+                    color: #000;
+                }
+    </style>
+</head>
+<body>
+    <div class="aui-content">
+        <ul class="aui-list-view" style="margin-bottom: 0">
+            <li class="aui-list-view-cell" style="padding: 3px;">
+                <table class="form">
+                    <tr>
+                        <th style="width: 80px;"></th>
+                        <th>本月</th>
+                        <th>本周</th>
+                        <th>本日</th>
+                    </tr>
+                    <tr>
+                        <th>销售目标</th>
+                        <td id="TargetSale1"></td>
+                        <td id="TargetSale2"></td>
+                        <td id="TargetSale3"></td>
+
+                    </tr>
+                    <tr>
+                        <th>累计销售</th>
+                        <td id="ActualSale1"></td>
+                        <td id="ActualSale2"></td>
+                        <td id="ActualSale3"></td>
+
+                    </tr>
+                    <tr>
+                        <th>累计完成率</th>
+                        <td id="TotalRate1"></td>
+                        <td id="TotalRate2"></td>
+                        <td id="TotalRate3"></td>
+
+                    </tr>
+                    <tr>
+                        <th>时间进度</th>
+                        <td id="TimeRate1"></td>
+                        <td id="TimeRate2"></td>
+                        <td id="TimeRate3"></td>
+
+                    </tr>
+                    <tr>
+                        <th>时间差异</th>
+                        <td id="TimeDifference1"></td>
+                        <td id="TimeDifference2"></td>
+                        <td id="TimeDifference3"></td>
+
+                    </tr>
+                    <tr>
+                        <th>同比增长</th>
+                        <td id="YearOnYear1"></td>
+                        <td id="YearOnYear2"></td>
+                        <td id="YearOnYear3"></td>
+
+                    </tr>
+                    <tr>
+                        <th>环比增长</th>
+                        <td id="QuarterOnQuarter1"></td>
+                        <td id="QuarterOnQuarter2"></td>
+                        <td id="QuarterOnQuarter3"></td>
+
+                    </tr>
+                    <tr>
+                        <th>客单价</th>
+                        <td id="CustomerUnitPrice1"></td>
+                        <td id="CustomerUnitPrice2"></td>
+                        <td id="CustomerUnitPrice3"></td>
+
+                    </tr>
+                    <tr>
+                        <th>客单件</th>
+                        <td id="CustomerSingle1"></td>
+                        <td id="CustomerSingle2"></td>
+                        <td id="CustomerSingle3"></td>
+                    </tr>
+                    <tr>
+                        <th>新开卡数</th>
+                        <td id="CardNum1"></td>
+                        <td id="CardNum2"></td>
+                        <td id="CardNum3"></td>
+
+                    </tr>
+                    <tr>
+                        <th>VIP占比</th>
+                        <td id="VipRate1"></td>
+                        <td id="VipRate2"></td>
+                        <td id="VipRate3"></td>
+
+                    </tr>
+                    <tr>
+                        <th>VIP单数</th>
+                        <td id="VIPOrderNum1"></td>
+                        <td id="VIPOrderNum2"></td>
+                        <td id="VIPOrderNum3"></td>
+
+                    </tr>
+                    <tr>
+                        <th>VIP件数</th>
+                        <td id="VIPClothesNum1"></td>
+                        <td id="VIPClothesNum2"></td>
+                        <td id="VIPClothesNum3"></td>
+
+                    </tr>
+                    <tr>
+                        <th>VIP客单价</th>
+                        <td id="VIPCustomerUnitPrice1"></td>
+                        <td id="VIPCustomerUnitPrice2"></td>
+                        <td id="VIPCustomerUnitPrice3"></td>
+
+                    </tr>
+                    <tr>
+                        <th>VIP客单量</th>
+                        <td id="VIPCustomerSingle1"></td>
+                        <td id="VIPCustomerSingle2"></td>
+                        <td id="VIPCustomerSingle3"></td>
+
+                    </tr>
+                </table>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>
+<script src="../../../../script/zepto.js"></script>
+<script src="../../../../script/api.js"></script>
+<script src="../../../../script/honesty.base.js"></script>
+
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            LoadData();
+
+            //下拉刷新
+            api.setRefreshHeaderInfo({
+                visible: true,
+                loadingImg: 'widget://image/refresh.png',
+                bgColor: '#fff',
+                textColor: '#000',
+                textDown: '下拉刷新...',
+                textUp: '松开刷新...',
+                showTime: true
+            }, function (ret, err) {
+                LoadData();
+                api.refreshHeaderLoadDone();
+            });
+        });
+    }
+    function LoadData() {
+        var date = new Date(api.pageParam.TodayDate);
+        var today = date.getDate();
+        var week = date.getDay();
+        var dayNum = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+        var todaySale = 0;
+        if (week == "0") {
+            week = "7";
+        }
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "FormSaleAnalyse",
+                    DayID: api.pageParam.DayID
+                },
+                ProcName: "proc_SOM_ISR_DS_Title",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        var totalRate = (item.TargetSale == "0" ? "0" : (Number(item.ActualSale) / Number(item.TargetSale) * 100).toFixed(0));
+                        var timeRate = 0;
+                        var lastYear = (item.LastYearSale == "0" ? "0" : (Number(item.ActualSale) / Number(item.LastYearSale) * 100 - 100).toFixed(0));
+                        var lastMonth = (item.LastMonthSale == "0" ? "0" : (Number(item.ActualSale) / Number(item.LastMonthSale) * 100 - 100).toFixed(0));
+                        if (item.ID == "1") {
+                            timeRate = (today / dayNum * 100).toFixed(0);
+                        }
+                        else if (item.ID == "2") {
+                            timeRate = (week / 7 * 100).toFixed(0);
+
+                        }
+                        else if (item.ID == "3") {
+
+                            todaySale = item.ActualSale;
+                        }
+                        $("#TargetSale" + item.ID).html(item.TargetSale);
+                        $("#ActualSale" + item.ID).html(item.ActualSale);
+                        $("#TotalRate" + item.ID).html(totalRate + "%");
+                        if (item.ID != "3") {
+                            $("#TimeRate" + item.ID).html(timeRate + "%");
+                            $("#TimeDifference" + item.ID).html((totalRate - timeRate) + "%");
+
+                        }
+                        else {
+                            $("#TimeRate" + item.ID).html("");
+                            $("#TimeDifference" + item.ID).html("");
+                        }
+                        $("#CustomerUnitPrice" + item.ID).html((item.OrderNum == "0" ? "0" : (Number(item.ActualSale) / Number(item.OrderNum)).toFixed(0)));
+                        $("#CustomerSingle" + item.ID).html((item.OrderNum == "0" ? "0" : (Number(item.ClothesNum) / Number(item.OrderNum)).toFixed(1)));
+                        $("#CardNum" + item.ID).html(item.CardNum);
+                        $("#VipRate" + item.ID).html((item.ActualSale == "0" ? "0" : (Number(item.VIPSale) / Number(item.ActualSale) * 100).toFixed(0)) + "%");
+                        $("#VIPOrderNum" + item.ID).html(item.VIPOrderNum);
+                        $("#VIPClothesNum" + item.ID).html(item.VIPClothesNum);
+                        $("#VIPCustomerUnitPrice" + item.ID).html((item.VIPOrderNum == "0" ? "0" : (Number(item.VIPSale) / Number(item.VIPOrderNum)).toFixed(0)));
+                        $("#VIPCustomerSingle" + item.ID).html((item.VIPOrderNum == "0" ? "0" : (Number(item.VIPClothesNum) / Number(item.VIPOrderNum)).toFixed(1)));
+                        $("#YearOnYear" + item.ID).html(lastYear + "%");
+                        $("#QuarterOnQuarter" + item.ID).html(lastMonth + "%");
+                    })
+
+                }
+
+            }
+        });
+    }
+</script>

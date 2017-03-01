@@ -1,0 +1,121 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>Tensee</title>
+    <link href="css/api.css" rel="stylesheet" />
+    <link href="css/aui.css" rel="stylesheet" />
+    <link href="css/common.css" rel="stylesheet" />
+    <style type="text/css">
+        .aui-card {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            margin: 0px;
+            width: 100%;
+        }
+
+        .aui-input-addon.aui-iconfont {
+            font-size: 20px !important;
+        }
+
+        .aui-input-row {
+            width: 100% !important;
+        }
+    </style>
+</head>
+<body style="padding: 0px;">
+    <div class="aui-content aui-card">
+        <div id="divBottom" class="aui-btn-row">
+            <div class="aui-btn aui-btn-block aui-btn-warning" style="width: 48%; float: left" id="btnLogin">登录</div>
+            <div class="aui-btn aui-btn-block" style="width: 48%; float: right" id="btnRegister">入职</div>
+            <div style="clear: both"></div>
+        </div>
+    </div>
+    
+</body>
+<script type="text/javascript" src="script/api.js"></script>
+<script src="script/swipe.js"></script>
+<script type="text/javascript" src="script/zepto.js"></script>
+<script src="script/honesty.base.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            //Android双击返回退出
+            $honesty.DoubleBack();
+            if (!$honesty.IsLocal()) {
+                jpush = api.require("ajpush");
+                jpush.init(function (ret, err) {
+                    if (ret && ret.status) {
+                        alert('操作成功!');
+                    } else {
+                        alert('操作失败!');
+                    }
+                });
+                jpush.getRegistrationId(function (ret, err) {
+                    SetSession("PushKey", ret.id);
+                });
+            }
+
+
+            //滚动图片
+            var _ImgHeight = api.frameHeight - $("#divBottom").height();
+            var obj = api.require('UIScrollPicture');
+            obj.open({
+                rect: {
+                    x: 0,
+                    y: 0,
+                    w: api.frameWidth,
+                    h: _ImgHeight
+                },
+                data: {
+                    paths:
+                        [
+                           
+                            "widget://res/img/3.jpg",
+                            "widget://res/img/4.jpg",
+                            "widget://res/img/5.jpg",
+                            "widget://res/img/6.jpg"
+                        ]
+                },
+                styles: {
+                    indicator: {
+                        align: 'center',
+                        color: '#FFFFFF',
+                        activeColor: '#F1C40F'
+                    }
+                },
+                contentMode: 'scaleToFill',
+                interval: 5,
+                loop: true,
+                fixedOn: api.frameName,
+                fixed: false
+            });
+
+            //登录按钮点击
+            $("#btnLogin").tap(function () {
+                $honesty.OpenWin({
+                    name: "User_Login",
+                    url: "User/Login.html",
+                    title: "登录",
+                    IsRoot: true
+                });
+            });
+            //入职按钮点击
+            $("#btnRegister").tap(function () {
+                $honesty.OpenWin({
+                    name: "User_Register",
+                    url: "User/Register.html",
+                    title: "入职申请",
+                    IsRoot: true
+                });
+            });
+        });
+    }
+</script>
+
+</script>
+</html>

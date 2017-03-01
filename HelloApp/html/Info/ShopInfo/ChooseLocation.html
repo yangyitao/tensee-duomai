@@ -1,0 +1,205 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>店铺地址选择</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="aui-content">
+        <ul class="aui-list-view" style="margin-bottom: 0px;">
+            <li class="aui-list-view-cell" style="padding: 0px">
+                <div id="container" style="width: 100%; height: 200px;"></div>
+            </li>
+        </ul>
+        <div id="divList" style="overflow-y: auto">
+            <ul class="aui-list-view" id="AddressList">
+            </ul>
+        </div>
+        <footer id="footer" class="aui-nav" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7; display: none">
+            <div id="btnLocation" class="aui-btn aui-btn-block aui-btn-warning aui-iconfont aui-icon-location" style="height: 45px; width: 100%; line-height: 0.9;">
+                店铺定位
+            </div>
+        </footer>
+    </div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _Lon, _Lat, _NowLon, _NowLat;
+
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _Lon = api.pageParam.Lon;
+            _Lat = api.pageParam.Lat;
+            $("#divList").height(api.frameHeight - 250 - $("#footer").height());
+
+            $("#btnLocation").tap(function () {
+                $honesty.ConfirmWin({
+                    msg: "是否重新定位店铺？", callback: function (value, error) {
+                        if (value.buttonIndex == "1") {
+                            var _options = {
+                                PostData: {
+                                    Params: {
+                                        Result: "UpdateLocation",
+                                        OrganizeID: api.pageParam.OrganizeID,
+                                        lon: _Lon,
+                                        lat: _Lat
+                                    },
+                                    ProcName: "proc_SOM_ISR_ShopInfo",
+                                    DataType: "Bool",
+                                    ExecType: "PROC",
+                                    Mode: "MSSQL"
+                                }
+                            };
+
+                            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                                if (_result.Code == "1") {
+                                    if (_result.Data == "True") {
+                                        $honesty.ShowMsg({
+                                            title: "提示", msg: "更新成功", callback: function () {
+                                                api.sendEvent({
+                                                    name: 'Info_ShopInfo_ChooseLocation',
+                                                    extra: {
+                                                        Lon: _Lon,
+                                                        Lat: _Lat
+                                                    }
+                                                });
+                                                $honesty.CloseWin();
+                                            }
+                                        });
+                                    }
+                                    else {
+                                        $honesty.ShowMsg({ title: "错误", msg: "更新失败" });
+                                    }
+                                }
+                            });
+
+
+                        }
+                    }
+                });
+            });
+        });
+
+    }
+    window.onload = loadScript;
+    function loadScript() {
+        setTimeout(function () {
+            var script = document.createElement("script");
+            script.src = "http://api.map.baidu.com/api?v=2.0&ak=uFL9R4RZ35RIaVmXrazY4oiU2QDjcFSs&callback=IniInfo";//此为v2.0版本的引用方式  
+            document.body.appendChild(script);
+        }, 100);
+    }
+
+    function IniInfo() {
+        api.showProgress({
+            animationType: 'fade',
+            title: "请稍等",
+            text: "正在加载...",
+        });
+
+        var map = new BMap.Map("container");
+        map.centerAndZoom(new BMap.Point(116.331398, 39.897445), 17);
+        map.disableDragging();
+        map.disablePinchToZoom();
+        map.clearOverlays();
+
+
+        var baiduLocation = api.require('baiduLocation');
+        baiduLocation.startLocation({
+            accuracy: '100m',
+            filter: 1,
+            autoStop: true
+        }, function (ret, err) {
+            var sta = ret.status;
+            _NowLat = ret.latitude;
+            _NowLon = ret.longitude;
+            if (sta) {
+                var map = new BMap.Map("container");
+                map.centerAndZoom(new BMap.Point(116.331398, 39.897445), 17);
+                map.disableDragging();
+                map.disablePinchToZoom();
+                map.clearOverlays();
+                $.ajax({
+                    type: "GET",
+                    url: "http://api.map.baidu.com/geocoder/v2/?ak=uFL9R4RZ35RIaVmXrazY4oiU2QDjcFSs&location=" + _NowLat + "," + _NowLon + "&output=json&pois=1",
+                    dataType: "text",
+                    async: false,
+                    success: function (rData) {
+                        rData = JSON.parse(rData);
+                        if (rData.status == "0") {
+                            var _AddressList = rData.result.pois;
+                            //对距离进行排序
+                            var temp;
+                            for (var i = 0; i < _AddressList.length; i++) {
+                                for (var j = i + 1; j < _AddressList.length; j++) {
+                                    if (Number(_AddressList[i].distance) > Number(_AddressList[j].distance)) {
+                                        temp = _AddressList[i];
+                                        _AddressList[i] = _AddressList[j];
+                                        _AddressList[j] = temp;
+                                    }
+                                }
+                            }
+                            var _Content = "";
+                            if (_AddressList.length > 0) {
+                                $.each(_AddressList, function (i, item) {
+                                    _Content += '<li class="aui-list-view-cell" style="padding: 10px;" tapmode  onclick=\'SelectAddr(\"' + item.point.y + '\",\"' + item.point.x + '\")\'>' +
+                                                '<a class="aui-ellipsis-1" style="font-size: 14px">' + item.name +
+                                                '<p style="font-size:13px;">' + item.addr + '</p><span class="aui-badge" style="top:18px;">' + item.distance + 'm</span></a></li>';
+                                });
+                                $("#AddressList").html(_Content);
+                                api.parseTapmode();
+                            }
+                        }
+                    },
+                    error: function (XMLHttpRequest, textStatus, thrownError) {
+                        api.hideProgress();
+                        $honesty.ShowMsg({
+                            title: "错误", msg: "获取附近位置失败,请重新点击更新店铺位置", callback: function () {
+                                $honesty.CloseWin();
+                            }
+                        })
+                    }
+
+                });
+                var new_point;
+                if (!isNaN(_Lon)) {
+                    new_point = new BMap.Point(_Lon, _Lat);
+                }
+                else {
+                    new_point = new BMap.Point(_NowLon, _NowLat);
+                }
+                var marker = new BMap.Marker(new_point);  // 创建标注
+                map.addOverlay(marker);              // 将标注添加到地图中
+                map.panTo(new_point);
+                $("#footer").show();
+                api.hideProgress();
+
+            } else {
+                $honesty.ShowMsg({ title: "错误", msg: "未能获取到您的位置信息，请打开定位服务权限，若已经打开请，重新点位店铺位置页面" });
+                api.hideProgress();
+            }
+        });
+    }
+
+    function SelectAddr(lat, lon) {
+        var map = new BMap.Map("container");
+        map.centerAndZoom(new BMap.Point(116.331398, 39.897445), 17);
+        map.disableDragging();
+        map.disablePinchToZoom();
+        map.clearOverlays();
+        var new_point = new BMap.Point(lon, lat)
+        var marker = new BMap.Marker(new_point);
+        map.addOverlay(marker);
+        map.panTo(new_point);
+
+        _Lon = lon;
+        _Lat = lat;
+    }
+</script>
+</html>

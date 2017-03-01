@@ -1,0 +1,689 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>后台人员管理流程</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-input-row .aui-input-addon {
+            width: 100px;
+            color: #8f8f94;
+            text-align: left;
+        }
+
+        .aui-input-form .aui-input-row .aui-input-addon {
+            padding-left: 8px;
+            font-weight: 300;
+            font-size: 13px;
+        }
+
+        .aui-list-view-cell {
+            padding: 5px 15px;
+        }
+
+        .aui-label-title {
+            text-align: right;
+            width: 90px;
+        }
+    </style>
+</head>
+<body>
+    <div class="aui-content">
+        <p class="aui-padded-5 aui-text-center" style="color: #3175af; font-size: 16px;">后台人员管理流程</p>
+        <div class="aui-card" style="margin-bottom: 0px;">
+            <ul class="aui-list-view" style="margin-bottom: 0px;">
+                <li class="aui-list-view-cell">
+                    <label id="SN"></label>
+                    <p>单号</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="SendName"></label>
+                    <p>姓名</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="SendDate"></label>
+                    <p>日期</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="Area"></label>
+                    <p>大区</p>
+                </li>
+            </ul>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; margin: 0 10px; font-size: 15px;">人员权限类型</p>
+        <div class="aui-card aui-input-form" style="margin-bottom: 0px;">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">权限类型</span>
+                <select class="aui-input" id="MoveType">
+                    <option value="">请选择...</option>
+                    <option value="1">新增</option>
+                    <option value="2">变更</option>
+                    <option value="3">删除</option>
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">调整原因</span>
+                <input id="MoveReason" type="text" class="aui-input" placeholder="请填写调整原因" />
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; margin: 0 10px; font-size: 15px;">基本信息</p>
+        <div class="aui-card aui-input-form" style="margin-bottom: 0px;">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">姓名</span>
+                <input id="EmpName" type="text" class="aui-input" readonly="true" placeholder="点击选择部门" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">账号</span>
+                <input id="EmpAccount" type="text" class="aui-input" readonly="true" placeholder="请输入账号" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">性别</span>
+                <div class="aui-pull-left">
+                    <div style="float: left">
+                        <input name="EmpSex" value="男" class="aui-radio aui-radio-warning" type="radio" checked="checked" disabled="disabled">
+                        <div class="aui-radio-name">男</div>
+                    </div>
+                    <div style="float: left">
+                        <input name="EmpSex" value="女" class="aui-radio aui-radio-warning" type="radio" disabled="disabled">
+                        <div class="aui-radio-name">女</div>
+                    </div>
+                </div>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">岗位</span>
+                <select class="aui-input" id="EmpPost" disabled="disabled">
+                    <option value="">请选择...</option>
+                    <option value="A">大区总经理</option>
+                    <option value="B">零售总监</option>
+                    <option value="C">零售经理</option>
+                    <option value="D">区域经理</option>
+                    <option value="10">职员</option>
+                    <option value="11">主管</option>
+                    <option value="12">经理</option>
+                    <option value="13">总监</option>
+                    <option value="14">副总经理</option>
+                    <option value="15">总经理</option>
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">部门</span>
+                <input id="OrganizeID" type="text" class="aui-input" readonly="true" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">是否部门领导</span>
+                <div class="aui-pull-left">
+                    <div style="float: left">
+                        <input name="IsLeader" value="1" class="aui-radio aui-radio-warning" type="radio" disabled="disabled" checked="checked">
+                        <div class="aui-radio-name">是</div>
+                    </div>
+                    <div style="float: left">
+                        <input name="IsLeader" value="0" class="aui-radio aui-radio-warning" type="radio" disabled="disabled">
+                        <div class="aui-radio-name">否</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; margin: 0 10px; font-size: 15px; display: none" data-role="move">调整后信息</p>
+        <div class="aui-card aui-input-form" style="margin-bottom: 0px; display: none" data-role="move">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">岗位</span>
+                <select class="aui-input" id="TransferPost">
+                    <option value="">请选择...</option>
+                    <option value="A">大区总经理</option>
+                    <option value="B">零售总监</option>
+                    <option value="C">零售经理</option>
+                    <option value="D">区域经理</option>
+                    <option value="10">职员</option>
+                    <option value="11">主管</option>
+                    <option value="12">经理</option>
+                    <option value="13">总监</option>
+                    <option value="14">副总经理</option>
+                    <option value="15">总经理</option>
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">部门</span>
+                <input id="TransferOrganizeID" type="text" class="aui-input" readonly="true" placeholder="点击选择部门" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">是否部门领导</span>
+                <div class="aui-pull-left">
+                    <div style="float: left">
+                        <input name="TransferIsLeader" value="1" class="aui-radio aui-radio-warning" type="radio">
+                        <div class="aui-radio-name">是</div>
+                    </div>
+                    <div style="float: left">
+                        <input name="TransferIsLeader" value="0" class="aui-radio aui-radio-warning" type="radio" checked="checked">
+                        <div class="aui-radio-name">否</div>
+                    </div>
+                </div>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">是否兼职</span>
+                <div class="aui-pull-left">
+                    <div style="float: left">
+                        <input name="TransferIsPartTime" value="1" class="aui-radio aui-radio-warning" type="radio">
+                        <div class="aui-radio-name">是</div>
+                    </div>
+                    <div style="float: left">
+                        <input name="TransferIsPartTime" value="0" class="aui-radio aui-radio-warning" type="radio" checked="checked">
+                        <div class="aui-radio-name">否</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; margin: 0 10px; font-size: 15px; display: none" data-role="post">岗位角色</p>
+        <div class="aui-card aui-input-form" style="margin-bottom: 0px; display: none" data-role="post">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">岗位角色</span>
+                <select class="aui-input" id="RoleID">
+                    <option value="">请选择...</option>
+                    <option value="16FE559A-F4F6-4D37-90E1-0C1EB80EF086">卡宾员工</option>
+                    <option value="CA07CEC1-5891-459A-AC54-3EDDAF8618C5">区域陈列</option>
+                    <option value="78B66284-AE44-4ADC-8D50-65A228EB2D8D">零售推广</option>
+                    <option value="44CABC33-857F-4CD7-808E-7C57F5151CE4">VIP专员</option>
+                    <option value="374B375E-F532-48B6-9CBF-899F84B7136E">商品工程</option>
+                    <option value="9E973109-C1EE-4641-B3F5-A8F45BDBDFDD">HR经理</option>
+                    <option value="6A0F989A-C953-443E-85D5-C25B3AB8E07D">HR专员</option>
+                    <option value="305CDAFE-6883-4887-974E-B7E88A15C004">零售支持经理</option>
+                    <option value="0F1479C3-A4B7-4AEF-9BFB-DE914A6BF363">培训师</option>
+                </select>
+            </div>
+        </div>
+        <div style="height: 100px"></div>
+    </div>
+</body>
+<script src="../../script/api.js"></script>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script src="../../script/honesty.flow.js"></script>
+<script type="text/javascript">
+    var _BackID = null, _InstanceID;
+    var _SendUserID, _EmpID;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            $honestyFlow.InitFlow({ Async: false, wapflowpage: "HRFlow/EmpBackManage" });
+            _InstanceID = $honestyFlow.GetFlowInfo("instanceid");
+            if (api.pageParam.instanceid != undefined) {
+                _BackID = _InstanceID;
+            }
+
+            IniInfo();
+
+
+            //提交
+            $("#btnSend").unbind("tap").tap(function () {
+                if (SaveData()) {
+                    $honestyFlow.SendFlow();
+                }
+            });
+            //暂存
+            $("#btnPause").unbind("tap").tap(function () {
+                if (SaveData()) {
+                    $honestyFlow.PauseFlow();
+                }
+            });
+
+
+            $("#OrganizeID").tap(function () {
+                if ($honestyFlow.GetFlowInfo("stepname") == "HR专员发起" && $("#MoveType").val() == "1") {
+                    $honesty.Organize({
+                        control: "OrganizeID", ismore: "false", typemode: "O", root: false,
+                        callback: function () {
+                        }
+                    });
+                }
+            });
+
+            $("#TransferOrganizeID").tap(function () {
+                if ($honestyFlow.GetFlowInfo("stepname") == "HR专员发起") {
+                    $honesty.Organize({
+                        control: "TransferOrganizeID", ismore: "false", typemode: "O", root: false,
+                        callback: function () {
+                        }
+                    });
+                }
+            });
+
+            $("#EmpName").change(function () {
+                if ($("#EmpName").val().trim() != "") {
+                    _EmpID = new $honesty.GUID().NewGUID();
+                    var _options = {
+                        PostData: {
+                            Params: {
+                                Result: "GetAccount",
+                                EmpName: $("#EmpName").val().trim(),
+                                SN: $("#SN").html()
+                            },
+                            ProcName: "proc_SOM_HR_EmpBackManage",
+                            DataType: "Text",
+                            ExecType: "PROC",
+                            Mode: "MSSQL"
+                        }
+                    };
+                    $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                        if (_result.Code == "1") {
+                            $("#EmpAccount").val(_result.Data);
+                        }
+                        else {
+                            $("#EmpName").val("");
+                        }
+                    });
+                }
+                else {
+                    _EmpID = null;
+                    $("#EmpAccount").val("");
+                }
+            });
+
+            $("#EmpAccount").change(function () {
+                if ($("#EmpAccount").val().trim() != "") {
+                    _EmpID = new $honesty.GUID().NewGUID();
+                    var _options = {
+                        PostData: {
+                            Params: {
+                                Result: "GetInfoByAccount",
+                                EmpAccount: $("#EmpAccount").val().trim()
+                            },
+                            ProcName: "proc_SOM_HR_EmpBackManage",
+                            DataType: "DataTable",
+                            ExecType: "PROC",
+                            Mode: "MSSQL"
+                        }
+                    };
+                    $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                        if (_result.Code == "1") {
+                            if (_result.Data.length > 0) {
+                                $.each(_result.Data, function (i, item) {
+                                    $("#EmpName").val(item.Name);
+                                    $("#EmpPost").val(item.EmpLevel);
+                                    $("#OrganizeID").val(item.DeptName);
+                                    $("[name='EmpSex']").each(function () {
+                                        if ($(this).val() == item.Sex) {
+                                            $(this).prop("checked", true);
+                                        }
+                                    });
+                                    $("[name='IsLeader']").each(function () {
+                                        if ($(this).val() == item.IsLeader) {
+                                            $(this).prop("checked", true);
+                                        }
+                                    });
+                                    $("[name='TransferIsLeader']").each(function () {
+                                        if ($(this).val() == item.IsLeader) {
+                                            $(this).prop("checked", true);
+                                        }
+                                    });
+                                    $("#OrganizeID").attr("data-listid", JSON.stringify([item.OrganizeID]));
+                                    _EmpID = item.EmpID;
+                                })
+                            }
+                            else {
+                                $honesty.ShowMsg({
+                                    title: "提示", msg: "该工号不存在", callback: function () {
+                                        $("#EmpName").val("");
+                                        $("#EmpAccount").val("");
+                                        $("#EmpPost").val("");
+                                        $("#OrganizeID").val("");
+                                        $("#OrganizeID").removeAttr("data-listid");
+                                    }
+                                })
+                            }
+                        }
+                        else {
+                            $("#EmpName").val("");
+                            $("#EmpAccount").val("");
+                            $("#EmpPost").val("");
+                            $("#OrganizeID").val("");
+                            $("#OrganizeID").removeAttr("data-listid");
+                            _EmpID = null;
+                        }
+                    });
+                }
+                else {
+                    _EmpID = null;
+                    $("#EmpName").val("");
+                    $("#EmpPost").val("");
+                    $("#OrganizeID").val("");
+                    $("#OrganizeID").removeAttr("data-listid");
+                }
+            });
+
+            $("#MoveType").change(function () {
+                ClearInfo();
+                ChangeType();
+                ChangePost();
+            });
+
+            $("#EmpPost,#TransferPost").change(function () {
+                ChangePost();
+            });
+        });
+    }
+
+    function IniInfo() {
+        if (_BackID != null) {
+            var _options = {
+                PostData: {
+                    Params: {
+                        Result: "GetInfo",
+                        BackID: _BackID
+                    },
+                    ProcName: "proc_SOM_HR_EmpBackManage",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        $.each(_result.Data, function (i, item) {
+                            $("#SN").html(item.SN);
+                            $("#SendName").html(item.SendName);
+                            $("#SendDate").html(item.SendDate);
+                            $("#Area").html(item.Area);
+                            _SendUserID = item.SendUserID;
+                            $("#MoveType").val(item.MoveType);
+                            ChangeType();
+                            $("#MoveReason").val(item.MoveReason);
+                            $("#EmpName").val(item.EmpName);
+                            _EmpID = item.EmpID;
+                            $("#EmpAccount").val(item.EmpAccount);
+                            $("[name='EmpSex']").each(function () {
+                                if ($(this).val() == item.EmpSex) {
+                                    $(this).prop("checked", true);
+                                }
+                            });
+                            $("#EmpPost").val(item.EmpPost);
+                            $("#OrganizeID").val(item.DeptName);
+                            $("#OrganizeID").attr("data-listid", JSON.stringify([item.OrganizeID]));
+                            var isLeader = item.IsLeader == "True" ? "1" : "0"
+                            $("[name='IsLeader']").each(function () {
+                                if ($(this).val() == isLeader) {
+                                    $(this).prop("checked", true);
+                                }
+                            });
+                            $("#TransferPost").val(item.TransferPost);
+                            $("#TransferOrganizeID").val(item.TransferDeptName);
+                            $("#TransferOrganizeID").attr("data-listid", JSON.stringify([item.TransferOrganizeID]));
+                            var transferIsLeader = item.TransferIsLeader == "True" ? "1" : "0"
+                            $("[name='TransferIsLeader']").each(function () {
+                                if ($(this).val() == transferIsLeader) {
+                                    $(this).prop("checked", true);
+                                }
+                            });
+                            var transferIsPartTime = item.TransferIsPartTime == "True" ? "1" : "0"
+                            $("[name='TransferIsPartTime']").each(function () {
+                                if ($(this).val() == transferIsPartTime) {
+                                    $(this).prop("checked", true);
+                                }
+                            });
+                            $("#RoleID").val(item.RoleID.toUpperCase());
+                            ChangePost();
+                        });
+                    }
+                }
+            });
+        }
+        else {
+            $("#SN").html($honestyFlow.GetFlowInfo("SN"));
+            $("#SendDate").html($honesty.NowDate().Format("yyyy-MM-dd"));
+            $("#SendName").html(GetSession("UserName"));
+            $("#Area").html(GetSession("AreaName"));
+            _SendUserID = GetSession("UserID");
+        }
+    }
+
+    function SaveData() {
+        if ($("#MoveType").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请先选择权限类型" });
+            return false;
+        }
+        if ($("#MoveReason").val().trim() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请填写调整原因" });
+            return false;
+        }
+        if ($("#EmpName").val() == "" && $("#MoveType").val() == "1") {
+            $honesty.ShowMsg({ title: "警告", msg: "请填写姓名" });
+            return false;
+        }
+        if ($("#EmpPost").val() == "" && $("#MoveType").val() == "1") {
+            $honesty.ShowMsg({ title: "警告", msg: "请选择岗位" });
+            return false;
+        }
+        if ($("#OrganizeID").val() == "" && $("#MoveType").val() == "1") {
+            $honesty.ShowMsg({ title: "警告", msg: "请选择部门" });
+            return false;
+        }
+        if ($("#EmpAccount").val() == "" && $("#MoveType").val() != "1") {
+            $honesty.ShowMsg({ title: "警告", msg: "请填写工号" });
+            return false;
+        }
+        if ($("#TransferPost").val() == "" && $("#MoveType").val() == "2") {
+            $honesty.ShowMsg({ title: "警告", msg: "请选择调整后岗位" });
+            return false;
+        }
+        if ($("#TransferOrganizeID").val() == "" && $("#MoveType").val() == "2") {
+            $honesty.ShowMsg({ title: "警告", msg: "请选择调整后部门" });
+            return false;
+        }
+        if ($("#MoveType").val() == "1" && !isNaN($("#EmpPost").val()) && $("#RoleID").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请选择岗位角色" });
+            return false;
+        }
+        if ($("#MoveType").val() == "2" && !isNaN($("#TransferPost").val()) && $("#RoleID").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请选择岗位角色" });
+            return false;
+        }
+
+        var empSex = "男", isLeader = "0", transferIsLeader = "0", transferIsPartTime = "0";
+
+        $("[name='EmpSex']").each(function () {
+            if ($(this).is(":checked")) {
+                empSex = $(this).val();
+                return false;
+            }
+        });
+        $("[name='IsLeader']").each(function () {
+            if ($(this).is(":checked")) {
+                isLeader = $(this).val();
+                return false;
+            }
+        });
+        $("[name='TransferIsLeader']").each(function () {
+            if ($(this).is(":checked")) {
+                transferIsLeader = $(this).val();
+                return false;
+            }
+        });
+        $("[name='TransferIsPartTime']").each(function () {
+            if ($(this).is(":checked")) {
+                transferIsPartTime = $(this).val();
+                return false;
+            }
+        });
+        var roleID = "";
+
+        if ($("#MoveType").val() == "1") {
+            if (!isNaN($("#EmpPost").val())) {
+                roleID = $("#RoleID").val()
+            }
+            else {
+                switch ($("#EmpPost").val()) {
+                    case "A":
+                        roleID = "8910F6C9-E8AB-4495-8AF2-CBE28BB6016B"
+                        break;
+                    case "B":
+                        roleID = "8910F6C9-E8AB-4495-8AF2-CBE28BB6016B"
+                        break;
+                    case "C":
+                        roleID = "BAE54AD5-4890-4A04-B241-7A44D9A3C891";
+                        break;
+                    case "D":
+                        roleID = "DDADA21A-0BE0-40E3-844F-AC24FAD8165B";
+                        break;
+                    default:
+                }
+            }
+        }
+        if ($("#MoveType").val() == "2") {
+            if (!isNaN($("#TransferPost").val())) {
+                roleID = $("#RoleID").val()
+            }
+            else {
+                switch ($("#TransferPost").val()) {
+                    case "A":
+                        roleID = "8910F6C9-E8AB-4495-8AF2-CBE28BB6016B"
+                        break;
+                    case "B":
+                        roleID = "8910F6C9-E8AB-4495-8AF2-CBE28BB6016B"
+                        break;
+                    case "C":
+                        roleID = "BAE54AD5-4890-4A04-B241-7A44D9A3C891";
+                        break;
+                    case "D":
+                        roleID = "DDADA21A-0BE0-40E3-844F-AC24FAD8165B";
+                        break;
+                    default:
+                }
+            }
+        }
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "ModifyInfo",
+                    BackID: _InstanceID,
+                    SN: $("#SN").html(),
+                    SendName: $("#SendName").html(),
+                    SendDate: $("#SendDate").html(),
+                    SendUserID: _SendUserID,
+                    Area: $("#Area").html(),
+                    MoveType: $("#MoveType").val(),
+                    MoveReason: $("#MoveReason").val().trim(),
+                    EmpName: $("#EmpName").val().trim(),
+                    EmpID: _EmpID,
+                    EmpAccount: $("#EmpAccount").val().trim(),
+                    EmpSex: empSex,
+                    EmpPost: $("#EmpPost").val(),
+                    OrganizeID: $("#OrganizeID").data("listid")[0],
+                    IsLeader: isLeader,
+                    TransferPost: $("#MoveType").val() != "2" ? "" : $("#TransferPost").val(),
+                    TransferOrganizeID: $("#MoveType").val() != "2" ? "" : $("#TransferOrganizeID").data("listid")[0],
+                    TransferIsLeader: $("#MoveType").val() != "2" ? "" : transferIsLeader,
+                    TransferIsPartTime: $("#MoveType").val() != "2" ? "" : transferIsPartTime,
+                    RoleID: roleID
+                },
+                ProcName: "proc_SOM_HR_EmpBackManage",
+                DataType: "Bool",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            },
+            async: false
+        };
+
+        var _result = $honesty.AjaxChannel(_options);
+        if (_result.Code == "1") {
+            if (_result.Data == "True") {
+                return true;
+            }
+            else {
+                $honesty.ShowMsg({ title: "错误", msg: "保存失败" });
+                return false;
+            }
+        }
+        else {
+            return false;
+        }
+    }
+
+    function ChangeType() {
+        if ($("#MoveType").val() == "2") {
+            $("[data-role='move']").show();
+        }
+        else {
+            $("[data-role='move']").hide();
+        }
+
+        if ($("#MoveType").val() == "1") {
+            $("#EmpName").attr("placeholder", "请输入姓名");
+            $("#EmpAccount").removeAttr("placeholder");
+        }
+        else {
+            $("#EmpAccount").attr("placeholder", "请输入账号");
+            $("#EmpName").removeAttr("placeholder");
+        }
+
+        if ($("#MoveType").val() == "1")//新增
+        {
+            $("#EmpName").removeAttr("readonly");
+            $("#EmpAccount").attr("readonly", "readonly");
+            $("[name='EmpSex']").removeAttr("disabled");
+            $("#EmpPost").removeAttr("disabled");
+            $("[name='IsLeader']").removeAttr("disabled");
+        }
+        else {
+            $("#EmpName").attr("readonly", "readonly");
+            $("#EmpAccount").removeAttr("readonly");
+            $("[name='EmpSex']").attr("disabled", "disabled");
+            $("#EmpPost").attr("disabled", "disabled");
+            $("[name='IsLeader']").attr("disabled", "disabled");
+        }
+
+        if ($("#MoveType").val() == "") {
+            $("#EmpAccount").attr("readonly", "readonly");
+        }
+
+        if ($honestyFlow.GetFlowInfo("stepname") != "HR专员发起") {
+            $("#MoveType").attr("disabled", "disabled");
+            $("#MoveReason").attr("disabled", "disabled");
+            $("#EmpName").attr("disabled", "disabled");
+            $("#EmpAccount").attr("disabled", "disabled");
+            $("#EmpPost").attr("disabled", "disabled");
+            $("#TransferPost").attr("disabled", "disabled");
+            $("[name='EmpSex']").attr("disabled", "disabled");
+            $("[name='IsLeader']").attr("disabled", "disabled");
+            $("[name='TransferIsLeader']").attr("disabled", "disabled");
+            $("[name='TransferIsPartTime']").attr("disabled", "disabled");
+            $("#RoleID").attr("disabled", "disabled");
+        }
+    }
+
+    function ChangePost() {
+        if ($("#MoveType").val() == "1") {
+            if (!isNaN($("#EmpPost").val()) && $("#EmpPost").val() != "") {
+                $("[data-role='post']").show();
+            }
+            else {
+                $("[data-role='post']").hide();
+            }
+
+        }
+        else if ($("#MoveType").val() == "2") {
+            if (!isNaN($("#TransferPost").val()) && $("#EmpPost").val() != "") {
+                $("[data-role='post']").show();
+            }
+            else {
+                $("[data-role='post']").hide();
+            }
+        }
+        else {
+            $("[data-role='post']").hide();
+        }
+    }
+
+    function ClearInfo() {
+        $("#EmpName").val("");
+        $("#EmpAccount").val("");
+        $("#EmpPost").val("");
+        $("#TransferPost").val("");
+        $("#OrganizeID").val("");
+        $("#TransferOrganizeID").val("");
+        $("#RoleID").val("");
+        $("#OrganizeID_clear").remove();
+        $("#TransferOrganizeID_clear").remove();
+    }
+</script>
+</html>

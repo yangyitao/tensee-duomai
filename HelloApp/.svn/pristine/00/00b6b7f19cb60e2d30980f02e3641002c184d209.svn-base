@@ -1,0 +1,247 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>员工目标信息（日计划）</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-input-row .aui-input-addon {
+            width: 120px;
+        }
+    </style>
+</head>
+<body>
+    <div class="aui-content">
+        <p class="aui-padded-5 aui-text-center">员工信息</p>
+        <ul class="aui-list-view aui-in" style="margin-bottom: 0px;">
+            <li class="aui-list-view-cell">
+                <label id="EmpCode"></label>
+                <p>工号</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="EmpName"></label>
+                <p>姓名</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="EmpPost"></label>
+                <p>岗位</p>
+            </li>
+        </ul>
+        <p class="aui-padded-5 aui-text-center">员工目标</p>
+        <div class="aui-form aui-input-form" id="divEmpTarget">
+            <div class="aui-input-row">
+                <span class="aui-input-addon" id="spTorrowTarget">日目标</span>
+                <input id="TorrowTarget" type="text" class="aui-input aui-important" placeholder="请输入正整数" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon" id="spCardNum">月开卡数</span>
+                <input id="CardNum" type="text" class="aui-input" placeholder="请输入正整数" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon" id="spTorrowShift">日班次</span>
+                <input id="TorrowShift" type="text" class="aui-input" readonly="readonly" />
+            </div>
+            <div class="aui-input-row" style="padding-right: 3px;">
+                <span class="aui-input-addon" style="vertical-align: top;" id="spTorrowArrange">日工作安排</span>
+                <textarea id="TorrowArrange" class="aui-input" style="height: 70px; border: 1px solid #c8c7cc; overflow-y: auto"></textarea>
+            </div>
+        </div>
+    </div>
+    <div id="divFooter" style="height: 40px; display: none"></div>
+    <footer class="aui-nav" id="footer" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7; display: none">
+        <div id="btnSave" class="aui-btn aui-btn-block aui-btn-warning" style="height: 45px; width: 100%; line-height: 0.9;">
+            保存
+        </div>
+    </footer>
+</body>
+</html>
+
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script src="../../../script/honesty.valid.js"></script>
+<script type="text/javascript">
+    var _DayID, _IsLeader, _TodayDate, _YesterDate,
+        _YesterID, _OrganizeID, _ShopCode, _Date, _YesterDay,
+        _EmpID, _ID;
+    var _MonthTarget, _TodayTarget;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _DayID = api.pageParam.DayID;
+            _IsLeader = api.pageParam.IsLeader;
+            _TodayDate = api.pageParam.TodayDate;
+            _YesterDate = api.pageParam.YesterDate;
+            _YesterID = api.pageParam.YesterID;
+            _OrganizeID = api.pageParam.OrganizeID;
+            _ShopCode = api.pageParam.ShopCode;
+            _EmpID = api.pageParam.EmpID;
+            _ID = api.pageParam.ID || new $honesty.GUID().NewGUID();
+            _Date = $honesty.NowDate();
+            _Date.addDays(1)
+            _YesterDay = $honesty.NowDate();
+            var arrDay = _TodayDate.split("-");
+
+            $("#spTorrowTarget").html(arrDay[2] + $("#spTorrowTarget").html());
+            $("#spTorrowShift").html(arrDay[2] + $("#spTorrowShift").html());
+            $("#spTorrowArrange").html(arrDay[2] + $("#spTorrowArrange").html());
+
+            if (_IsLeader == "False") {
+                $("#divEmpTarget").addClass("aui-input-disabled");
+                $(".aui-input").attr("readonly", "readonly");
+            }
+            else {
+                if (_Date.Format("yyyy-MM-dd") == _TodayDate || _YesterDay.Format("yyyy-MM-dd") == _TodayDate) {
+                    $("#footer").css("display", "");
+                    $("#divFooter").css("display", "");
+                }
+                else {
+                    $("#divEmpTarget").addClass("aui-input-disabled");
+                    $(".aui-input").attr("readonly", "readonly");
+                }
+            }
+
+
+            LoadData();
+
+            //保存按钮点击
+            $("#btnSave").tap(function () {
+                if (CheckInfo()) {
+                    var _options = {
+                        PostData: {
+                            Params: {
+                                Result: "MaintainInfo",
+                                DayID: _DayID,
+                                ID: _ID,
+                                DayID: _YesterID,
+                                EmpID: _EmpID,
+                                EmpCode: $("#EmpCode").html(),
+                                EmpName: $("#EmpName").html(),
+                                EmpPost: $("#EmpPost").html(),
+                                MonthTarget: _MonthTarget,
+                                CardNum: $("#CardNum").val().trim(),
+                                TodayTarget: _TodayTarget,
+                                TorrowTarget: $("#TorrowTarget").val().trim(),
+                                TorrowShift: $("#TorrowShift").val().trim(),
+                                TorrowArrange: $("#TorrowArrange").val().trim(),
+                                CreateUserID: GetSession("UserID"),
+                                CreateName: GetSession("UserName")
+                            },
+                            ProcName: "proc_SOM_ISR_DS_EmpAnalyse",
+                            DataType: "Bool",
+                            ExecType: "PROC",
+                            Mode: "MSSQL"
+                        }
+                    };
+                    $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                        if (_result.Code == "1") {
+                            if (_result.Data == "True") {
+                                $honesty.ShowMsg({
+                                    title: "提示",
+                                    msg: "保存成功",
+                                    callback: function () {
+                                        api.sendEvent({
+                                            name: 'Sale_DaySale_EmpAnalyseInfo',
+                                            extra: {
+                                                EmpID: _EmpID
+                                            }
+                                        });
+                                        api.closeWin();
+                                    }
+                                });
+                            }
+                            else {
+                                $honesty.ShowMsg({ title: "错误", msg: "保存失败" });
+                            }
+                        }
+                    });
+                }
+
+            });
+
+        });
+
+    }
+
+    //数据加载函数
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "SelectInfo",
+                    OrganizeID: _OrganizeID,
+                    ShopCode: _ShopCode,
+                    ZYear: new Date(_YesterDate).getFullYear(),
+                    ZMonth: (new Date(_YesterDate).getMonth() + 1),
+                    TodayDate: _YesterDate,
+                    EmpID: _EmpID,
+                    ID: _ID
+                },
+                ProcName: "proc_SOM_ISR_DS_EmpAnalyse",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        $("#EmpCode").html(item.Account);
+                        $("#EmpName").html(item.Name);
+                        $("#EmpPost").html(item.Title);
+                        _MonthTarget = item.TargetSale;
+                        _TodayTarget = item.TodayTarget;
+                        $("#TorrowTarget").val(item.TorrowTarget);
+                        $("#TorrowShift").val(item.TorrowShift);
+                        $("#TorrowArrange").val(item.TorrowArrange);
+                        $("#CardNum").val(item.CardNum);
+                    });
+                }
+            }
+            else {
+                $("#footer").css("display", "none");
+            }
+        });
+    }
+
+    //验证函数
+    function CheckInfo() {
+        if ($("#TorrowTarget").val().trim() == "") {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: $("#spTorrowTarget").html() + "不能为空",
+                callback: function () {
+                    $("#TorrowTarget").focus();
+                }
+            });
+            return false;
+        }
+        else if (valid_int($("#TorrowTarget").val().trim())) {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: $("#spTorrowTarget").html() + "不为整数",
+                callback: function () {
+                    $("#TorrowTarget").focus();
+                }
+            });
+            return false;
+        }
+        else if (valid_int($("#CardNum").val().trim()) && $("#CardNum").val().trim() != "") {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "月开卡目标不为整数",
+                callback: function () {
+                    $("#CardNum").focus();
+                }
+            });
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+</script>

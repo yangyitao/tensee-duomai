@@ -1,0 +1,187 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>明日目标计划（日计划）</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-input-row .aui-input-addon {
+            width: 80px;
+        }
+    </style>
+</head>
+<body>
+    <div class="aui-content">
+        <p class="aui-padded-5 aui-text-center" id="pTitle"></p>
+        <div class="aui-form aui-input-form" id="divSaleAnalyse">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">销售目标</span>
+                <input id="TargetSale" type="text" class="aui-input" placeholder="请输入正整数/单位为（元）" />
+            </div>
+            <div class="aui-input-row" style="padding: 2px;">
+                <span class="aui-input-addon" style="vertical-align: top">销售计划</span>
+                <textarea id="SalePlan" class="aui-input" style="border: 1px solid #c8c7cc; overflow-y: auto; height: 150px;"></textarea>
+            </div>
+        </div>
+    </div>
+    <div id="divFooter" style="height: 40px; display: none"></div>
+    <footer class="aui-nav" id="footer" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7; display: none">
+        <div id="btnSave" class="aui-btn aui-btn-block aui-btn-info" style="height: 45px; width: 100%; line-height: 0.9;">
+            保存
+        </div>
+    </footer>
+</body>
+</html>
+
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script src="../../../script/honesty.valid.js"></script>
+<script type="text/javascript">
+    var _DayID, _IsLeader, _TodayDate, _Date, _YesterDay;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _Date = $honesty.NowDate();
+            _Date.addDays(1)
+            _YesterDay = $honesty.NowDate();
+            _DayID = api.pageParam.DayID;
+            _IsLeader = api.pageParam.IsLeader;
+            _TodayDate = api.pageParam.TodayDate;
+
+            $("#pTitle").html(_TodayDate + "目标计划");
+            if (_IsLeader == "False") {
+                $("#divSaleAnalyse").addClass("aui-input-disabled");
+                $(".aui-input").attr("readonly", "readonly");
+            }
+            else {
+                if (_Date.Format("yyyy-MM-dd") == _TodayDate || _YesterDay.Format("yyyy-MM-dd") == _TodayDate) {
+                    $("#footer").css("display", "");
+                    $("#divFooter").css("display", "");
+                }
+                else {
+                    $("#divSaleAnalyse").addClass("aui-input-disabled");
+                    $(".aui-input").attr("readonly", "readonly");
+                }
+            }
+
+            $("#pTitle").html(_TodayDate + "目标计划");
+            if (_IsLeader == "False") {
+                $("#divSaleAnalyse").addClass("aui-input-disabled");
+                $(".aui-input").attr("readonly", "readonly");
+            }
+            else {
+                if (_Date.Format("yyyy-MM-dd") == _TodayDate || _YesterDay.Format("yyyy-MM-dd") == _TodayDate) {
+                    $("#footer").css("display", "");
+                    $("#divFooter").css("display", "");
+                }
+                else {
+                    $("#divSaleAnalyse").addClass("aui-input-disabled");
+                    $(".aui-input").attr("readonly", "readonly");
+                }
+            }
+
+            LoadData();
+
+            $("#btnSave").tap(function () {
+
+                if (CheckInfo()) {
+                    var _options = {
+                        PostData: {
+                            Params: {
+                                Result: "MondifyInfo",
+                                DayID: _DayID,
+                                SalePlan: $("#SalePlan").val().trim(),
+                                TargetSale: $("#TargetSale").val().trim(),
+                                CreateUserID: GetSession("UserID"),
+                                CreateName: GetSession("UserName")
+                            },
+                            ProcName: "proc_SOM_ISR_DS_SaleAnalyse",
+                            DataType: "Bool",
+                            ExecType: "PROC",
+                            Mode: "MSSQL"
+                        }
+                    };
+
+                    $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                        if (_result.Code == "1") {
+                            if (_result.Data == "True") {
+                                $honesty.ShowMsg({
+                                    title: "提示",
+                                    msg: "保存成功",
+                                    callback: function () {
+                                        api.closeWin();
+                                    }
+                                });
+                            }
+                            else {
+                                $honesty.ShowMsg({ title: "错误", msg: "保存失败" });
+                            }
+                        }
+                    });
+                }
+            });
+
+        });
+
+    }
+
+    //数据加载函数
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "GetInfo",
+                    DayID: _DayID
+                },
+                ProcName: "proc_SOM_ISR_DS_SaleAnalyse",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length) {
+                    $.each(_result.Data, function (i, item) {
+                        $("#TargetSale").val(item.TargetSale);
+                        $("#SalePlan").val(item.SalePlan);
+                    });
+                }
+            }
+            else {
+                $("#footer").css("display", "none");
+            }
+        });
+    }
+
+    //验证函数
+    function CheckInfo() {
+        if ($("#TargetSale").val().trim() == "") {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "销售目标不能为空",
+                callback: function () {
+                    $("#TargetSale").focus();
+                }
+            });
+            return false;
+        }
+        else if (valid_int($("#TargetSale").val().trim())) {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "销售目标不为整数",
+                callback: function () {
+                    $("#TargetSale").focus();
+                }
+            });
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+</script>

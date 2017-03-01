@@ -1,0 +1,149 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>考勤异常表报查询</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-input-row .aui-input-addon {
+            width: 90px;
+        }
+    </style>
+</head>
+<body>
+    <div style="height: 10px;"></div>
+    <div class="aui-content aui-card">
+        <div class="aui-form aui-input-form">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">组织架构</span>
+                <input id="OrganizeID" type="text" class="aui-input aui-important" readonly="readonly" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">状态筛选</span>
+                <select id="ddlStatus" class="aui-input">
+                    <option value="0">人为异常</option>
+                    <option value="1">真实异常</option>
+                    <option value="2">系统异常</option>
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">工号/姓名</span>
+                <input id="txtKey" type="text" class="aui-input" placeholder="请填写工号/姓名" />
+            </div>
+            <div class="aui-btn-row">
+                <div id="btnSearch" class="aui-btn aui-btn-block aui-btn-warning">
+                    查询
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _AreaName = GetSession("AreaName");
+    var _EmpLevel = GetSession("EmpLevel");
+    var _DeptName = GetSession("DeptName");
+    var _AreaID = "00000000-0000-0000-0000-000000000000";
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            var _Date = $honesty.NowDate();
+
+            if (_EmpLevel != "A" && _EmpLevel != "B" && _EmpLevel != "C" && _EmpLevel != "D" && _EmpLevel != "E" && _EmpLevel != "F" && _EmpLevel != "G") {
+                switch (_AreaName) {
+                    case "华南":
+                        $("#OrganizeID").attr("data-listid", JSON.stringify(["b03abf91-67be-4b22-b2c8-0de0598876fc"]));
+                        _AreaID = "b03abf91-67be-4b22-b2c8-0de0598876fc";
+                        break;
+                    case "华东":
+                        $("#OrganizeID").attr("data-listid", JSON.stringify(["377735cb-eb28-4b0a-a8e1-f9e3bdcad863"]));
+                        _AreaID = "377735cb-eb28-4b0a-a8e1-f9e3bdcad863";
+                        break;
+                    case "北方":
+                        $("#OrganizeID").attr("data-listid", JSON.stringify(["ce8ef2f7-44b6-45a0-9f33-d5f6fc493922"]));
+                        _AreaID = "ce8ef2f7-44b6-45a0-9f33-d5f6fc493922";
+                        break;
+                    case "西北":
+                        $("#OrganizeID").attr("data-listid", JSON.stringify(["214d0b66-663e-4170-8d14-a49de334c05f"]));
+                        _AreaID = "214d0b66-663e-4170-8d14-a49de334c05f";
+                        break;
+                    case "成都":
+                        $("#OrganizeID").attr("data-listid", JSON.stringify(["b298e965-9069-404a-a7bf-342d38b844a0"]));
+                        _AreaID = "b298e965-9069-404a-a7bf-342d38b844a0";
+                        break;
+                    default:
+                        if (GetSession("ShopName") == "信息管理部") {
+                            _AreaName = "卡宾集团"
+                            $("#OrganizeID").attr("data-listid", JSON.stringify(["04f12beb-d99d-43df-ac9a-3042957d6bda"]));
+                            _AreaID = "04f12beb-d99d-43df-ac9a-3042957d6bda";
+                        }
+                        break;
+                }
+                switch (_DeptName) {
+                    case "北津组":
+                        $("#OrganizeID").attr("data-listid", JSON.stringify(["57947c08-2345-42a2-9efa-e2ff228b2cb0"]));
+                        _AreaID = "57947c08-2345-42a2-9efa-e2ff228b2cb0";
+                        break;
+                    case "东北组":
+                        $("#OrganizeID").attr("data-listid", JSON.stringify(["8f6bba5f-716b-43b1-b03b-fad3027a57c4"]));
+                        _AreaID = "8f6bba5f-716b-43b1-b03b-fad3027a57c4";
+                        break;
+                    case "山西人事部":
+                        $("#OrganizeID").attr("data-listid", JSON.stringify(["5a43336f-8afe-47f0-bca8-42da841eba7b"]));
+                        _AreaID = "5a43336f-8afe-47f0-bca8-42da841eba7b";
+                        break;
+                    case "信息管理部":
+                        _AreaName = "卡宾集团"
+                        $("#OrganizeID").attr("data-listid", JSON.stringify(["04f12beb-d99d-43df-ac9a-3042957d6bda"]));
+                        _AreaID = "04f12beb-d99d-43df-ac9a-3042957d6bda";
+                        break;
+                }
+            }
+            else {
+                $("#OrganizeID").attr("oid", GetSession("OrganizeID"));
+                $("#OrganizeID").attr("rootid", GetSession("OrganizeID"));
+                _AreaName = GetSession("ShopName");
+                _AreaID = GetSession("OrganizeID");
+            }
+            if (GetSession("ShopName") == "信息管理部") {
+                _AreaName = "卡宾集团"
+                $("#OrganizeID").attr("data-listid", JSON.stringify(["04f12beb-d99d-43df-ac9a-3042957d6bda"]));
+                _AreaID = "04f12beb-d99d-43df-ac9a-3042957d6bda";
+            }
+            $("#OrganizeID").val(_AreaName);
+
+            $("#OrganizeID").tap(function () {
+                $honesty.Organize({
+                    control: "OrganizeID", ismore: "false", typemode: "S", isowner: true,
+                    callback: function () {
+                    }
+                });
+            });
+
+
+            //查询按钮点击
+            $("#btnSearch").tap(function () {
+                $honesty.OpenWin({
+                    name: "Attend_DayAttendFault_DayAttendFault",
+                    url: "Attend/DayAttendFault/DayAttendFault.html",
+                    title: "考勤异常报表",
+                    LevelNum: 2,
+                    pageParam: {
+                        Key: $("#txtKey").val().trim(),
+                        OrganizeID: ($("#OrganizeID").data("listid") != "" && $("#OrganizeID").data("listid") != undefined) ? $("#OrganizeID").data("listid")[0] : _AreaID,
+                        Status: $("#ddlStatus").val()
+                    }
+                });
+            });
+
+        });
+
+    }
+
+</script>
+</html>

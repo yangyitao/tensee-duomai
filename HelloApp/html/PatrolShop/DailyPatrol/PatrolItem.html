@@ -1,0 +1,83 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>日常巡店问题列表</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        
+    </style>
+</head>
+<body>
+    <div class="aui-content">
+        <ul class="aui-list-view" id="ulList">
+        </ul>
+    </div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _StartDate, _EndDate, _OrganizeID, _PatrolType;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _OrganizeID = api.pageParam.OrganizeID;
+            _StartDate = api.pageParam.StartDate;
+            _EndDate = api.pageParam.EndDate;
+            _PatrolType = api.pageParam.PatrolType;
+            LoadData();
+
+
+        });
+    };
+
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "SelectList",
+                    OrganizeID: _OrganizeID,
+                    BeginDate: _StartDate,
+                    EndDate: _EndDate,
+                    PatrolType: _PatrolType
+                },
+                ProcName: "proc_SOM_ISR_PatrolShop",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    var _Content = "";
+                    $.each(_result.Data, function (i, item) {
+                        _Content += '<li class="aui-list-view-cell" tapmode onclick=\"ItemClick(\'' + item.PatrolID + '\',\'' + item.ImageScore + '\',\'' + item.PatrolDate + '\')\"><div class="aui-arrow-right aui-ellipsis-1">' +
+                                    '<label>' + item.PatrolDate + '</label><p>' + item.ImageUserName + ' ' + item.ImageScore + '分</p></div></li>';
+                    });
+                    $("#ulList").html(_Content);
+                    api.parseTapmode();
+                }
+            }
+        });
+    }
+
+    function ItemClick(patrolID, imageScore, patrolDate) {
+        $honesty.OpenWin({
+            url: "PatrolShop/DailyPatrol/Index.html",
+            name: "PatrolShop_DailyPatrol_Index",
+            title: "日常巡店",
+            LevelNum: 2,
+            pageParam: {
+                PatrolID: patrolID,
+                TodayDate: patrolDate,
+                ImageScore: imageScore
+            }
+        });
+    }
+
+</script>
+</html>

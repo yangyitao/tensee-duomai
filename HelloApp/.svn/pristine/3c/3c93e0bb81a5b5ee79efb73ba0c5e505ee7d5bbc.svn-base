@@ -1,0 +1,68 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>零售部选择</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="aui-content">
+        <ul class="aui-list-view" id="ulList">
+        </ul>
+    </div>
+</body>
+<script src="../../script/api.js"></script>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            LoadData();
+
+        });
+    }
+
+    //加载数据函数
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: { Result: "GetList", UserID: GetSession("UserID") },
+                ProcName: "proc_SOM_ISR_RetailSale",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    var _Content = "";
+                    $.each(_result.Data, function (i, item) {
+                        _Content += "<li class='aui-list-view-cell' tapmode onclick=\"SelectItem(\'" + item.ID.toLowerCase() + "\',\'" + item.Name + "\')\">" +
+                                    "<label class='aui-arrow-right'>" + item.Name + "</label></li>";
+                    });
+                    $("#ulList").append(_Content);
+                }
+            }
+            api.parseTapmode();
+        });
+    }
+
+    //行项目点击函数
+    function SelectItem(organizeID, name) {
+        $honesty.OpenWin({
+            title: api.pageParam.JumpTitle,
+            name: api.pageParam.JumpName,
+            url: api.pageParam.JumpUrl,
+            pageParam: {
+                OrganizeID: organizeID,
+                Name: name
+            }
+        });
+    }
+</script>
+</html>

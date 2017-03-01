@@ -1,0 +1,413 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>周销售计划</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .sale-header {
+            background: url('../../../image/Sale.jpg') no-repeat;
+            background-size: cover;
+            min-height: 200px;
+            position: relative;
+        }
+
+        .sale-info {
+            position: relative;
+            padding: 20px 0;
+            width: 100%;
+            bottom: 0;
+            text-align: center;
+        }
+
+            .sale-info p.ratename {
+                margin-top: 15px;
+                color: #ffffff;
+                font-size: 16px;
+            }
+
+            .sale-info p.ratevalue {
+                margin-top: 5px;
+                color: #ffffff;
+                font-size: 30px;
+            }
+
+        .aui-grid-nine li {
+            padding: 5px 10px;
+        }
+
+            .aui-grid-nine li p:first-child {
+                font-weight: bold;
+            }
+    </style>
+</head>
+<body>
+    <div class="aui-content sale-header" style="margin-bottom: 0px;">
+        <div class="sale-info" id="divForm">
+            <p class="ratename" id="pShopName"></p>
+            <p class="ratename" id="pShopCode"></p>
+            <p class="ratename" id="pTitle"></p>
+            <p class="ratevalue" id="pRate"></p>
+        </div>
+    </div>
+    <ul class="aui-grid-nine">
+        <li class="aui-col-xs-6 aui-text-center">
+            <p>本周计划</p>
+            <p id="pTargetSale"></p>
+        </li>
+        <li class="aui-col-xs-6 aui-text-center">
+            <p>本周销售</p>
+            <p id="pActualSale"></p>
+        </li>
+        <li class="aui-col-xs-3 aui-text-center" data-role="block" data-url="Sale/WeekSale/WeekTarget" data-name="Sale_WeekSale_WeekTarget">
+            <span class="aui-iconfont aui-icon-sponsor aui-text-default"></span>
+            <p>本周目标</p>
+            <span id="spWeekTarget" data-role="check" data-name="本周目标"></span>
+        </li>
+        <li class="aui-col-xs-3 aui-text-center" data-role="block" data-url="Sale/WeekSale/GoodsTarget" data-name="Sale_WeekSale_GoodsTarget">
+            <span class="aui-iconfont aui-icon-clothes aui-text-danger"></span>
+            <p>货品目标</p>
+            <span id="spGoodsTarget" data-role="check" data-name="货品目标"></span>
+        </li>
+        <li class="aui-col-xs-3 aui-text-center" data-role="block" data-url="Sale/WeekSale/VipTarget" data-name="Sale_WeekSale_VipTarget">
+            <span class="aui-iconfont aui-icon-vip aui-text-success"></span>
+            <p>VIP信息</p>
+            <span id="spVIPTarget" data-role="check" data-name="VIP信息"></span>
+        </li>
+        <li class="aui-col-xs-3 aui-text-center" data-role="block" data-url="Sale/WeekSale/EmpTarget" data-name="Sale_WeekSale_EmpTarget">
+            <span class="aui-iconfont aui-icon-friend aui-text-blue"></span>
+            <p>员工目标</p>
+            <span id="spEmpTarget" data-role="check" data-name="员工目标"></span>
+        </li>
+        <li class="aui-col-xs-3 aui-text-center" data-role="block" data-url="Sale/WeekSale/SalePlan" data-name="Sale_WeekSale_SalePlan">
+            <span class="aui-iconfont aui-icon-cart aui-text-primary"></span>
+            <p>销售计划</p>
+            <span id="spSalePlan" data-role="check" data-name="销售计划"></span>
+        </li>
+        <li class="aui-col-xs-3 aui-text-center" data-role="block" data-url="Sale/WeekSale/WorkPlan" data-name="Sale_WeekSale_WorkPlan">
+            <span class="aui-iconfont aui-icon-read aui-text-pink"></span>
+            <p>工作计划</p>
+            <span id="spWorkPlan"></span>
+        </li>
+        <li class="aui-col-xs-3 aui-text-center" data-role="block" data-url="Sale/WeekSale/SaleSummary" data-name="Sale_WeekSale_SaleSummary" data-send="show" style="display: none">
+            <span class="aui-iconfont aui-icon-list aui-text-danger"></span>
+            <p>销售总结</p>
+            <span id="spSaleSummary"></span>
+        </li>
+        <li class="aui-col-xs-3 aui-text-center">
+            <span class="aui-iconfont">&nbsp;</span>
+            <p>&nbsp;</p>
+        </li>
+        <li class="aui-col-xs-3 aui-text-center" data-send="hide">
+            <span class="aui-iconfont">&nbsp;</span>
+            <p>&nbsp;</p>
+        </li>
+    </ul>
+    <div style="height: 40px;"></div>
+</body>
+</html>
+
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script src="../../../script/honesty.flow.js"></script>
+<script type="text/javascript">
+    var _WeekID, _Year, _Month, _WeekNum, _IsSend, _OrganizeID, _IsLeader;
+    apiready = function () {
+        api.parseTapmode();
+
+        $(function () {
+            _WeekID = api.pageParam.WeekID || api.pageParam.instanceid;
+            LoadData();
+
+
+            //模块点击
+            $("[data-role='block']").tap(function () {
+                $honesty.OpenWin({
+                    name: $(this).attr("data-name"),
+                    url: $(this).attr("data-url") + ".html",
+                    title: "周计划",
+                    LevelNum: 2,
+                    pageParam: {
+                        WeekID: _WeekID,
+                        IsSend: (_IsLeader == "False" ? "True" : _IsSend),
+                        Year: _Year,
+                        Month: _Month,
+                        WeekNum: _WeekNum,
+                        IsLeader: _IsLeader
+                    }
+                });
+            });
+            //报表点击
+            $("#divForm").tap(function () {
+                $honesty.OpenWin({
+                    name: "Sale_WeekSale_WeekSaleForm_Index",
+                    url: "Sale/WeekSale/WeekSaleForm/Index.html",
+                    title: "周计划报表",
+                    LevelNum: 2,
+                    pageParam: {
+                        WeekID: _WeekID,
+                    }
+                });
+            });
+
+            //本周目标保存监听事件
+            api.addEventListener({
+                name: 'Sale_WeekSale_WeekTarget'
+            }, function (ret) {
+                if (ret && ret.value) {
+                    $("#pTargetSale").html(ret.value.SumSale);
+                    $("#pRate").html((ret.value.SumSale == "0" ? "0" : (Number($("#pActualSale").html()) / Number(ret.value.SumSale) * 100).toFixed(0)) + "%");
+                    if ($("#spWeekTarget").hasClass("aui-superscript-danger")) {
+                        $("#spWeekTarget").removeClass("aui-superscript-danger");
+                        $("#spWeekTarget").addClass("aui-superscript-success");
+                    }
+                }
+            });
+            //货品目标监听事件
+            api.addEventListener({
+                name: 'Sale_WeekSale_GoodsTarget'
+            }, function (ret) {
+                if (ret && ret.value) {
+                    if (ret.value.Count == "0") {
+                        if (!$("#spGoodsTarget").hasClass("aui-superscript-danger")) {
+                            $("#spGoodsTarget").addClass("aui-superscript-danger");
+                            $("#spGoodsTarget").removeClass("aui-superscript-success");
+                        }
+                    }
+                    else {
+                        if (!$("#spGoodsTarget").hasClass("aui-superscript-success")) {
+                            $("#spGoodsTarget").removeClass("aui-superscript-danger");
+                            $("#spGoodsTarget").addClass("aui-superscript-success");
+                        }
+                    }
+                }
+            });
+            //VIP目标监听事件
+            api.addEventListener({
+                name: 'Sale_WeekSale_VipTargetInfo'
+            }, function (ret) {
+                if (ret && ret.value) {
+                    if ($("#spVIPTarget").hasClass("aui-superscript-danger")) {
+                        $("#spVIPTarget").removeClass("aui-superscript-danger");
+                        $("#spVIPTarget").addClass("aui-superscript-success");
+                    }
+                }
+            });
+            //员工目标监听事件
+            api.addEventListener({
+                name: 'Sale_WeekSale_EmpTargetInfo'
+            }, function (ret) {
+                if (ret && ret.value) {
+                    if ($("#spEmpTarget").hasClass("aui-superscript-danger")) {
+                        $("#spEmpTarget").removeClass("aui-superscript-danger");
+                        $("#spEmpTarget").addClass("aui-superscript-success");
+                    }
+                }
+            });
+            //销售计划监听事件
+            api.addEventListener({
+                name: 'Sale_WeekSale_SalePlan'
+            }, function (ret) {
+                if (ret && ret.value) {
+                    if ($("#spSalePlan").hasClass("aui-superscript-danger")) {
+                        $("#spSalePlan").removeClass("aui-superscript-danger");
+                        $("#spSalePlan").addClass("aui-superscript-success");
+                    }
+                }
+            });
+            //工作计划监听事件
+            api.addEventListener({
+                name: 'Sale_WeekSale_WorkPlan'
+            }, function (ret) {
+                if (ret && ret.value) {
+                    if (ret.value.Count == "0") {
+                        if (!$("#spWorkPlan").hasClass("aui-superscript-danger")) {
+                            $("#spWorkPlan").addClass("aui-superscript-danger");
+                            $("#spWorkPlan").removeClass("aui-superscript-success");
+                        }
+                    }
+                    else {
+                        if (!$("#spWorkPlan").hasClass("aui-superscript-success")) {
+                            $("#spWorkPlan").removeClass("aui-superscript-danger");
+                            $("#spWorkPlan").addClass("aui-superscript-success");
+                        }
+                    }
+                }
+            });
+            //销售总结监听事件
+            api.addEventListener({
+                name: 'Sale_WeekSale_SaleSummary'
+            }, function (ret) {
+                if (ret && ret.value) {
+                    if ($("#spSaleSummary").hasClass("aui-superscript-danger")) {
+                        $("#spSaleSummary").removeClass("aui-superscript-danger");
+                        $("#spSaleSummary").addClass("aui-superscript-success");
+                    }
+                }
+            });
+
+        });
+    }
+
+    //初始化数据函数
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "GetMainInfo",
+                    WeekID: _WeekID
+                },
+                ProcName: "proc_SOM_ISR_WeekSale",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        _Year = item.ZYear;
+                        _Month = item.ZMonth;
+                        _WeekNum = item.WeekNum;
+                        _IsSend = item.IsSend;
+                        _OrganizeID = item.OrganizeID;
+                        if ( _OrganizeID.toUpperCase() == GetSession("OrganizeID").toUpperCase() && GetSession("IsLeader") != "0") {
+                            _IsLeader = "True";
+                        }
+                        else {
+                            _IsLeader = "False";
+                        }
+                        $("#pShopCode").html(item.ShopCode);
+                        $("#pShopName").html(item.ShopName);
+                        $("#pRate").html(item.Rate + "%");
+                        $("#pTargetSale").html(item.TargetSale);
+                        $("#pActualSale").html(item.ActualSale);
+
+                        $("#spWeekTarget").addClass((item.WeekTarget == "0" ? "aui-superscript-danger" : "aui-superscript-success"));
+                        $("#spGoodsTarget").addClass((item.GoodsTarget == "0" ? "aui-superscript-danger" : "aui-superscript-success"));
+                        $("#spVIPTarget").addClass((item.VIPTarget == "0" ? "aui-superscript-danger" : "aui-superscript-success"));
+                        $("#spEmpTarget").addClass((item.EmpTarget == "0" ? "aui-superscript-danger" : "aui-superscript-success"));
+                        $("#spSalePlan").addClass((item.SalePlan == "0" ? "aui-superscript-danger" : "aui-superscript-success"));
+                        $("#spWorkPlan").addClass((item.WorkPlan == "0" ? "aui-superscript-danger" : "aui-superscript-success"));
+                        $("#spSaleSummary").addClass((item.SaleSummary == "0" ? "aui-superscript-danger" : "aui-superscript-success"));
+                        if (api.pageParam.WeekID != null || api.pageParam.WeekID != undefined) {
+                            if (_IsLeader == "True" && _IsSend == "False") {
+                                $honestyFlow.InitFlow({ Async: false, instanceid: _WeekID, wapflowpage: "Sale/WeekSale/Index" });
+                            }
+                        }
+                        else {
+                            $honestyFlow.InitFlow({ Async: false, instanceid: _WeekID, wapflowpage: "Sale/WeekSale/Index" });
+                        }
+                        $("#pTitle").html(_Year + "年" + _Month + "月" + _WeekNum + "周达成率");
+                    });
+                }
+                //流程发送按钮点击
+                $("#btnSend").unbind("tap").tap(function () {
+                    if ($honestyFlow.GetFlowInfo("stepname") == "销售计划定制" || $honestyFlow.GetFlowInfo("stepname") == "店长审核") {
+                        var _CheckMsg = "";
+                        $("[data-role='check']").each(function () {
+                            if ($(this).hasClass("aui-superscript-danger")) {
+                                _CheckMsg = $(this).data("name");
+                                return false;
+                            }
+                        });
+                        if (_CheckMsg != "") {
+                            $honesty.ShowMsg({ title: "警告", msg: _CheckMsg + "未维护，请先维护" });
+                        }
+                        else {
+                            $("#flow_button").attr("title", $("#pShopCode").html() + "-" + $("#pShopName").html() + _Year + "年" + _Month + "月" + _WeekNum + "周周销售计划");
+                            $honestyFlow.SendFlow({
+                                Callback: function () {
+                                    SetState(1);
+                                }
+                            });
+
+                        }
+                    }
+                    else {
+                        $honestyFlow.SendFlow({
+                            Callback: function () {
+                                var _options = {
+                                    PostData: {
+                                        Params: {
+                                            Result: "SetFlowApprove",
+                                            WeekID: _WeekID,
+                                            ApprovalOpinion: $("#txtNote").val(),
+                                        },
+                                        ProcName: "proc_SOM_ISR_WeekSale",
+                                        DataType: "Bool",
+                                        ExecType: "PROC",
+                                        Mode: "MSSQL"
+                                    },
+                                    async: false
+                                };
+                                var _result = $honesty.AjaxChannel(_options);
+                                if (_result.Code == "1") {
+                                    if (_result.Data == "True") { }
+                                    else {
+                                        $honesty.ShowMsg({ title: "错误", msg: "评语保存失败" });
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+                //流程撤回按钮点击
+                $("#btnBack").unbind("tap").tap(function () {
+                    $honestyFlow.BackFlow({
+                        Callback: function () {
+                            SetState(0);
+                        }
+                    });
+                });
+                ControlShow();
+            }
+            else {
+                $honesty.CloseWin();
+            }
+        });
+
+    }
+
+    //控制是否显示函数
+    function ControlShow() {
+        if (_IsSend == "True") {
+            $("[data-send='hide']").hide();
+            $("[data-send='show']").show();
+        }
+        else {
+            $("[data-send='hide']").show();
+            $("[data-send='show']").hide();
+        }
+    }
+
+    //设置流程发送状态
+    function SetState(state) {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "SendFlow",
+                    WeekID: _WeekID,
+                    IsSend: state
+                },
+                ProcName: "proc_SOM_ISR_WeekSale",
+                DataType: "Bool",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            },
+            async: false
+        };
+        var _result = $honesty.AjaxChannel(_options);
+        if (_result.Code == "1") {
+            if (_result.Data == "True") { }
+            else {
+                $honesty.ShowMsg({ title: "错误", msg: "流程状态设置不成功" });
+            }
+        }
+    }
+</script>

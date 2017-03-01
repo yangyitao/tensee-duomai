@@ -1,0 +1,304 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>工作计划（周计划）</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="aui-content">
+        <p id="pTitle" class="aui-padded-5 aui-text-center">工作计划列表</p>
+        <footer class="aui-nav" id="footer" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7; display: none">
+            <div id="btnAdd" class="aui-btn aui-btn-block aui-btn-info" style="height: 45px; width: 100%; line-height: 0.9;">
+                新增
+            </div>
+        </footer>
+    </div>
+</body>
+</html>
+
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script src="../../../script/honesty.valid.js"></script>
+<script type="text/javascript">
+    var UIListView;
+    var _WeekID, _IsSend, _IsLeader;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _WeekID = api.pageParam.WeekID;
+            _IsSend = api.pageParam.IsSend;
+            _IsLeader = api.pageParam.IsLeader;
+            if (_IsSend != "True") {
+                $("#footer").css("display", "");
+            }
+
+            //列表控件打开
+            UIListView = api.require('UIListView');
+            UIListView.open({
+                rect: {
+                    x: 0,
+                    y: $("#pTitle").height(),
+                    "w": api.frameWidth,
+                    "h": api.frameHeight - (_IsSend == "True" ? 0 : $("#footer").height()) - $("#pTitle").height(),
+                },
+                data: [{}],
+                styles: {
+                    borderColor: '#dce1e7',
+                    item: {
+                        bgColor: '#fff',
+                        activeBgColor: '#F5F5F5',
+                        height: 55.0,
+                        titleSize: 13.0,
+                        titleColor: '#000',
+                        subTitleSize: 12.0,
+                        subTitleColor: '#000',
+                        remarkColor: '#000',
+                        remarkSize: 16,
+                        remarkIconWidth: 30
+                    }
+                },
+                fixedOn: api.frameName
+            }, function (ret, err) {
+                if (ret) {
+                    var clickBtn = "";
+                    //点击按钮判断
+                    switch (ret.eventType) {
+                        case "clickRightBtn":       //右侧按钮点击
+                            switch (ret.btnIndex) {
+                                case 0:             //删除按钮点击
+                                    clickBtn = "deleteInfo";
+                                    break
+                            }
+                            break;
+                        case "clickContent":        //内容点击
+                            clickBtn = "clickContent";
+                            break;
+                    }
+                    if (clickBtn != "") {
+                        //获取点击列数据
+                        UIListView.getDataByIndex({
+                            index: ret.index
+                        }, function (info, err) {
+                            if (info) {
+                                if (clickBtn == "deleteInfo") {
+                                    $honesty.ConfirmWin({
+                                        msg: "是否删除该行数据？", callback: function (value, error) {
+                                            if (value.buttonIndex == "1") {
+                                                var _options = {
+                                                    PostData: {
+                                                        Params: {
+                                                            Result: "DeleteInfo",
+                                                            ID: info["data"].ID
+                                                        },
+                                                        ProcName: "proc_SOM_ISR_WS_WorkPlan",
+                                                        DataType: "Bool",
+                                                        ExecType: "PROC",
+                                                        Mode: "MSSQL"
+                                                    }
+                                                };
+                                                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                                                    if (_result.Code == "1") {
+                                                        if (_result.Data == "True") {
+                                                            UIListView.deleteItem({
+                                                                index: ret.index
+                                                            }, function (ret, err) {
+                                                                if (ret) {
+                                                                    $honesty.ShowMsg({
+                                                                        tite: "提示",
+                                                                        msg: "删除成功!",
+                                                                        callback: function () {
+                                                                            GetCount();
+                                                                        }
+                                                                    })
+                                                                } else {
+                                                                    $honesty.ShowToast({ msg: JSON.stringify(err) });
+                                                                }
+                                                            });
+                                                        }
+                                                        else {
+                                                            $honesty.ShowMsg({ title: "错误", msg: "删除失败" });
+                                                        }
+                                                    }
+                                                });
+
+
+                                            }
+                                        }
+                                    });
+                                }
+                                else if (clickBtn == "clickContent") {
+                                    $honesty.OpenWin({
+                                        name: "Sale_WeekSale_WorkPlanInfo",
+                                        url: "Sale/WeekSale/WorkPlanInfo.html",
+                                        title: "周计划",
+                                        LevelNum: 2,
+                                        pageParam: {
+                                            ID: info["data"].ID,
+                                            WeekID: _WeekID,
+                                            IsSend: _IsSend,
+                                            Index: ret.index,
+                                            IsLeader:_IsLeader
+                                        }
+                                    });
+                                }
+
+                            } else {
+                                $honesty.ShowToast({ msg: JSON.stringify(err) });
+                            }
+                        });
+
+                    }
+
+                } else {
+                    $honesty.ShowToast({ msg: JSON.stringify(err) });
+                }
+            });
+            LoadData();
+
+            //新增按钮点击
+            $("#btnAdd").tap(function () {
+                $honesty.OpenWin({
+                    name: "Sale_WeekSale_WorkPlanInfo",
+                    url: "Sale/WeekSale/WorkPlanInfo.html",
+                    title: "周计划",
+                    LevelNum: 2,
+                    pageParam: {
+                        WeekID: _WeekID,
+                        IsSend: _IsSend,
+                        IsLeader: _IsLeader
+                    }
+                });
+            });
+
+            //工作计划维护事件监听
+            api.addEventListener({
+                name: 'Sale_WeekSale_WorkPlanInfo'
+            }, function (ret) {
+                if (ret && ret.value) {
+                    if (ret.value.Index == "-1") {
+                        UIListView.insertItem({
+                            data: {
+                                ID: ret.value.ID,    //开发者自定义的唯一标识
+                                title: ret.value.PerformName,
+                                icon: '',
+                                rightBtns: [{
+                                    bgColor: '#e74c3c',
+                                    activeBgColor: '#c0392b',
+                                    width: 70,
+                                    title: '删除',
+                                    titleSize: 12,
+                                    titleColor: '#fff',
+                                    icon: '',
+                                    iconWidth: 20
+                                }],
+                            }
+
+                        });
+                        GetCount();
+                    }
+                    else {
+                        UIListView.updateItem({
+                            index: ret.value.Index,
+                            data: {
+                                ID: ret.value.ID,    //开发者自定义的唯一标识
+                                title: ret.value.PerformName,
+                                icon: '',
+                                rightBtns: [{
+                                    bgColor: '#e74c3c',
+                                    activeBgColor: '#c0392b',
+                                    width: 70,
+                                    title: '删除',
+                                    titleSize: 12,
+                                    titleColor: '#fff',
+                                    icon: '',
+                                    iconWidth: 20
+                                }]
+                            }
+
+                        });
+                    }
+
+                }
+            });
+
+
+        });
+
+    }
+
+    //数据加载函数
+    function LoadData() {
+        UIListView.deleteItem({
+            index: 0
+        });
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "SelectList",
+                    WeekID: _WeekID
+                },
+                ProcName: "proc_SOM_ISR_WS_WorkPlan",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        if (_IsSend == "True") {
+                            UIListView.insertItem({
+                                data: {
+                                    ID: item.ID,    //开发者自定义的唯一标识
+                                    title: item.SpecificPerform,
+                                    icon: ''
+                                }
+                            });
+                        }
+                        else {
+                            UIListView.insertItem({
+                                data: {
+                                    ID: item.ID,    //开发者自定义的唯一标识
+                                    title: item.SpecificPerform,
+                                    icon: '',
+                                    rightBtns: [{
+                                        bgColor: '#e74c3c',
+                                        activeBgColor: '#c0392b',
+                                        width: 70,
+                                        title: '删除',
+                                        titleSize: 12,
+                                        titleColor: '#fff',
+                                        icon: '',
+                                        iconWidth: 20
+                                    }],
+                                }
+                            });
+                        }
+
+
+                    });
+                }
+            }
+        });
+    }
+
+    //获取列表行数函数
+    function GetCount() {
+        UIListView.getCount(function (ret) {
+            api.sendEvent({
+                name: 'Sale_WeekSale_WorkPlan',
+                extra: {
+                    Count: ret.count,
+                }
+            });
+        });
+    }
+
+
+</script>

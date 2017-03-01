@@ -1,0 +1,878 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>个人资料完善</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <input type="hidden" id="EmpID" />
+    <input type="hidden" id="AbnormalID" />
+    <input type="hidden" id="AbnormalLevelDesc" />
+    <div id="main">
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; font-size: 16px; padding-left: 12px">基本信息</p>
+        <div data-role="80" class="aui-card aui-input-form aui-input-flow" style="margin-bottom: 0px;">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">入职店铺</span>
+                <input id="OrganizeID" type="text" class="aui-input" tapmode placeholder="请选择入职的店铺!" readonly="readonly" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">姓名</span>
+                <input id="EmpName" type="text" class="aui-input aui-important" readonly="readonly" placeholder="请填写姓名!" />
+            </div>
+            <div class="aui-input-row" style="padding: 2px">
+                <label class="aui-input-addon">性别</label>
+                <div class="aui-pull-left">
+                    <input class="aui-radio aui-radio-warning" type="radio" name="Sex" value="男" checked><div class="aui-radio-name">男</div>
+                    <input class="aui-radio aui-radio-warning" type="radio" name="Sex" value="女"><div class="aui-radio-name">女</div>
+                </div>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">入职岗位</span>
+                <select id="EmpPosition" class="aui-input aui-important" placeholder="请选择入职岗位!">
+                    <option value="">请选择</option>
+                    <option value="E1">店经理</option>
+                    <option value="F1">高级店长</option>
+                    <option value="F2">中级店长</option>
+                    <option value="F3">初级店长</option>
+                    <!--<option value="G1">助店</option>-->
+                    <option value="H1">高级导购</option>
+                    <!-- <option value="H2">中级导购</option>
+                    <option value="H3">初级导购</option>-->
+                    <option value="H4">导购</option>
+                    <!--<option value="I1">陈列小帮手</option>-->
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">入职日期</span>
+                <input id="InDate" type="text" class="aui-input aui-important" readonly="readonly" placeholder="请选择入职日期!" />
+                <input id="FactInDate" type="text" class="aui-input aui-important" style="display: none" placeholder="实际入职日期!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">出生年月</span>
+                <input id="BirthDate" type="text" class="aui-input aui-important" readonly="readonly" placeholder="请选择出生年月!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">联系电话</span>
+                <input id="TelPhone" type="text" class="aui-input aui-important" placeholder="请填写联系电话!" readonly="readonly" />
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; font-size: 16px; padding-left: 12px">个人资料</p>
+        <div data-role="80" class="aui-card aui-input-form aui-input-flow" style="margin-bottom: 0px;">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">毕业院校</span>
+                <input id="School" type="text" class="aui-input" tapmode placeholder="请填写毕业院校!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">学历</span>
+                <select id="Education" class="aui-input aui-important" placeholder="请选择学历!">
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">专业</span>
+                <input id="Major" type="text" class="aui-input aui-important" placeholder="若无专业请填写“无”!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">籍贯</span>
+                <input id="Native" type="text" class="aui-input aui-important" placeholder="请填写籍贯!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">民族</span>
+                <select id="Nation" class="aui-input aui-important" placeholder="请选择民族!">
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">政治面貌</span>
+                <select id="PoliticsStatus" class="aui-input aui-important" placeholder="请选择政治面貌!">
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">户口性质</span>
+                <select id="Nature" class="aui-input aui-important" placeholder="请选择户口性质!">
+                    <option value="">请选择...</option>
+                    <option value="1">本地城镇</option>
+                    <option value="2">本地农村</option>
+                    <option value="3">外埠城镇</option>
+                    <option value="4">外埠农村</option>
+                </select>
+            </div>
+            <div class="aui-input-row" style="padding: 2px">
+                <label class="aui-input-addon">婚姻状况</label>
+                <div class="aui-pull-left">
+                    <input class="aui-radio aui-radio-warning" type="radio" name="IsMarry" value="1" checked><div class="aui-radio-name">已婚</div>
+                    <input class="aui-radio aui-radio-warning" type="radio" name="IsMarry" value="0"><div class="aui-radio-name">未婚</div>
+                </div>
+            </div>
+            <div class="aui-input-row" style="padding: 2px">
+                <label class="aui-input-addon">生育状况</label>
+                <div class="aui-pull-left">
+                    <input class="aui-radio aui-radio-warning" type="radio" name="IsBear" value="1" checked><div class="aui-radio-name">已育</div>
+                    <input class="aui-radio aui-radio-warning" type="radio" name="IsBear" value="0"><div class="aui-radio-name">未育</div>
+                </div>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">血型</span>
+                <select id="BloodType" class="aui-input aui-important" placeholder="请选择血型!">
+                </select>
+            </div>
+            <div id="divOtherBlood" class="aui-input-row" style="display: none">
+                <span class="aui-input-addon">其他血型</span>
+                <input id="OtherBlood" type="text" class="aui-input aui-important" placeholder="请填写其他血型!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">身高(cm)</span>
+                <input id="Height" type="text" class="aui-input aui-important" placeholder="请填写身高,单位(cm)!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">体重(kg)</span>
+                <input id="Weight" type="text" class="aui-input aui-important" placeholder="请填写体重,单位(Kg)!" />
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; font-size: 16px; padding-left: 12px">银行信息</p>
+        <div data-role="90" class="aui-card aui-input-form aui-input-flow" style="margin-bottom: 0px;">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">身份证号码</span>
+                <input id="IdentityCode" type="text" class="aui-input" tapmode placeholder="请填写身份证号码!" readonly="readonly" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">开户行</span>
+                <input id="BankName" type="text" class="aui-input aui-important" placeholder="请填写开户行!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">开户行省份</span>
+                <select id="BankProvince" class="aui-input aui-important" placeholder="请选择开户行省份!">
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">开户行城市</span>
+                <select id="BankCity" class="aui-input aui-important" placeholder="请选择开户行城市!">
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">银行卡号</span>
+                <input id="BankCode" type="text" class="aui-input aui-important" placeholder="请填写银行卡号!" />
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; font-size: 16px; padding-left: 12px">附件信息</p>
+        <div data-role="80" class="aui-card aui-input-form aui-input-flow" style="margin-bottom: 0px;">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">工作时间</span>
+                <input id="WorkDate" type="text" class="aui-input" tapmode placeholder="请选择参加工作时间!" readonly="readonly" />
+            </div>
+            <div class="aui-input-row" style="padding: 2px">
+                <label class="aui-input-addon">是否复职</label>
+                <div class="aui-pull-left">
+                    <input class="aui-radio aui-radio-warning" type="radio" name="IsResume" value="1" checked><div class="aui-radio-name">是</div>
+                    <input class="aui-radio aui-radio-warning" type="radio" name="IsResume" value="0"><div class="aui-radio-name">否</div>
+                </div>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">旧工号</span>
+                <input id="OldCode" type="text" class="aui-input aui-important" placeholder="请填写旧工号!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">过往病史</span>
+                <input id="SickNote" type="text" class="aui-input aui-important" placeholder="请填写过往病史!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">招聘渠道</span>
+                <select id="Recruitment" class="aui-input aui-important" placeholder="请选择招聘渠道!">
+                </select>
+            </div>
+            <div id="divOtherRecruitment" class="aui-input-row" style="display: none">
+                <span class="aui-input-addon">其他渠道</span>
+                <input id="OtherRecruitment" type="text" class="aui-input aui-important" placeholder="请填写其他渠道!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">上装尺码</span>
+                <select id="ClothesSize" class="aui-input aui-important" placeholder="请选择上装尺码!">
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">下装尺码</span>
+                <select id="TrousersSize" class="aui-input aui-important" placeholder="请选择下装尺码!">
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">鞋子尺码</span>
+                <select id="ShoeSize" class="aui-input aui-important" placeholder="请选择鞋子尺码!">
+                </select>
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; font-size: 16px; padding-left: 12px">通讯信息</p>
+        <div data-role="90" class="aui-card aui-input-form aui-input-flow" style="margin-bottom: 0px;">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">身份证地址</span>
+                <input id="IdentityAddress" type="text" class="aui-input" tapmode placeholder="请填写身份证地址!" />
+            </div>
+            <div class="aui-input-row">
+                <label class="aui-input-addon">现住地址</label>
+                <input id="Address" type="text" class="aui-input" tapmode placeholder="请填写现住地址!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">邮箱地址</span>
+                <input id="Email" type="text" class="aui-input aui-important" placeholder="请填写邮箱地址!" />
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; font-size: 16px; padding-left: 12px">紧急联系人信息</p>
+        <div data-role="80" class="aui-card aui-input-form aui-input-flow" style="margin-bottom: 0px;">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">姓名</span>
+                <input id="UrgencyName" type="text" class="aui-input" tapmode placeholder="请填写紧急联系人姓名!" />
+            </div>
+            <div class="aui-input-row">
+                <label class="aui-input-addon">联系电话</label>
+                <input id="UrgencyPhone" type="text" class="aui-input aui-important" placeholder="请填写紧急联系人联系电话!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">现住地址</span>
+                <input id="UrgencyAddress" type="text" class="aui-input aui-important" placeholder="请填写紧急联系人现住地址!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">工作单位</span>
+                <input id="UrgencyUnit" type="text" class="aui-input aui-important" placeholder="请填写紧急联系人工作单位!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">职务</span>
+                <input id="UrgencyDuty" type="text" class="aui-input aui-important" placeholder="请填写紧急联系人职务!" />
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; font-size: 16px; padding-left: 12px">原离职公司信息</p>
+        <div data-role="80" class="aui-card aui-input-form aui-input-flow" style="margin-bottom: 0px;">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">底薪金额</span>
+                <input id="BaseWage" type="text" class="aui-input" tapmode placeholder="请填写底薪金额!" />
+            </div>
+            <div class="aui-input-row">
+                <label class="aui-input-addon">提成金额</label>
+                <input id="Royalty" type="text" class="aui-input aui-important" placeholder="请填写提成金额!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">社保是否购买</span>
+                <select id="IsSocial" class="aui-input aui-important">
+                    <option value="">请选择</option>
+                    <option value="是">是</option>
+                    <option value="否">否</option>
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">基数</span>
+                <input id="SocialBase" type="text" class="aui-input aui-important" placeholder="请填写基数!" />
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; font-size: 16px; padding-left: 12px">劳动合同签属页（签字、手印）</p>
+        <div class="aui-card aui-input-form" style="margin-bottom: 0px; margin-top: 5px">
+            <div class="aui-btn-row">
+                <div class="aui-btn aui-btn-warning aui-iconfont aui-icon-upload" data-role="Slaves" data-type="EmpFile_List" style="float: left">上传附件</div>
+                <div class="aui-btn aui-btn-danger aui-iconfont aui-icon-delete" data-role="Clear" data-type="EmpFile_List" style="float: left; margin-left: 5px">清空附件</div>
+                <table class="aui-salves" id="EmpFile_List">
+                </table>
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; font-size: 16px; padding-left: 12px">身份证复印件附件</p>
+        <div class="aui-card aui-input-form" style="margin-bottom: 0px; margin-top: 5px">
+            <div class="aui-btn-row">
+                <div class="aui-btn aui-btn-warning aui-iconfont aui-icon-upload" data-role="Slaves" data-type="IdentityFile_List" style="float: left">上传附件</div>
+                <div class="aui-btn aui-btn-danger aui-iconfont aui-icon-delete" data-role="Clear" data-type="IdentityFile_List" style="float: left; margin-left: 5px">清空附件</div>
+                <table class="aui-salves" id="IdentityFile_List">
+                </table>
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; font-size: 16px; padding-left: 12px">银行卡复印件附件</p>
+        <div class="aui-card aui-input-form" style="margin-bottom: 0px; margin-top: 5px">
+            <div class="aui-btn-row">
+                <div class="aui-btn aui-btn-warning aui-iconfont aui-icon-upload" data-role="Slaves" data-type="CardFile_List" style="float: left">上传附件</div>
+                <div class="aui-btn aui-btn-danger aui-iconfont aui-icon-delete" data-role="Clear" data-type="CardFile_List" style="float: left; margin-left: 5px">清空附件</div>
+                <table class="aui-salves" id="CardFile_List">
+                </table>
+            </div>
+        </div>
+        <div id="divFooter" style="height: 60px;"></div>
+        <footer class="aui-nav" id="footer" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7; display: none">
+            <div id="btnSave" class="aui-btn aui-btn-block aui-btn-info" style="height: 45px; width: 100%; line-height: 0.9;">
+                保存修改
+            </div>
+        </footer>
+    </div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script src="../../../script/honesty.flow.js"></script>
+<script src="../../../script/honesty.valid.js"></script>
+<script src="../../../script/honesty.location.js"></script>
+<script type="text/javascript">
+    var InstanceID = "", StepName = "", SN = "", IsRead = false;
+    var loc = new Location();
+    apiready = function () {
+        $(function () {
+            LoadData();
+            $("#OrganizeID").tap(function () {
+                if (StepName == "提交资料") {
+                    $honesty.Organize({
+                        control: "OrganizeID", ismore: "false", typemode: "S", root: false
+                    });
+                }
+            });
+
+            $("#InDate,#BirthDate,#WorkDate").tap(function () {
+                var ID = $(this).attr("id");
+                if (api.pageParam.StepName == "提交资料") {
+                    $honesty.DateTimeSelect({
+                        Type: "Date",
+                        LevelNum: 2,
+                        ControlID: $(this).attr("id"),
+                        ControlValue: $(this).val(),
+                        onchange: function (ret) {
+                            if (ret) {
+                                if (ID == "InDate") {
+                                    var _MinDate = new Date($honesty.NowDate("yyyy-MM-dd").replace(/-/g, "/"));
+                                    _MinDate.addDays(-11);
+                                    if (Date.parse($("#InDate").val().replace(/-/g, "/")) < Date.parse(_MinDate)) {
+                                        $honesty.ShowMsg({ title: "警告", msg: "入职日期比当前日期早11天!" });
+                                        $("#InDate").val("");
+                                        return;
+                                    }
+                                    $("#FactInDate").val($("#InDate").val());
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+
+            $("#BloodType").change(function () {
+                if ($("#BloodType").val() == "Z") {
+                    $("#divOtherBlood").show();
+                }
+                else {
+                    $("#divOtherBlood").hide();
+                }
+            });
+
+            $("#Recruitment").change(function () {
+                if ($("#Recruitment").val() == "08") {
+                    $("#divOtherRecruitment").show();
+                }
+                else {
+                    $("#divOtherRecruitment").hide();
+                }
+            });
+
+            $("#BankProvince").change(function () {
+                $("#BankCity").empty();
+                loc.fillOption("BankCity", "0," + $("#BankProvince option:selected").val());
+            });
+
+            $("input[name=Sex]").change(function (event) {
+                if ($(this).is(":checked")) {
+                    InitClothes({ Con_ID: "ClothesSize", Sex: $(this).val() });
+                    InitTrousers({ Con_ID: "TrousersSize", Sex: $(this).val() });
+                    InitShoe({ Con_ID: "ShoeSize", Sex: $(this).val() });
+                }
+            });
+
+            $("div[data-role='Slaves']").tap(function () {
+                $honesty.UploadSlaves($(this).attr("data-type"));
+            });
+
+            $("#EmpPosition").change(function () {
+                var _options = {
+                    PostData: {
+                        Params: {
+                            result: "CheckPostCount",
+                            EmpID: InstanceID,
+                            LevelDesc: $("#EmpPosition").val(),
+                            OrganizeID: $("#OrganizeID").data("listid")[0]
+                        },
+                        ProcName: "proc_SOM_HR_EmpInfo",
+                        DataType: "DataTable",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    }
+                };
+                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                    if (_result.Code == "1") {
+                        if (_result.Data.length > 0) {
+                            $.each(_result.Data, function (i, item) {
+                                if (item.LastCount < 1) {
+                                    $("#EmpPosition").val("");
+                                    $honesty.ShowMsg({ title: "警告", msg: "你选择的岗位编制数已满，不可入职!" });
+                                    return false;
+                                }
+                            });
+                        }
+                        else {
+                            $("#EmpPosition").val("");
+                            $honesty.ShowMsg({ title: "警告", msg: "你选择的岗位未维护编制，不可入职!" });
+                        }
+                    }
+                    else {
+                        $("#EmpPosition").val("");
+                        $honesty.ShowMsg({ title: "警告", msg: "编制验证出现异常，请重试!" });
+                    }
+                });
+            });
+
+            $("div[data-role='Clear']").tap(function () {
+                var _ListID = $(this).attr("data-type");
+                $honesty.ConfirmWin({
+                    title: "提示",
+                    msg: "是否删除所有文件?",
+                    buttons: ["确认", "取消"],
+                    callback: function (ret, err) {
+                        if (ret.buttonIndex == 1) {
+                            $("#" + _ListID).html("");
+                        }
+                    }
+                });
+            });
+
+            $("input[name=IsResume]").change(function (event) {
+                if ($("input[name=IsResume]:checked").val() == "0") {
+                    $("#OldCode").val("");
+                }
+            });
+
+            $("#btnSave").tap(function () {
+                if (CheckInput()) {
+                    try {
+                        var EmpFiles = "", IdentityFile = "", CardFile = "";
+                        $.each($("#EmpFile_List tr[dataname='EmpFile_List']"), function (i, item) {
+                            EmpFiles += $(item).attr("value") + "|";
+                        });
+                        $.each($("#IdentityFile_List tr[dataname='IdentityFile_List']"), function (i, item) {
+                            IdentityFile += $(item).attr("value") + "|";
+                        });
+                        $.each($("#CardFile_List tr[dataname='CardFile_List']"), function (i, item) {
+                            CardFile += $(item).attr("value") + "|";
+                        });
+                        var _options = {
+                            PostData: {
+                                Params: {
+                                    result: "ModifyEmpBaseInfo",
+                                    EmpID: InstanceID,
+                                    SN: SN,
+                                    EmpName: $("#EmpName").val(),
+                                    EmpPosition: $("#EmpPosition").val(),
+                                    OrganizeID: $("#OrganizeID").data("listid")[0],
+                                    InDate: $("#InDate").val(),
+                                    FactInDate: $("#FactInDate").val(),
+                                    IdentityCode: $("#IdentityCode").val(),
+                                    IdentityAddress: $("#IdentityAddress").val(),
+                                    BirthDate: $("#BirthDate").val(),
+                                    Sex: $("input[name=Sex]:checked").val(),
+                                    Education: $("#Education").val(),
+                                    Native: $("#Native").val(),
+                                    Nation: $("#Nation").val(),
+                                    PoliticsStatus: $("#PoliticsStatus").val(),
+                                    Nature: $("#Nature").val(),
+                                    BankProvince: $("#BankProvince option:selected").text(),
+                                    BankCity: $("#BankCity option:selected").text(),
+                                    IsMarry: $("input[name=IsMarry]:checked").val() == "1" ? "是" : "否",
+                                    IsBear: $("input[name=IsBear]:checked").val() == "1" ? "是" : "否",
+                                    BloodType: $("#BloodType").val(),
+                                    OtherBlood: ($("#BloodType").val() == "Z" ? $("#OtherBlood").val() : ""),
+                                    Weight: $("#Weight").val(),
+                                    Height: $("#Height").val(),
+                                    TelPhone: $("#TelPhone").val(),
+                                    Email: $("#Email").val(),
+                                    School: $("#School").val(),
+                                    Major: $("#Major").val(),
+                                    Address: $("#Address").val(),
+                                    Recruitment: $("#Recruitment").val(),
+                                    OtherRecruitment: ($("#Recruitment").val() == "08" ? $("#OtherRecruitment").val() : ""),
+                                    EmpFiles: EmpFiles,
+                                    IdentityFile: IdentityFile,
+                                    CardFile: CardFile,
+                                    UrgencyName: $("#UrgencyName").val(),
+                                    UrgencyPhone: $("#UrgencyPhone").val(),
+                                    UrgencyUnit: $("#UrgencyUnit").val(),
+                                    UrgencyDuty: $("#UrgencyDuty").val(),
+                                    UrgencyAddress: $("#UrgencyAddress").val(),
+                                    ClothesSize: $("#ClothesSize").val(),
+                                    TrousersSize: $("#TrousersSize").val(),
+                                    ShoeSize: $("#ShoeSize").val(),
+                                    BankName: $("#BankName").val(),
+                                    BankCode: $("#BankCode").val(),
+                                    SickNote: $("#SickNote").val(),
+                                    WorkDate: $("#WorkDate").val(),
+                                    IsResume: $("input[name=IsResume]:checked").val() == "1" ? "是" : "否",
+                                    OldCode: $("#OldCode").val(),
+                                    WageBase: $("#WageBase").val(),
+                                    Royalty: $("#Royalty").val(),
+                                    IsSocial: $("#IsSocial").val(),
+                                    SocialBase: $("#SocialBase").val()
+                                },
+                                ProcName: "proc_SOM_HR_EmpInfo",
+                                DataType: "Bool",
+                                ExecType: "PROC",
+                                Mode: "MSSQL"
+                            }
+                        };
+                        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                            if (_result.Data == "True") {
+                                api.sendEvent({
+                                    name: "HRFlow_EmpEntry_EmpInfo",
+                                    extra: {
+                                        InDate: $("#InDate").val(),
+                                        EmpPosition: GetPosition($("#EmpPosition").val()),
+                                        DeptName: $("#OrganizeID").val()
+                                    }
+                                });
+                                $honesty.CloseWin();
+                            }
+                            else {
+                                $honesty.ShowMsg({ title: "警告", msg: "保存出现异常!" });
+                            }
+                        });
+                    }
+                    catch (e) {
+                        alert(e);
+                    }
+                }
+            });
+        });
+    }
+
+    function LoadData() {
+        loc.fillOption("BankProvince", "0", "BankProvince");
+        loc.fillOption("BankCity", "0," + $("#BankProvince option:selected").val());
+        InitNation({ Con_ID: "Nation" });
+        InitPolitics({ Con_ID: "PoliticsStatus" });
+        InitClothes({ Con_ID: "ClothesSize" });
+        InitTrousers({ Con_ID: "TrousersSize" });
+        InitShoe({ Con_ID: "ShoeSize" });
+        InitBlood({ Con_ID: "BloodType" });
+        InitEducation({ Con_ID: "Education" });
+        InitRecruitment({ Con_ID: "Recruitment" });
+        InstanceID = api.pageParam.ID;
+        StepName = api.pageParam.StepName;
+        SN = api.pageParam.SN;
+        IsRead = (api.pageParam.IsRead == "false" ? false : true);
+        $("#Education").val("40");
+        if (InstanceID != "") {
+            var _options = {
+                PostData: {
+                    Params: {
+                        result: "InitEmpInfo",
+                        EmpID: InstanceID
+                    },
+                    ProcName: "proc_SOM_HR_EmpInfo",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        $.each(_result.Data, function (i, item) {
+                            $("#OrganizeID").val(item.ZDeptName);
+                            $("#OrganizeID").data("listid", [item.OrganizeID.toLocaleLowerCase()]);
+                            $("#EmpName").val(item.EmpName);
+                            if (item.EmpPosition != "") { $("#EmpPosition").val(item.EmpPosition) };
+                            item.InDate = (item.InDate == "" ? $honesty.NowDate().Format("yyyy-MM-dd") : item.InDate);
+                            $("#InDate").val(item.InDate);
+                            $("#IdentityCode").val(item.IdentityCode);
+                            $("#IdentityAddress").val(item.IdentityAddress);
+                            $("#BirthDate").val(item.BirthDate);
+                            item.Sex = (item.Sex == "女" ? "女" : "男");
+                            $("input[name=Sex][value='" + item.Sex + "']").prop("checked", "checked");
+                            InitClothes({ Con_ID: "ClothesSize", Sex: item.Sex });
+                            InitTrousers({ Con_ID: "TrousersSize", Sex: item.Sex });
+                            InitShoe({ Con_ID: "ShoeSize", Sex: item.Sex });
+                            if (item.Education != "") { $("#Education").val(item.Education) };
+                            if (item.Native != "") { $("#Native").val(item.Native) };
+                            if (item.Nation != "") { $("#Nation").val(item.Nation) };
+                            if (item.PoliticsStatus != "") { $("#PoliticsStatus").val(item.PoliticsStatus) };
+                            if (item.Nature != "") { $("#Nature").val(item.Nature) }
+                            $("#BankProvince option[text='" + item.BankProvince + "']").attr("selected", true);
+                            $("#BankCity").empty();
+                            loc.fillOption("BankCity", "0," + $("#BankProvince option[text='" + item.BankProvince + "']").val());
+                            if (item.BankCity != "") {
+                                $("#BankCity option[text='" + item.BankCity + "']").attr("selected", true);
+                            }
+                            $("input[name=IsMarry][value='" + (item.IsMarry == "是" ? "1" : "0") + "']").prop("checked", "checked");
+                            $("input[name=IsBear][value='" + (item.IsBear == "是" ? "1" : "0") + "']").prop("checked", "checked");
+                            $("input[name=IsResume][value='" + (item.IsResume == "是" ? "1" : "0") + "']").prop("checked", "checked");
+                            if (item.BloodType != "") {
+                                $("#BloodType").val(item.BloodType);
+                                if (item.BloodType == "Z") {
+                                    $("#divOtherBlood").show();
+                                    $("#OtherBlood").val(item.OtherBlood);
+                                }
+                            };
+                            $("#BankName").val(item.BankName);
+                            $("#BankCode").val(item.BankCode);
+                            $("#WorkDate").val(item.WorkDate);
+                            $("#SickNote").val(item.SickNote);
+                            if (item.EmpOldCode != "" && item.OldCode == "") {
+                                $("#OldCode").val(item.EmpOldCode);
+                                $("input[name=IsResume][value='1']").prop("checked", "checked");
+                            }
+                            else {
+                                $("#OldCode").val(item.OldCode);
+                            }
+                            $("#Weight").val(item.Weight);
+                            $("#Height").val(item.Height);
+                            $("#TelPhone").val(item.TelPhone);
+                            $("#Email").val(item.Email);
+                            $("#School").val(item.School);
+                            $("#Major").val(item.Major);
+                            $("#InfoMajor").html(item.Major);
+                            $("#Address").val(item.Address);
+                            if (item.Recruitment != "") {
+                                $("#Recruitment").val(item.Recruitment);
+                                if (item.Recruitment == "08") {
+                                    $("#divOtherRecruitment").show();
+                                    $("#OtherRecruitment").val(item.OtherRecruitment);
+                                }
+                            };
+                            $honesty.InitSlaves({ con_id: "EmpFile_List", dataname: "EmpFile_List", move: (StepName == "提交资料" && !IsRead), files: item.EmpFiles });
+                            $honesty.InitSlaves({ con_id: "IdentityFile_List", dataname: "IdentityFile_List", move: (StepName == "提交资料" && !IsRead), files: item.IdentityFile });
+                            $honesty.InitSlaves({ con_id: "CardFile_List", dataname: "CardFile_List", move: (StepName == "提交资料" && !IsRead), files: item.CardFile });
+                            $("#UrgencyName").val(item.UrgencyName);
+                            $("#UrgencyPhone").val(item.UrgencyPhone);
+                            $("#UrgencyUnit").val(item.UrgencyUnit);
+                            $("#UrgencyDuty").val(item.UrgencyDuty);
+                            $("#UrgencyAddress").val(item.UrgencyAddress);
+                            if (item.ClothesSize != "") { $("#ClothesSize").val(item.ClothesSize) };
+                            if (item.TrousersSize != "") { $("#TrousersSize").val(item.TrousersSize) };
+                            if (item.ShoeSize != "") { $("#ShoeSize").val(item.ShoeSize) };
+                            $("#WageBase").val(item.WageBase);
+                            $("#Royalty").val(item.Royalty);
+                            $("#IsSocial").val(item.IsSocial);
+                            $("#SocialBase").val(item.SocialBase);
+                        });
+                    }
+                }
+            });
+        }
+        if (StepName == "提交资料" && !IsRead) {
+            $("#footer").show();
+        }
+        else {
+            $("div[data-role='divDel'],div[data-role='Slaves'],div[data-role='Clear']").hide();
+        }
+    }
+
+    function CheckInput() {
+        if ($("#OrganizeID").data("listid") == "" || $("#OrganizeID").data("listid") == undefined) {
+            $honesty.ShowMsg({ title: "警告", msg: "请选择入职店铺!" });
+            return false;
+        }
+        if ($("#EmpName").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请填写姓名!" });
+            return false;
+        }
+        if ($("#EmpPosition").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请选择入职岗位!" });
+            return false;
+        }
+        if ($("#InDate").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请选择入职日期!" });
+            return false;
+        }
+        if ($("#BirthDate").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请选择出生年月!" });
+            return false;
+        }
+        if ($("#TelPhone").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请填写联系电话!" });
+            return false;
+        }
+        else {
+            if (valid_phone($("#TelPhone").val())) {
+                $honesty.ShowMsg({ title: "警告", msg: "联系电话格式不正确!" });
+                return false;
+            }
+        }
+        if ($("#School").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请填写毕业院校!" });
+            return false;
+        }
+        if ($("#Major").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请填写专业!" });
+            return false;
+        }
+        if ($("#Native").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请填写籍贯!" });
+            return false;
+        }
+        if ($("#Nature").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请选择户口性质!" });
+            return false;
+        }
+        if ($("BankProvince").val() == "请选择") {
+            $honesty.ShowMsg({ title: "警告", msg: "请选择开户行省份!" });
+            return false;
+        }
+        if ($("#BloodType").val() == "Z" && $("#OtherBloodType").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "选择其他血型请填写明细!" });
+            return false;
+        }
+        if ($("#Height").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请填写身高!" });
+            return false;
+        }
+        else {
+            if (valid_int($("#Height").val())) {
+                $honesty.ShowMsg({ title: "警告", msg: "身高请填整数!" });
+                return false;
+            }
+        }
+        if ($("#Weight").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请填写体重!" });
+            return false;
+        }
+        else {
+            if (valid_float($("#Weight").val()) && valid_int($("#Weight").val())) {
+                $honesty.ShowMsg({ title: "警告", msg: "体重请填整数!" });
+                return false;
+            }
+        }
+        if ($("#IdentityCode").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请填写身份证号码!" });
+            return false;
+        }
+        if ($("#BankCode").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请填写银行卡卡号!" });
+            return false;
+        }
+        else {
+            if (valid_cardnum($("#BankCode").val())) {
+                $honesty.ShowMsg({ title: "警告", msg: "银行卡号不正确!" });
+                return false;
+            }
+        }
+        if ($("#BankName").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请填写开户行!" });
+            return false;
+        }
+        if ($("#WorkDate").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请选择参加工作时间!" });
+            return false;
+        }
+        else {
+            var _CardResult = valid_cardid($("#IdentityCode").val());
+            if (_CardResult != "验证通过!") {
+                $honesty.ShowMsg({ title: "警告", msg: _CardResult });
+                return false;
+            }
+        }
+        if ($("#Recruitment").val() == "08" && $("#OtherRecruitment").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "选择其他招聘渠道请填写明细!" });
+            return false;
+        }
+        if ($("#ClothesSize").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请选择上装尺码!" });
+            return false;
+        }
+        if ($("#TrousersSize").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请选择裤子尺码!" });
+            return false;
+        }
+        if ($("#ShoeSize").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请选择鞋子尺码!" });
+            return false;
+        }
+        if ($("#IdentityAddress").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请填写身份证地址!" });
+            return false;
+        }
+        if ($("#Address").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请填写现住地址!" });
+            return false;
+        }
+        if ($("#Email").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请填写邮箱地址!" });
+            return false;
+        }
+        else {
+            if (valid_email($("#Email").val())) {
+                $honesty.ShowMsg({ title: "警告", msg: "邮箱地址格式不正确!" });
+                return false;
+            }
+        }
+        if ($("#UrgencyName").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请填写紧急联系人!" });
+            return false;
+        }
+        if ($("#UrgencyPhone").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请填写紧急联系人电话!" });
+            return false;
+        }
+        else {
+            if (valid_phone($("#UrgencyPhone").val())) {
+                $honesty.ShowMsg({ title: "警告", msg: "紧急联系人电话格式不正确!" });
+                return false;
+            }
+            else {
+                if ($("#TelPhone").val() == $("#UrgencyPhone").val()) {
+                    $honesty.ShowMsg({ title: "警告", msg: "紧急联系人电话号码不可与联系电话一样!" });
+                    return false;
+                }
+            }
+        }
+        if ($("#UrgencyAddress").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请填写紧急联系人现住地址!" });
+            return false;
+        }
+        if ($("#EmpFile_List tr").length < 1) {
+            $honesty.ShowMsg({ title: "警告", msg: "合同附件必须添加!" });
+            return false;
+        }
+        if ($("#IdentityFile_List tr").length < 1) {
+            $honesty.ShowMsg({ title: "警告", msg: "身份证附件必须添加!" });
+            return false;
+        }
+        if ($("#CardFile_List tr").length < 1) {
+            $honesty.ShowMsg({ title: "警告", msg: "银行卡附件必须添加!" });
+            return false;
+        }
+        var _options = {
+            PostData: {
+                Params: {
+                    result: "CheckPostCount",
+                    EmpID: InstanceID,
+                    LevelDesc: $("#EmpPosition").val(),
+                    OrganizeID: $("#OrganizeID").data("listid")[0]
+                },
+                ProcName: "proc_SOM_HR_EmpInfo",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            },
+            async: false
+        };
+        var _result = $honesty.AjaxChannel(_options);
+        var CheckPos = true;
+        if (_result.Code == "1") {
+            if (_result.Data.length > 0) {
+                $.each(_result.Data, function (i, item) {
+                    if (item.LastCount < 1) {
+                        $("#EmpPosition").val("");
+                        $honesty.ShowMsg({ title: "警告", msg: "你选择的岗位编制数已满，不可入职!" });
+                        CheckPos = false;
+                        return false;
+                    }
+                });
+            }
+            else {
+                $("#EmpPosition").val("");
+                $honesty.ShowMsg({ title: "警告", msg: "你选择的岗位未维护编制，不可入职!" });
+                CheckPos = false;
+            }
+        }
+        else {
+            $("#EmpPosition").val("");
+            $honesty.ShowMsg({ title: "警告", msg: "编制验证出现异常，请重试!" });
+            CheckPos = false;
+        }
+        return CheckPos;
+    }
+</script>
+</html>

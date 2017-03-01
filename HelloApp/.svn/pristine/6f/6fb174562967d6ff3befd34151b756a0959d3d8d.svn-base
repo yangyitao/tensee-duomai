@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>工资异常申请流程</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-input-row .aui-input-addon {
+            width: 120px;
+            color: #8f8f94;
+            text-align: left;
+        }
+
+        .aui-input-form .aui-input-row .aui-input-addon {
+            padding-left: 8px;
+            font-weight: 300;
+            font-size: 13px;
+        }
+
+        .aui-list-view-cell {
+            padding: 5px 15px;
+        }
+
+        .aui-label-title {
+            text-align: right;
+            width: 90px;
+        }
+    </style>
+</head>
+<body>
+    <input type="hidden" id="EmpID" />
+    <input type="hidden" id="AbnormalID" />
+    <input type="hidden" id="AbnormalLevelDesc" />
+    <div id="main">
+        <p class="aui-padded-5 aui-text-center" style="color: #3175af; font-size: 16px;">工资异常申请流程</p>
+        <div class="aui-card" style="margin-bottom: 0px;">
+            <ul class="aui-list-view" style="margin-bottom: 0px;">
+                <li class="aui-list-view-cell">
+                    <label id="InfoSN"></label>
+                    <p>单号</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="InfoEmpName"></label>
+                    <p>姓名</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="InfoWriteDate"></label>
+                    <p>日期</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="InfoEmpCode"></label>
+                    <p>工号</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoAreaName"></label>
+                    <p>大区</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoProvince"></label>
+                    <p>区域</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoEmpPosition"></label>
+                    <p>岗位</p>
+                </li>
+                <li data-role="colspan" data-show="hide" class="aui-list-view-cell" id="liBaseMore">
+                    <p style="text-align: center">点击显示详情</p>
+                </li>
+            </ul>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; margin: 0 10px; font-size: 15px;">工资异常详情</p>
+        <div class="aui-card aui-input-form" style="margin-bottom: 0px;">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">被申请人工号</span>
+                <input id="AbnormalCode" type="text" class="aui-input aui-important" disabled="disabled" placeholder="请输入员工号" onchange="UserInfo()" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">被申请人姓名</span>
+                <input id="AbnormalName" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">被申请人岗位</span>
+                <input id="AbnormalPosition" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">所在店铺代码</span>
+                <input id="AbnormalSapCode" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">所在店铺名称</span>
+                <input id="AbnormalShopName" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">工资异常说明</span>
+                <input id="Reson" type="text" class="aui-input aui-important" disabled="disabled" />
+            </div>
+            <div class="aui-btn-row">
+                <div class="aui-btn aui-btn-success" id="btnSlaves" style="float: left">上传附件</div>
+                <table class="aui-salves" id="tbSlaves">
+                </table>
+            </div>
+        </div>
+    </div>
+    <div style="height: 100px"></div>
+</body>
+<script src="../../script/api.js"></script>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script src="../../script/honesty.flow.js"></script>
+<script src="../../script/honesty.valid.js"></script>
+<script type="text/javascript">
+    var AbnormalID = "";
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            $honestyFlow.InitFlow({ Async: false, wapflowpage: "HRFlow/EmpAbnormal" });
+            var InstanceID = $honestyFlow.GetFlowInfo("instanceid");
+            if (api.pageParam.instanceid != undefined) {
+                AbnormalID = InstanceID;
+            }
+            if ($honestyFlow.GetFlowInfo("stepname") == "提交工资异常申请") {
+                $("#AbnormalCode,#Reson,#Slaves").removeAttr("disabled", "");
+            }
+            //基本信息点击展示隐藏
+            $("#liBaseMore").tap(function () {
+                $("[data-role='baseMore']").fadeToggle(200);
+                if ($("#liBaseMore").attr("data-show") == "hide") {
+                    $("#liBaseMore").children("p").html("点击收起");
+                    $("#liBaseMore").attr("data-show", "show");
+                }
+                else {
+                    $("#liBaseMore").children("p").html("点击显示详情");
+                    $("#liBaseMore").attr("data-show", "hide");
+                }
+            });
+
+            InitBase();
+            //提交
+            $("#btnSend").unbind("tap").tap(function () {
+                if (SaveData()) {
+                    $honestyFlow.SendFlow();
+                }
+            });
+            //暂存
+            $("#btnPause").unbind("tap").tap(function () {
+                if (SaveData()) {
+                    $honestyFlow.PauseFlow();
+                }
+            });
+            //完成
+            $("#btnComplete").unbind("tap").tap(function () {
+                var NowDate = $honesty.NowDate();
+                var EmpAbnormal = {
+                    PostData: {
+                        Params: {
+                            empId: $("#EmpID").val(),
+                            sn: $honestyFlow.GetFlowInfo("SN"),
+                            date: new Date($("#InfoWriteDate").html()).Format("yyyyMMdd"),
+                            abnormalCode: $("#AbnormalID").val(),
+                            sapCode: $("#AbnormalSapCode").val(),
+                            levelDesc: $("#AbnormalLevelDesc").val(),
+                            reason: $("#Reson").val(),
+                            applyDate: new Date(NowDate).Format("yyyyMMdd")
+                        },
+                        URL: "employeeEvent/salaryException",
+                        Mode: "ESB",
+                        Handle: "POST"
+                    },
+                    Loading: {
+                        Title: "SAP数据传输中...",
+                        Show: true
+                    }
+                };
+                $.when($honesty.AjaxChannel(EmpAbnormal)).done(function (_result) {
+                    if (_result.Data.returnCode == "000") {
+                        $honestyFlow.CompleteFlow();
+                    }
+                    else {
+                        $honesty.ShowMsg({ msg: _result.Data.returnMsg, title: "警告" });
+                    }
+                })
+            });
+            $("#AbnormalCode").change(function () {
+                $honesty.GetUserInfo({
+                    account: $("#AbnormalCode").val(),
+                    callback: function (ret) {
+                        if (ret.Code == 1) {
+                            $("#AbnormalName").val(ret.Data.UserName);
+                            $("#AbnormalPosition").val(ret.Data.Position);
+                            $("#AbnormalSapCode").val(ret.Data.SapCode);
+                            $("#AbnormalShopName").val(ret.Data.ShopName);
+                            $("#AbnormalID").val(ret.Data.UserID);
+                            $("#AbnormalLevelDesc").val(ret.Data.LevelDesc);
+                        }
+                        else {
+                            $honesty.ShowMsg({ title: "警告", msg: "该工号不存在！" });
+                            $("#AbnormalCode").val("");
+                        }
+                    }
+                })
+            });
+        })
+    };
+    //加载基础信息
+    function InitBase() {
+        if (AbnormalID != "") {
+            var _options = {
+                PostData: {
+                    Params: {
+                        Result: "InitEmpAbnormal",
+                        ID: AbnormalID
+                    },
+                    ProcName: "proc_SOM_HR_EmpAbnormal",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        $.each(_result.Data, function (i, item) {
+                            $("#InfoSN").html(item.SN);
+                            $("#InfoWriteDate").html(item.WriteDate);
+                            $("#InfoEmpCode").html(item.EmpCode);
+                            $("#InfoEmpName").html(item.EmpName);
+                            $("#InfoAreaName").html(item.AreaName);
+                            $("#InfoProvince").html(item.Province);
+                            $("#InfoEmpPosition").html(item.EmpPosition);
+                            $("#EmpID").val(item.EmpID);
+                            $("#AbnormalID").val(item.AbnormalID);
+                            //加载附件列表
+                            $.each(item.Slaves.split("|"), function (n, value) {
+                                if (value != "") {
+                                    var FileID = RoadUI.Core.newid(true)
+                                    $("#Slaves_List").append('<tr dataname="Slaves" data="' + value + '" id="' + FileID + '"><td><a target="_blank" href="' + value + '">' + GetFileName(value) + '</a></td><td class="delete" width="40px"><button class="btn default btn-sm"  onclick=\"FileDelete(\'' + FileID + '\')\"><i class="fa fa-times"></i></button></td></tr>');
+                                }
+                            });
+                            $("#AbnormalCode").val(item.AbnormalCode);
+                            $("#AbnormalName").val(item.AbnormalName);
+                            $("#AbnormalPosition").val(item.AbnormalPosition);
+                            $("#AbnormalSapCode").val(item.AbnormalSapCode);
+                            $("#AbnormalShopName").val(item.AbnormalShopName);
+                            $("#AbnormalLevelDesc").val(item.AbnormalLevelDesc);
+                            $("#Reson").val(item.Reson);
+                        });
+                    }
+                }
+            })
+        }
+        else {
+            AbnormalID = $honestyFlow.GetFlowInfo("instanceid");
+            $("#InfoSN").html($honestyFlow.GetFlowInfo("SN"));
+            $("#InfoWriteDate").html($honesty.NowDate().Format("yyyy-MM-dd"));
+            $("#InfoEmpCode").html(GetSession("UserCode"));
+            $("#InfoEmpName").html(GetSession("UserName"));
+            $("#InfoAreaName").html(GetSession("AreaName"));
+            $("#InfoProvince").html(GetSession("Province"));
+            $("#InfoEmpPosition").html(GetSession("Position"));
+        }
+        if ($honestyFlow.GetFlowInfo("stepname") != "提交工资异常申请") {
+            $("#divMain input").attr("readonly", "readonly");
+        }
+        if ($honestyFlow.GetFlowInfo("isread") == "true") {
+            $("#divMain input").attr("readonly", "readonly");
+        }
+    }
+    function SaveData() {
+        if ($honestyFlow.GetFlowInfo("stepname") == "提交工资异常申请") {
+
+            if ($("#Reson").val == "") {
+                $honesty.ShowMsg({ msg: "请写工资异常说明！", title: "警告" });
+                return false;
+            }
+            var Slaves = "";
+            $.each($("#Slaves_List tr[dataname='Slaves']"), function (i, item) {
+                Slaves += $(item).attr("data") + "|";
+            });
+
+            var _options = {
+                PostData: {
+                    Params: {
+                        result: "ModifyEmpAbnormal",
+                        ID: AbnormalID,
+                        SN: $honestyFlow.GetFlowInfo("SN"),
+                        EmpID: GetSession("UserID"),
+                        EmpCode: GetSession("UserCode"),
+                        EmpName: GetSession("UserName"),
+                        OrganizeID: GetSession("OrganizeID"),
+                        AreaName: GetSession("AreaName"),
+                        Province: GetSession("Province"),
+                        CompanyName: GetSession("CompanyName"),
+                        ShopCode: GetSession("ShopCode"),
+                        ShopName: GetSession("ShopName"),
+                        EmpPosition: GetSession("Position"),
+                        EmpLevel: GetSession("EmpLevel"),
+                        LevelDesc: GetSession("LevelDesc"),
+                        AbnormalID: $("#AbnormalID").val(),
+                        AbnormalCode: $("#AbnormalCode").val(),
+                        AbnormalName: $("#AbnormalName").val(),
+                        AbnormalPosition: $("#AbnormalPosition").val(),
+                        AbnormalSapCode: $("#AbnormalSapCode").val(),
+                        AbnormalShopName: $("#AbnormalShopName").val(),
+                        AbnormalLevelDesc: $("#AbnormalLevelDesc").val(),
+                        Reson: $("#Reson").val(),
+                        Slaves: Slaves,
+                        Title: $honestyFlow.GetFlowInfo("title"),
+                    },
+                    ProcName: "proc_SOM_HR_EmpRContract",
+                    DataType: "Bool",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                async: false
+            };
+            var _result = $honesty.AjaxChannel(_options);
+            if (_result.Data == "True") {
+                return true;
+            }
+            else {
+                $honesty.ShowMsg({ msg: "业务数据保存失败", title: "警告" });
+                return false;
+            }
+        }
+        else {
+            return true;
+        }
+    }
+</script>
+</html>

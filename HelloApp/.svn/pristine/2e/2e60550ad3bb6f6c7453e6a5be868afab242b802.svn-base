@@ -1,0 +1,210 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>销售分配详细（月计划）</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-input-row .aui-input-addon {
+            width: 110px;
+        }
+    </style>
+</head>
+<body>
+    <div class="aui-content">
+        <p class="aui-padded-5 aui-text-center">员工信息</p>
+        <ul class="aui-list-view aui-in" style="margin-bottom: 0px;">
+            <li class="aui-list-view-cell">
+                <label id="Account"></label>
+                <p>工号</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="Name"></label>
+                <p>姓名</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="Title"></label>
+                <p>岗位</p>
+            </li>
+        </ul>
+        <p class="aui-padded-5 aui-text-center">销售信息</p>
+        <div class="aui-form aui-input-form">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">销售目标</span>
+                <input id="TargetSale" type="text" class="aui-input aui-important" placeholder="请输入正整数" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">当前销售额</span>
+                <input id="ActualSale" type="text" class="aui-input" disabled="disabled" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">剩余销售额</span>
+                <input id="LeaveSale" type="text" class="aui-input" disabled="disabled" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">分配销售额</span>
+                <input id="AssignSale" type="text" class="aui-input" placeholder="只能填写整数,且小于等于剩余销售额" />
+            </div>
+        </div>
+    </div>
+    <div id="divFooter" style="height: 40px;"></div>
+    <footer class="aui-nav" id="footer" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7;">
+        <div id="btnSave" class="aui-btn aui-btn-block aui-btn-warning" style="height: 45px; width: 100%; line-height: 0.9;">
+            保存
+        </div>
+    </footer>
+</body>
+</html>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script src="../../../script/honesty.valid.js"></script>
+<script type="text/javascript">
+    var _MonthID, _UserID;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _MonthID = api.pageParam.MonthID;
+            _UserID = api.pageParam.UserID;
+            LoadData();
+
+            //保存按钮点击
+            $("#btnSave").tap(function () {
+                if (CheckInfo()) {
+                    var _options = {
+                        PostData: {
+                            Params: {
+                                Result: "SetAssignSale",
+                                MonthID: _MonthID,
+                                EmpID: _UserID,
+                                EmpCode: $("#Account").html(),
+                                EmpName: $("#Name").html(),
+                                EmpPost: $("#Title").html(),
+                                TargetSale: $("#TargetSale").val().trim(),
+                                ShareSale: $("#AssignSale").val().trim(),
+                                CreateUserID: GetSession("UserID"),
+                                CreateName: GetSession("UserName")
+                            },
+                            ProcName: "proc_SOM_ISR_MS_EmpTarget",
+                            DataType: "Bool",
+                            ExecType: "PROC",
+                            Mode: "MSSQL"
+                        }
+                    };
+                    $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                        if (_result.Code == "1") {
+                            if (_result.Data == "True") {
+                                $honesty.ShowMsg({
+                                    title: "提示",
+                                    msg: "保存成功",
+                                    callback: function () {
+                                        api.sendEvent({
+                                            name: 'Sale_MonthSale_SaleAssignInfo',
+                                            extra: {
+                                                IsTrue: true
+                                            }
+                                        });
+                                        api.closeWin();
+                                    }
+                                })
+                            }
+                            else {
+                                $honesty.ShowMsg({ title: "错误", msg: "系统错误" });
+                            }
+                        }
+                    });
+                }
+            });
+        });
+
+    }
+
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "GetAssignSingle",
+                    MonthID: _MonthID,
+                    EmpID: _UserID
+                },
+                ProcName: "proc_SOM_ISR_MS_EmpTarget",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        $("#Account").html(item.Account);
+                        $("#Name").html(item.Name);
+                        $("#Title").html(item.Title);
+                        $("#TargetSale").val(item.TargetSale);
+                        $("#ActualSale").val(item.ActualSale);
+                        $("#LeaveSale").val(item.LeaveSale);
+                    });
+                }
+            }
+        })
+    }
+
+    function CheckInfo() {
+        var regex = /^-?\d*$/;
+        if ($("#TargetSale").val().trim() == "") {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "销售目标不能为空",
+                callback: function () {
+                    $("#TargetSale").focus();
+                }
+            });
+            return false;
+        }
+        else if (valid_int($("#TargetSale").val().trim())) {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "销售目标不为整数",
+                callback: function () {
+                    $("#TargetSale").focus();
+                }
+            });
+            return false;
+        }
+        else if ($("#AssignSale").val().trim() == "") {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "分配销售额不能为空",
+                callback: function () {
+                    $("#AssignSale").focus();
+                }
+            });
+            return false;
+        }
+        else if (!regex.test($("#AssignSale").val().trim())) {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "分配销售额不为整数",
+                callback: function () {
+                    $("#AssignSale").focus();
+                }
+            });
+            return false;
+        }
+        else if (Number($("#AssignSale").val().trim()) > Number($("#LeaveSale").val().trim())) {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "分配销售额不能大于剩余销售额",
+                callback: function () {
+                    $("#AssignSale").focus();
+                }
+            });
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+</script>

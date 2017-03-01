@@ -1,0 +1,192 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>个人信息</title>
+    <link href="../../css/aui.css" rel="stylesheet" type="text/css" />
+    <style type="text/css">
+        .aui-input-row:first-child:after {
+            border-top: 0px !important;
+        }
+
+        .aui-input-row:after {
+            border-bottom: 0px !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="aui-content">
+        <ul class="aui-list-view aui-in" style="margin-bottom: 0px;">
+            <li class="aui-list-view-cell">
+                <label id="Account"></label>
+                <p id="Name"></p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="EmpPosition"></label>
+                <p>岗位</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="City"></label>
+                <p>所在城市</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="DeptName"></label>
+                <p>所在店铺</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="IdentityCode"></label>
+                <p>身份证号</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="IdentityAddress"></label>
+                <p>户籍所在地</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="BirthDate"></label>
+                <p>生日</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="Email"></label>
+                <p>Email</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="InDate"></label>
+                <p>入职日期</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="txtPhone"></label>
+                <p>手机号码</p>
+            </li>
+            <!--<li class="aui-list-view-cell" style="padding-left: 15px !important;">
+                <div class="aui-input-row" style="padding: 0px">
+                    <span class="aui-input-addon" style="color: #3175af; font-size: 14px; padding: 0px;">手机号码<font color="red">*</font></span>
+                    <input id="txtPhone" type="text" class="aui-input aui-important" placeholder="请填写手机号码" />
+                </div>
+            </li>-->
+        </ul>
+        <p class="aui-padded-5 aui-text-center aui-text-violet">信息详情</p>
+        <ul class="aui-grid-nine">
+            <li class="aui-col-xs-4 aui-text-center" data-role="show" data-page="Info" tapmode data-text="个人资料">
+                <span class="aui-iconfont aui-icon-info aui-text-primary"></span>
+                <p>个人资料</p>
+            </li>
+            <li class="aui-col-xs-4 aui-text-center" data-role="show" data-page="Bank" tapmode data-text="银行信息">
+                <span class="aui-iconfont aui-icon-vipcard aui-text-success"></span>
+                <p>银行信息</p>
+            </li>
+            <li class="aui-col-xs-4 aui-text-center" data-role="show" data-page="File" tapmode data-text="附件信息">
+                <span class="aui-iconfont aui-icon-file aui-text-info"></span>
+                <p>附件信息</p>
+            </li>
+            <li class="aui-col-xs-4 aui-text-center" data-role="show" data-page="Link" tapmode data-text="通讯信息">
+                <span class="aui-iconfont aui-icon-mobile aui-text-warning"></span>
+                <p>通讯信息</p>
+            </li>
+            <li class="aui-col-xs-4 aui-text-center" data-role="show" data-page="Urgency" tapmode data-text="紧急联系人信息">
+                <span class="aui-iconfont aui-icon-people aui-text-danger"></span>
+                <p>紧急联系人信息</p>
+            </li>
+            <li class="aui-col-xs-4 aui-text-center">
+                <span class="aui-iconfont">&nbsp;</span>
+                <p>&nbsp;</p>
+            </li>
+        </ul>
+    </div>
+    <!--<div id="divFooter" style="height: 40px;"></div>
+    <footer class="aui-nav" id="footer" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7;">
+        <div id="btnSave" class="aui-btn aui-btn-block aui-btn-warning" style="height: 45px; width: 100%; line-height: 0.9;">
+            保存
+        </div>
+    </footer>-->
+</body>
+</html>
+
+<script src="../../script/api.js" type="text/javascript"></script>
+<script src="../../script/zepto.js" type="text/javascript"></script>
+<script src="../../script/honesty.base.js" type="text/javascript"></script>
+<script src="../../script/honesty.valid.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            var _UserID = GetSession("UserID");
+            var _options = {
+                PostData: {
+                    Params: {
+                        Result: "InitInfo",
+                        UserID: _UserID
+                    },
+                    ProcName: "proc_HC_GetUserInfo",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        $.each(_result.Data, function (i, item) {
+                            $("#Account").html(item.Account);
+                            $("#Name").html(item.Name);
+                            $("#EmpPosition").html((item.Position == "" ? "未维护" : item.Position));
+                            $("#City").html((item.City == "" ? "未维护" : item.City));
+                            $("#DeptName").html((item.DeptName == "" ? "未维护" : item.DeptName));
+                            $("#IdentityCode").html((item.IdentityCode == "" ? "未维护" : item.IdentityCode));
+                            $("#IdentityAddress").html((item.IdentityAddress == "" ? "未维护" : item.IdentityAddress));
+                            $("#BirthDate").html((item.BirthDate == "" ? "未维护" : item.BirthDate));
+                            $("#txtPhone").html((item.TelPhone == "" ? "未维护" : item.TelPhone));
+                            $("#Email").html((item.Email == "" ? "未维护" : item.Email));
+                            $("#InDate").html((item.InDate == "" ? "未维护" : item.InDate));
+                        });
+                    }
+                }
+            });
+            $("#btnSave").tap(function () {
+                if ($("#txtPhone").val() == "") {
+                    $honesty.ShowMsg({ title: "警告", msg: "请填写手机号码!" });
+                    return false;
+                }
+                else {
+                    if (valid_phone($("#txtPhone").val())) {
+                        $honesty.ShowMsg({ title: "警告", msg: "手机号码格式不正确!" });
+                        return false;
+                    }
+                }
+                var _options = {
+                    PostData: {
+                        Params: {
+                            Result: "ModifyTelPhone",
+                            UserID: _UserID,
+                            TelPhone: $("#txtPhone").val()
+                        },
+                        ProcName: "proc_HC_GetUserInfo",
+                        DataType: "Text",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    }
+                };
+                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                    if (_result.Code == "1") {
+                        $honesty.ShowToast({ title: "提示", msg: _result.Data });
+                    }
+                    else {
+                        $honesty.ShowToast({ title: "提示", msg: "更新出现异常！" });
+                    }
+                });
+            });
+            $("li[data-role='show']").tap(function () {
+                var _page = $(this).attr("data-page");
+                $honesty.OpenWin({
+                    title: $(this).attr("data-text"),
+                    name: "User_EmpInfo_" + _page,
+                    url: "User/EmpInfo/" + _page + ".html",
+                    pageParam: {
+                        ID: _UserID
+                    }
+                });
+            });
+        });
+    }
+</script>

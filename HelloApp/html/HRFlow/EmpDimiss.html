@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>离职申请流程</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-input-row .aui-input-addon {
+            width: 120px;
+            color: #8f8f94;
+            text-align: left;
+        }
+
+        .aui-input-form .aui-input-row .aui-input-addon {
+            padding-left: 8px;
+            font-weight: 300;
+            font-size: 13px;
+        }
+
+        .aui-list-view-cell {
+            padding: 5px 15px;
+        }
+
+        .aui-label-title {
+            text-align: right;
+            width: 90px;
+        }
+    </style>
+</head>
+<body>
+    <input id="EmpID" type="hidden" />
+    <input id="DimissID" type="hidden" />
+    <input id="DimissSapCode" type="hidden" />
+    <input id="IsLeader" type="hidden" />
+    <input type="hidden" id="SelectInfo" />
+    <input id="DimissLevelDesc" type="hidden" />
+    <input id="DimissDeviceSN" type="hidden" />
+    <input id="DimissShopCode" type="hidden" />
+    <div id="main">
+        <p class="aui-padded-5 aui-text-center" style="color: #3175af; font-size: 16px;">离职申请流程</p>
+        <div class="aui-card" style="margin-bottom: 0px;">
+            <ul class="aui-list-view" style="margin-bottom: 0px;">
+                <li class="aui-list-view-cell">
+                    <label id="InfoSN"></label>
+                    <p>单号</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="InfoEmpName"></label>
+                    <p>姓名</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="InfoWriteDate"></label>
+                    <p>日期</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="InfoEmpCode"></label>
+                    <p>工号</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoAreaName"></label>
+                    <p>大区</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoProvince"></label>
+                    <p>区域</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoEmpPosition"></label>
+                    <p>岗位</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoSapCode"></label>
+                    <p>店铺代码</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoShopName"></label>
+                    <p>店铺名称</p>
+                </li>
+                <li data-role="colspan" data-show="hide" class="aui-list-view-cell" id="liBaseMore">
+                    <p style="text-align: center">点击显示详情</p>
+                </li>
+            </ul>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; margin: 0 10px; font-size: 15px;">基本信息</p>
+        <div class="aui-card aui-input-form" style="margin-bottom: 0px;">
+            <div class="aui-input-row" id="DimissCodeFrom" style="display: none" title="Leader">
+                <span class="aui-input-addon">离职员工工号</span>
+                <input id="DimissCode" type="text" class="aui-input aui-important" placeholder="请填写员工工号" onchange="UserInfo()" disabled="disabled" />
+            </div>
+            <div class="aui-input-row" id="DimissNameFrom" style="display: none" title="Leader">
+                <span class="aui-input-addon">离职员工姓名</span>
+                <input id="DimissName" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">所在店铺</span>
+                <input id="DimissShopName" type="text" class="aui-input" readonly="readonly" />
+            </div>
+            <div class="aui-input-row" id="DimissPositionFrom">
+                <span class="aui-input-addon">岗位</span>
+                <input id="DimissPosition" type="text" class="aui-input" readonly="readonly" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">入职日期</span>
+                <input id="InDate" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">是否试用期</span>
+                <select class="aui-input aui-important" id="IsTry" disabled="disabled">
+                    <option value="">请选择...</option>
+                    <option value="否">否</option>
+                    <option value="是">是</option>
+                </select>
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; margin: 0 10px; font-size: 15px;">离职信息</p>
+        <div class="aui-card aui-input-form" style="margin-bottom: 0px;">
+            <div class="aui-input-row" id="DimissNoteFrom" style="display: none" title="Leader">
+                <span class="aui-input-addon">离职类型</span>
+                <select class="aui-input aui-important" id="DimissNote" disabled="disabled">
+                    <option value="辞职">辞职</option>
+                    <option value="自动离职">自动离职</option>
+                    <option value="协商解除" disabled="disabled">协商解除</option>
+                    <option value="辞退(旷工)" disabled="disabled">辞退(旷工)</option>
+                    <option value="辞退(非旷工)" disabled="disabled">辞退(非旷工)</option>
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">离职申请描述</span>
+                <input id="Note" type="text" class="aui-input aui-important" placeholder="请填写离职申请描述" disabled="disabled" />
+            </div>
+            <div class="aui-input-row" style="padding-right: 3px;">
+                <span class="aui-input-addon" style="vertical-align: top">离职原因</span>
+                <div id="divReason">
+                    <textarea id="Reason" class="aui-input aui-text-default" style="border: 1px solid #c8c7cc; overflow-y: auto; height: 60px" placeholder="请选择离职原因" readonly="readonly"></textarea>
+                </div>
+            </div>
+            <div class="aui-input-row" id="SubsidyMoneyform">
+                <span class="aui-input-addon">其他离职<br />
+                    原因说明</span>
+                <input id="OtherReason" type="text" class="aui-input aui-important" placeholder="请填写离职申请" disabled="disabled" />
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; margin: 0 10px; font-size: 15px;">其他信息</p>
+        <div class="aui-card aui-input-form" style="margin-bottom: 0px;">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">劳动关系所在公司</span>
+                <input id="DimissCompany" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">合同开始日期</span>
+                <input id="ContractBegin" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">合同结束日期</span>
+                <input id="ContractEnd" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-btn-row">
+                <div class="aui-btn aui-btn-success" id="btnSlaves" style="float: left">上传附件</div>
+                <table class="aui-salves" id="tbSlaves">
+                </table>
+            </div>
+        </div>
+    </div>
+    <div style="height: 100px"></div>
+</body>
+<script src="../../script/api.js"></script>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script src="../../script/honesty.flow.js"></script>
+<script src="../../script/honesty.valid.js"></script>
+<script type="text/javascript">
+    var IsRead = false;
+    var DimissID = "";
+    var NowDate = $honesty.NowDate();
+    var _IsLeader = "";
+    var _TypeArr = [];
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            $honestyFlow.InitFlow({ Async: false, wapflowpage: "HRFlow/EmpDimiss" });
+            var InstanceID = $honestyFlow.GetFlowInfo("instanceid");
+            if (api.pageParam.instanceid != undefined) {
+                DimissID = InstanceID;
+            }
+            var _parames = {
+                PostData: {
+                    Params: {
+                        Result: "LoadType"
+                    },
+                    ProcName: "proc_SOM_HR_EmpDimiss",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                async: false
+            };
+            var _Type = $honesty.AjaxChannel(_parames);
+            $.each(_Type["Data"], function (i, item) {
+                _TypeArr.push({
+                    text: item.Title,
+                    id: item.ID,
+                    status: 'normal',
+                });
+            });
+
+            //基本信息点击展示隐藏
+            $("#liBaseMore").tap(function () {
+                $("[data-role='baseMore']").fadeToggle(200);
+                if ($("#liBaseMore").attr("data-show") == "hide") {
+                    $("#liBaseMore").children("p").html("点击收起");
+                    $("#liBaseMore").attr("data-show", "show");
+                }
+                else {
+                    $("#liBaseMore").children("p").html("点击显示详情");
+                    $("#liBaseMore").attr("data-show", "hide");
+                }
+            });
+            InitBase();
+
+
+            $("#divReason").tap(function () {
+                $honesty.MultiSelector({
+                    text: {
+                        title: '离职原因',
+                        rightBtn: '确定',
+                    },
+                    item: _TypeArr,
+                    callbackOK: function (ret) {
+                        var _SelectInfo = "";
+                        var _Reasons = "";
+                        if (ret.items.length > 0) {
+                            $.each(ret.items, function (i, item) {
+                                if (i == ret.items.length - 1) {
+                                    _SelectInfo += item.id;
+                                    _Reasons += item.text;
+                                }
+                                else {
+                                    _SelectInfo += item.id + ",";
+                                    _Reasons += item.text + ",";
+                                }
+
+                            });
+                        }
+                        $("#SelectInfo").val(_SelectInfo);
+                        $("#Reason").val(_Reasons);
+                    }
+                });
+            });
+            $("#btnSlaves").tap(function () {
+                $honesty.UploadSlaves("tbSlaves");
+            });
+
+            //提交
+            $("#btnSend").unbind("tap").tap(function () {
+                if (SaveData()) {
+                    $honestyFlow.SendFlow();
+                }
+            });
+            //暂存
+            $("#btnPause").unbind("tap").tap(function () {
+                if (SaveData()) {
+                    $honestyFlow.PauseFlow();
+                }
+            });
+            //完成
+            $("#btnComplete").unbind("tap").tap(function () {
+                var _dimissType = "";
+                switch ($("#DimissNote").val()) {
+                    case "辞退(旷工)": _dimissType = "B"; break;
+                    case "辞退(非旷工)": _dimissType = "C"; break;
+                    case "自动离职": _dimissType = "A"; break;
+                    case "协商解除": _dimissType = "D"; break;
+                    case "辞职": _dimissType = "E"; break;
+                };
+
+
+                var EmpDimiss = {
+                    PostData: {
+                        Params: {
+                            empId: $("#TransID").val(),
+                            sn: $honestyFlow.GetFlowInfo("sn"),
+                            createDate: new Date($("#InfoWriteDate").html()).Format("yyyyMMdd"),
+                            dimissId: $("#DimissID").val(),
+                            dimissCode: $("#DimissCode").val(),
+                            sapCode: $("#DimissSapCode").val(),
+                            isCompen: "",
+                            applyDate: new Date(NowDate).Format("yyyyMMdd"),
+                            applyTime: new Date(NowDate).Format("hh:mm:ss"),
+                            dimissType: _dimissType,
+                            note: $("#Note").val(),
+                            reason: $("#Reason").val(),
+                            otherReason: $("#OtherReason").val(),
+                            deviceSN: $("#DimissDeviceSN").val(),
+                            shopCode: $("#DimissShopCode").val()
+                        },
+                        URL: "employeeEvent/setDismission",
+                        Mode: "ESB",
+                        Handle: "POST"
+                    },
+                    Loading: {
+                        Title: "SAP数据传输中...",
+                        Show: true
+                    }
+                };
+                $.when($honesty.AjaxChannel(EmpDimiss)).done(function (_result) {
+                    if (_result.Data.returnCode == "000") {
+                        $honestyFlow.CompleteFlow({
+                            Callback: function () {
+                                var _options = {
+                                    PostData: {
+                                        Params: {
+                                            result: "HandoverEmp",
+                                            EmpID: $("#EmpID").val(),
+                                            EmpCode: $("#InfoEmpCode").html()
+                                        },
+                                        ProcName: "proc_SOM_HR_EmpHandover",
+                                        DataType: "DataTable",
+                                        ExecType: "PROC",
+                                        Mode: "MSSQL"
+                                    },
+                                    Loading: {
+                                        Title: "工作交接推送中...",
+                                        Show: true
+                                    },
+                                    async: false
+                                };
+                                var _result = $honesty.AjaxChannel(_options);
+                                if (_result.Code == "1") {
+                                    $honesty.ShowMsg({ msg: "工作交接推送成功", title: "警告" });
+                                    $honesty.CloseWin();
+                                }
+                            }
+                        });
+
+                    }
+                    else {
+                        $honesty.ShowMsg({ msg: _result.Data.returnMsg, title: "警告" });
+                    }
+                });
+            })
+
+        })
+    }
+    //加载基础信息
+    function InitBase() {
+        if ($honestyFlow.GetFlowInfo("isread") == "false") {
+            IsRead = true;
+        }
+        if (DimissID != "") {
+            var _options = {
+                PostData: {
+                    Params: {
+                        Result: "InitEmpDimiss",
+                        ID: DimissID
+                    },
+                    ProcName: "proc_SOM_HR_EmpDimiss",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                async: false
+            };
+            var _result = $honesty.AjaxChannel(_options);
+            //$.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        $("#InfoSN").html(item.SN);
+                        $("#InfoWriteDate").html(item.WriteDate);
+                        $("#InfoEmpCode").html(item.EmpCode);
+                        $("#InfoEmpName").html(item.EmpName);
+                        $("#InfoAreaName").html(item.AreaName);
+                        $("#InfoProvince").html(item.Province);
+                        $("#InfoShopName").html(item.ShopName);
+                        $("#InfoEmpPosition").html(item.EmpPosition);
+                        $("#InfoSapCode").html(item.SapCode);
+                        $("#EmpID").val(item.EmpID);
+                        //加载附件列表
+                        $honesty.InitSlaves({
+                            con_id: "tbSlaves", dataname: "tbSlaves", move: IsRead, files: item.Slaves
+                        });
+                        $("#DimissCode").val(item.DimissCode);
+                        $("#DimissName").val(item.DimissName);
+                        $("#DimissSapCode").val(item.DimissSapCode);
+                        $("#DimissShopName").val(item.DimissShopName);
+                        $("#InDate").val(item.InDate);
+                        $("#DimissPosition").val(item.DimissPosition);
+                        $("#ContractBegin").val(item.ContractBegin);
+                        $("#ContractEnd").val(item.ContractEnd);
+                        $("#IsTry").val(item.IsTry);
+                        $("#DimissCompany").val(item.DimissCompany);
+                        $("#DimissCompany").val(item.DimissCompany);
+                        $("#DimissNote").val(item.DimissNote);
+                        $("#Note").val(item.Note);
+                        $("#OtherReason").val(item.OtherReason);
+                        $("#SelectInfo").val(item.Reason);
+                        $("#DimissID").val(item.DimissID);
+                        $("#DimissLevelDesc").val(item.DimissLevelDesc);
+                        $("#DimissShopCode").val(item.DimissShopCode);
+                        $("#DimissDeviceSN").val(item.DimissDeviceSN);
+
+
+                        var _Arr = document.getElementById("SelectInfo").value.split(",");
+                        var TypeName = "";
+                        if (_Arr.length > 0) {
+                            for (var j = 0; j < _Arr.length; j++) {
+                                $.each(_TypeArr, function (i, item) {
+                                    if (item.id == _Arr[j]) {
+                                        item.status = "selected";
+                                        if (j == _Arr.length - 1) {
+                                            TypeName += item.text;
+                                        }
+                                        else {
+                                            TypeName += item.text + ",";
+                                        }
+                                        return false;
+                                    }
+                                });
+                            }
+                        }
+                        $("#Reason").val(TypeName);
+                    });
+                }
+                if (IsRead) {
+                    $("#divMain input").attr("readonly", "readonly");
+                    $("#divMain select").attr("disabled", "disabled");
+                    $("#btnSlaves,#btnClear").hide();
+                }
+            }
+            //})
+        }
+        else {
+            DimissID = $honestyFlow.GetFlowInfo("instanceid");
+            $("#InfoSN").html($honestyFlow.GetFlowInfo("SN"));
+            $("#InfoWriteDate").html($honesty.NowDate().Format("yyyy-MM-dd"));
+            $("#InfoEmpCode").html(GetSession("UserCode"));
+            $("#InfoEmpName").html(GetSession("UserName"));
+            $("#InfoAreaName").html(GetSession("AreaName"));
+            $("#InfoProvince").html(GetSession("Province"));
+            $("#InfoShopName").html(GetSession("ShopName"));
+            $("#InfoEmpPosition").html(GetSession("Position"));
+            $("#InfoSapCode").html(GetSession("SapCode"));
+            $("#InDate").val(GetSession("CreateDate"));
+            $("#DimissShopName").val(GetSession("ShopName"));
+            $("#DimissPosition").val(GetSession("Position"));
+            $("#ContractBegin").val(GetSession("ContractBegin"));
+            $("#ContractEnd").val(GetSession("ContractEnd"));
+            $("#DimissCompany").val(GetSession("CompanyName"));
+            if (GetSession("IsLeader") == 1) {
+                $("div[title='Leader']").css("display", "");
+            }
+            $("#DimissID").val(GetSession("UserID"));
+            $("#DimissCode").val(GetSession("UserCode"));
+            $("#DimissName").val(GetSession("UserName"));
+            $("#IsLeader").val(GetSession("IsLeader"));
+            $("#DimissSapCode").val(GetSession("SapCode"));
+            $("#DimissLevelDesc").val(GetSession("LevelDesc"));
+            $("#DimissShopCode").val(GetSession("ShopCode"));
+            $("#DimissDeviceSN").val(GetSession("CardSN"));
+            if ($honestyFlow.GetFlowInfo("stepname") != "提出离职申请") {
+                $("#divMain input").attr("readonly", "readonly");
+                $("#divMain select").attr("disabled", "disabled");
+            }
+        }
+        $honesty.GetUserInfo({
+            account: $("#DimissCode").val(),
+            callback: function (ret) {
+                _IsLeader = ret.Data.IsLeader;
+            }
+        })
+        if ($honestyFlow.GetFlowInfo("stepname") == "提出离职申请") {
+            $("#DimissCode,#IsTry,#Note,#OtherReason,#btnSlaves").removeAttr("disabled", "");
+            if ($("#DimissCode").val() != "" && $("#DimissCode").val() != $("#InfoEmpCode").html()) {
+                $("div[title='Leader']").css("display", "");
+            }
+            else {
+                if (_IsLeader == 1) {
+                    $("div[title='Leader']").css("display", "");
+                }
+            }
+        }
+
+        if ($honestyFlow.GetFlowInfo("stepname") == "店长审核" || $honestyFlow.GetFlowInfo("stepname") == "零售部区域经理审核") {
+            if ($("#DimissCode").val() != $("#InfoEmpCode").html()) {
+                $("div[title='Leader']").css("display", "");
+            }
+        }
+
+    }
+    function SaveData() {
+
+        if ($honestyFlow.GetFlowInfo("stepname") == "提出离职申请") {
+
+            var _IsDimiss = {
+                PostData: {
+                    Params: {
+                        Result: "IsDimissStatus",
+                        EmpID: GetSession("UserID"),
+                        DimissID: $("#DimissID").val(),
+                        SN: $("#InfoSN").html()
+                    },
+                    ProcName: "proc_SOM_HR_EmpDimiss",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                async: false
+            };
+            var _resultIsDimiss = $honesty.AjaxChannel(_IsDimiss);
+            var _Erre = true;
+            if (_resultIsDimiss.Data.length > 0) {
+                $.each(_resultIsDimiss.Data, function (i, item) {
+                    if (item.LinkSN == "") {
+                        if (item.FlowCompleted == "1") {
+                            $honesty.ShowMsg({ msg: "离职流程完成，请先完成工作交接！", title: "警告" });
+                            _Erre = false;
+                        }
+                        else {
+                            $honesty.ShowMsg({ msg: "相同的离职流程已存在，请先完成前一条离职流程！流程信息：" + item.SN, title: "警告" });
+                            _Erre = false;
+                        }
+                    }
+                    else {
+                        if (item.LinkSN != "" && item.HFlowCompleted != "1") {
+                            $honesty.ShowMsg({ msg: "该离职流程的工作交接尚未完成，请耐心等待完成！流程信息：" + item.HSN, title: "警告" });
+                            _Erre = false;
+                        }
+                    }
+                });
+            }
+            else {
+                if (_Erre == false) {
+                    return false;
+                }
+                if ($("#DimissCode").val() == "") {
+                    $honesty.ShowMsg({ msg: "请输入工号!", title: "警告" });
+                    return false;
+                }
+                if ($("#IsTry").val() == "") {
+                    $honesty.ShowMsg({ msg: "请选择是否是试用期!", title: "警告" });
+                    return false;
+                }
+                if ($("#Note").val() == "") {
+                    $honesty.ShowMsg({ msg: "请填写离职申请说明!", title: "警告" });
+                    return false;
+                }
+                if ($("#Reason").val() == "") {
+                    $honesty.ShowMsg({ msg: "请选择离职原因!", title: "警告" });
+                    return false;
+                }
+                var Slaves = "";
+                $.each($("#tbSlaves tr[dataname='tbSlaves']"), function (i, item) {
+                    Slaves += $(item).attr("value") + "|";
+                });
+                var _options = {
+                    PostData: {
+                        Params: {
+                            result: "ModifyEmpDimiss",
+                            ID: DimissID,
+                            SN: $honestyFlow.GetFlowInfo("SN"),
+                            EmpID: GetSession("UserID"),
+                            EmpCode: GetSession("UserCode"),
+                            EmpName: GetSession("UserName"),
+                            OrganizeID: GetSession("OrganizeID"),
+                            AreaName: GetSession("AreaName"),
+                            Province: GetSession("Province"),
+                            CompanyName: GetSession("CompanyCode"),
+                            ShopCode: GetSession("ShopCode"),
+                            SapCode: GetSession("SapCode"),
+                            ShopName: GetSession("ShopName"),
+                            EmpPosition: GetSession("Position"),
+                            EmpLevel: GetSession("EmpLevel"),
+                            LevelDesc: GetSession("LevelDesc"),
+                            InDate: $("#InDate").val(),
+                            DimissID: $("#DimissID").val(),
+                            DimissCode: $("#DimissCode").val(),
+                            DimissName: $("#DimissName").val(),
+                            DimissSapCode: $("#DimissSapCode").val(),
+                            DimissLevelDesc: $("#DimissLevelDesc").val(),
+                            DimissShopName: $("#DimissShopName").val(),
+                            DimissPosition: $("#DimissPosition").val(),
+                            DimissShopCode: $("#DimissShopCode").val(),
+                            DimissDeviceSN: $("#DimissDeviceSN").val(),
+                            ContractBegin: $("#ContractBegin").val(),
+                            ContractEnd: $("#ContractEnd").val(),
+                            DimissCompany: $("#DimissCompany").val(),
+                            IsTry: $("#IsTry").val(),
+                            DimissNote: $("#DimissNote").val(),
+                            Note: $("#Note").val(),
+                            Reason: document.getElementById("SelectInfo").value,
+                            OtherReason: $("#OtherReason").val(),
+                            Slaves: Slaves,
+                            Title: $honestyFlow.GetFlowInfo("title"),
+                        },
+                        ProcName: "proc_SOM_HR_EmpDimiss",
+                        DataType: "Bool",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    },
+                    async: false
+                };
+                var _result = $honesty.AjaxChannel(_options);
+                if (_result.Data == "True") {
+                    return true;
+                }
+                else {
+                    $honesty.ShowMsg({ msg: "业务数据保存失败", title: "警告" });
+                    return false;
+                }
+            }
+        }
+        else {
+            return true;
+        }
+    }
+    function UserInfo() {
+        $("#DimissName,#InDate,#DimissShopName,#DimissPosition,#DimissCompany,#ContractBegin,#ContractEnd").val("");
+        $honesty.GetUserInfo({
+            account: $("#DimissCode").val(),
+            callback: function (ret) {
+                if (ret.Code == 1) {
+                    if ($("#DimissCode").val() == $("#InfoEmpCode").html()) {
+                        $("#DimissNote").val("辞职");
+
+                    }
+                    else {
+                        $("#DimissNote").val("自动离职");
+                    }
+                    $("#DimissID").val(ret.Data.UserID);
+                    $("#DimissName").val(ret.Data.UserName);
+                    $("#DimissLevelDesc").val(ret.Data.LevelDesc);
+                    $("#InDate").val(ret.Data.CreateDate);
+                    $("#DimissShopName").val(ret.Data.ShopName);
+                    $("#DimissPosition").val(ret.Data.Position);
+                    $("#DimissCompany").val(ret.Data.CompanyName);
+                    $("#ContractBegin").val(ret.Data.ContractBegin);
+                    $("#ContractEnd").val(ret.Data.ContractEnd);
+                    $("#DimissSapCode").val(ret.Data.SapCode);
+                    $("#IsLeader").val(ret.Data.IsLeader);
+                    $("#DimissDeviceSN").val(ret.Data.CardSN);
+                    $("#DimissShopCode").val(ret.Data.ShopCode);
+                }
+                else {
+                    $honesty.ShowMsg({ title: "警告", msg: "该工号不存在！" });
+                    $("#TransCode").val("");
+                }
+            }
+        });
+    }
+</script>
+</html>

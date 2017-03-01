@@ -1,0 +1,98 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>异常区域统计</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-input-row .aui-input-addon {
+            width: 90px;
+        }
+    </style>
+</head>
+<body>
+    <div style="height: 10px;"></div>
+    <div class="aui-content aui-card">
+        <div class="aui-form aui-input-form">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">开始时间:</span>
+                <input id="StartDate" type="text" class="aui-input aui-important" readonly="readonly" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">结束时间:</span>
+                <input id="EndDate" type="text" class="aui-input" readonly="readonly" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">状态:</span>
+                <select id="Status" class="aui-input">
+                    <option value="">全部</option>
+                    <option value="1">已处理</option>
+                    <option value="0">未处理</option>
+                </select>
+            </div>
+            <div class="aui-btn-row">
+                <div id="btnSearch" class="aui-btn aui-btn-block aui-btn-warning">
+                    查询
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _OrganizeID;
+    var _PatrolType = "";
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _Date = $honesty.NowDate().Format("yyyy-MM-dd");
+            _OrganizeID = api.pageParam.OrganizeID;
+            _PatrolType = api.pageParam.PatrolType;
+
+            var arrDate = _Date.split("-")
+            $("#StartDate").val(arrDate[0] + "-" + arrDate[1] + "-01");
+            $("#EndDate").val(_Date);
+
+            //开始时间点击
+            $("#StartDate").tap(function () {
+                $honesty.DateTimeSelect({
+                    LevelNum: 2,
+                    Type: "Date",
+                    ControlID: "StartDate",
+                    ControlValue: $("#StartDate").val()
+                });
+            });
+            //结束时间点击
+            $("#EndDate").tap(function () {
+                $honesty.DateTimeSelect({
+                    LevelNum: 2,
+                    Type: "Date",
+                    ControlID: "EndDate",
+                    ControlValue: $("#EndDate").val()
+                });
+            });
+
+            //查询按钮点击
+            $("#btnSearch").tap(function () {
+                $honesty.OpenWin({
+                    url: "Attend/FaultCountScale/FaultCountScale.html",
+                    name: "Attend_FaultCountScale_FaultCountScale",
+                    title: "异常区域统计",
+                    LevelNum: 2,
+                    pageParam: {
+                        StartDate: $("#StartDate").val(),
+                        EndDate: $("#EndDate").val(),
+                        Status: $("#Status").val()
+                    }
+                });
+            });
+
+        });
+    };
+</script>
+</html>

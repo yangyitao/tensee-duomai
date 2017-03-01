@@ -1,0 +1,82 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>班次详情</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-input-row .aui-input-addon {
+            width: 50px;
+            text-align:left;
+        }
+    </style>
+</head>
+<body>
+    <p class="aui-padded-10 aui-text-center">班次信息</p>
+    <div class="aui-card">
+        <div class="aui-form aui-input-form" id="TimeList">
+        </div>
+    </div>
+</body>
+</html>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+
+<script type="text/javascript">
+    var _OrganizeID = "";
+    var _UserID = GetSession("UserID");
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _OrganizeID = api.pageParam.OrganizeID;
+            //获取店铺排班班次
+            var _Type = {
+                PostData: {
+                    Params: { "Result": "SelectShopType", "UserID": _UserID, "OrganizeID": _OrganizeID },
+                    ProcName: "proc_SOM_ISR_Scheduling",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                async: false
+            };
+            var _Content = "";
+            $("#TimeList").html("");
+            var _resultType = $honesty.AjaxChannel(_Type);
+            if (_resultType["Data"].length > 0) {
+                $.each(_resultType["Data"], function (i, item) {
+                    if (item.Title != "休息") {
+                        var d1 = new Date(item.TimeBegin1).Format("hh:mm");
+                        if (d1 == "00:00") {
+                            d1 = "";
+                        }
+                        var d2 = new Date(item.TimeEnd1).Format("hh:mm");
+                        if (d2 == "00:00") {
+                            d2 = "";
+                        }
+                        var d3 = new Date(item.TimeBegin2).Format("hh:mm");
+                        if (d3 == "00:00") {
+                            d3 = "";
+                        }
+                        var d4 = new Date(item.TimeEnd2).Format("hh:mm");
+                        if (d4 == "00:00") {
+                            d4 = "";
+                        }
+                        _Content += "<div class='aui-input-row'><span class='aui-input-addon'>" + item.Title + "</span>";
+                        if (d3 != "") {
+                            _Content += "<input type='text' class='aui-input' value='" + d1 + "--" + d2 + "    " + d3 + "--" + d4 + "' />";
+                        }
+                        else {
+                            _Content += "<input type='text' class='aui-input' value='" + d1 + "--" + d2 + "' />";
+                        }
+                        _Content += "</div>";
+                    }
+                });
+                $("#TimeList").html(_Content);
+            };
+        });
+    }
+</script>

@@ -1,0 +1,78 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>资料共享详细页面</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        p {
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <div class="aui-content">
+        <div class="aui-list-view" style="margin-bottom: 0px;">
+            <div class="aui-list-view-cell" style="padding: 3px;">
+                <label id="lbTitle"></label>
+                <p style="color: #8f8f94" id="pDate"></p>
+            </div>
+        </div>
+        <div class="aui-list-view" id="divContent" style="margin-bottom: 0px;">
+        </div>
+        <table class="aui-salves" id="tbSlaves">
+        </table>
+    </div>
+</body>
+</html>
+
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            
+            LoadData();
+
+        });
+
+
+
+    }
+
+    //数据加载函数
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    result: "SingleInfo",
+                    DatumID: api.pageParam.DatumID,
+                },
+                ProcName: "proc_SOM_ISR_Datum",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL",
+                ReadFields: ["DatumContent"]
+            }
+        };
+
+
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        $("#lbTitle").html(item.DatumTitle);
+                        $("#pDate").html(item.PublishedDate);
+                        $("#divContent").html(item.DatumContent);
+                        $honesty.InitSlaves({ con_id: "tbSlaves", files: item.DatumURL });
+                        $("#tbSlaves").find("td").width(api.frameWidth);
+                    });
+                }
+            }
+        });
+    }
+</script>

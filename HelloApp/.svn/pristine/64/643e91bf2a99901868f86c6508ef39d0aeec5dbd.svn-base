@@ -1,0 +1,83 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>店铺信息</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="aui-tab" id="divTab">
+        <ul id="TopBar" class="aui-tab-nav">
+            <li data-value="Archives" data-index="0" class="active">档案详情
+            </li>
+            <li data-value="Organization" data-index="1">店铺编制
+            </li>
+            <li data-value="Location" data-index="2">店铺定位
+            </li>
+            <li data-value="Employee" data-index="3">店铺人员
+            </li>
+        </ul>
+    </div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            $("#TopBar").children("li").tap(function () {
+                $("#TopBar").find(".active").removeClass("active");
+                $(this).addClass("active");
+
+                api.setFrameGroupIndex({
+                    name: 'shopinfo_tab',
+                    index: $(this).data("index"),
+                    scroll: true
+                });
+            });
+
+            var h = $honesty.RangeTop(50);
+            api.openFrameGroup({
+                name: 'shopinfo_tab',
+                scrollEnabled: false,
+                rect: { x: 0, y: $("#divTab").height() + h, w: 'auto', h: 'auto' },
+                index: 0,
+                preload: 0,
+                frames:
+                [{
+                    name: 'ShopInfo_Archives',
+                    url: 'Archives.html',
+                    bounces: false,
+                    pageParam: {
+                        OrganizeID: api.pageParam.OrganizeID
+                    }
+                }, {
+                    name: 'ShopInfo_Organization',
+                    url: 'Organization.html',
+                    bounces: false,
+                    pageParam: {
+                        OrganizeID: api.pageParam.OrganizeID
+                    }
+                }, {
+                    name: 'ShopInfo_Location',
+                    url: 'Location.html',
+                    bounces: false,
+                    pageParam: {
+                        OrganizeID: api.pageParam.OrganizeID
+                    }
+                }, {
+                    name: 'ShopInfo_Employee',
+                    url: 'Employee.html',
+                    bounces: false,
+                    pageParam: {
+                        OrganizeID: api.pageParam.OrganizeID
+                    }
+                }]
+            });
+        });
+    }
+</script>
+</html>

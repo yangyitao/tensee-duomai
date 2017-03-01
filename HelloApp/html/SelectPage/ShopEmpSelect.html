@@ -1,0 +1,140 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>店铺人员选择</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="aui-content">
+        <ul class="aui-list-view" id="ulList">
+        </ul>
+    </div>
+    <div style="height: 40px"></div>
+    <footer class="aui-nav" id="footer" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7;">
+        <table style="width: 100%; border-collapse: collapse">
+            <tr>
+                <td data-role="checkbox" style="display: none">
+                    <div id="btnSelectAll" class="aui-btn aui-btn-block aui-btn-success" style="height: 45px; width: 99%; line-height: 0.9;">
+                        全选
+                    </div>
+                </td>
+                <td data-role="checkbox" style="display: none">
+                    <div id="btnCancelAll" class="aui-btn aui-btn-block aui-btn-danger" style="height: 45px; width: 99%; line-height: 0.9;">
+                        取消
+                    </div>
+                </td>
+                <td>
+                    <div id="btnSure" class="aui-btn aui-btn-block aui-btn-info" style="height: 45px; width: 99%; line-height: 0.9;">
+                        确定
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </footer>
+</body>
+<script src="../../script/api.js"></script>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _ChooseType;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _ChooseType = api.pageParam.ChooseType;
+            if (_ChooseType == "checkbox") {
+                $("[data-role='checkbox']").css("display", "");
+            }
+
+
+            if (GetSession("ShopEmpList")) {
+                LoadData();
+            }
+            else {
+                var _options = {
+                    PostData: {
+                        Params: { "Result": "SelectEmpList", "OrganizeID": GetSession("OrganizeID") },
+                        ProcName: "proc_Authortity",
+                        DataType: "DataTable",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    }
+                };
+                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                    if (_result.Code == "1") {
+                        if (_result.Data.length > 0) {
+                            SetSession("ShopEmpList", $api.jsonToStr(_result.Data));
+                            LoadData();
+                        }
+                    }
+                });
+            }
+
+            //确定按钮点击
+            $("#btnSure").tap(function () {
+                var _UserID = [], _UserName = [];
+                $("[name='emp']").each(function () {
+                    if ($(this).is(':checked')) {
+                        _UserID.push($(this).attr("data-useID"));
+                        _UserName.push($(this).attr("data-useName"));
+                    }
+                });
+                if (_UserID == "") {
+                    $honesty.ShowMsg({ title: "警告", msg: "请选择员工" });
+                }
+                else {
+                    var unSelect = 0;
+                    $("[name='emp']").each(function () {
+                        if (!$(this).is(':checked')) {
+                            unSelect++;
+                        }
+                    });
+                    api.sendEvent({
+                        name: 'SelectPage_ShopEmpSelect',
+                        extra: {
+                            UserName: _UserName,
+                            UserID: _UserID,
+                            IsAll:unSelect
+                        }
+                    });
+                    api.closeWin();
+                }
+            });
+
+            //全选按钮点击
+            $("#btnSelectAll").tap(function () {
+                $("[name='emp']").each(function () {
+                    if (!$(this).is(":checked")) {
+                        $(this).prop("checked", true);
+                    }
+                });
+            });
+
+            //取消按钮点击
+            $("#btnCancelAll").tap(function () {
+                $("[name='emp']").each(function () {
+                    if ($(this).is(":checked")) {
+                        $(this).prop("checked", false);
+                    }
+                });
+            });
+        });
+    }
+
+    //加载数据函数
+    function LoadData() {
+        var _Content = "";
+        $.each($api.strToJson(GetSession("ShopEmpList")), function (i, item) {
+            _Content += "<li class='aui-list-view-cell'>" +
+                        "<input class='aui-pull-right aui-" + _ChooseType + " aui-" + _ChooseType + "-warning' name='emp' data-useName='" + item.Name +
+                        "' data-useID='" + item.UserID + "' type='" + _ChooseType + "'>" +
+                        "<label>" + item.Name + "</label><p>" + item.Title + "</p></li>";
+        });
+        $("#ulList").html(_Content);
+    }
+
+
+</script>
+</html>

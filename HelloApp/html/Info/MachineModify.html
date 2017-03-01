@@ -1,0 +1,155 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>考勤机维护</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-input-row .aui-input-addon {
+            width: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div class="aui-content">
+        <div class="aui-form aui-input-form" id="divMonthTarget">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">考勤机编号</span>
+                <input id="CardMachineNum" type="text" class="aui-input aui-important" placeholder="请录入考勤机编号" />
+            </div>
+            <div id="divSave" class="aui-input-row" style="padding: 5px;display:none">
+                <div id="btnSave" class="aui-btn aui-btn-block aui-btn-info" style="height: 45px; width: 100%; line-height: 0.9;">
+                    保存
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+<script src="../../script/zepto.js"></script>
+<script src="../../script/api.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _CardMachineNum = "";
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            if (GetSession("IsLeader") != "0")
+            {
+                $("#divSave").show();
+            }
+            LoadData();
+
+            $("#btnSave").tap(function () {
+                if ($("#CardMachineNum").val().trim() == "") {
+                    $honesty.ShowMsg({ title: "警告", msg: "请输入考勤机编号" });
+                }
+                else {
+                    var _options = {
+                        PostData: {
+                            Params: {
+                                Result: "UpdateInfo",
+                                OrganizeID: GetSession("OrganizeID"),
+                                CardMachineNum: $("#CardMachineNum").val().trim()
+                            },
+                            ProcName: "proc_SOM_ISR_CardMachine",
+                            DataType: "Bool",
+                            ExecType: "PROC",
+                            Mode: "MSSQL"
+                        },
+                        Loading: {
+                            Show: true,
+                            Title: "正在保存..."
+                        }
+                    };
+
+                    $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                        if (_result.Code == "1") {
+                            if (_result.Data == "True") {
+                                _options = {
+                                    PostData: {
+                                        Params: {
+                                            shopCode: GetSession("OrganizeID"),
+                                            SN: $("#CardMachineNum").val().trim(),
+                                            shopName: GetSession("ShopName")
+                                        },
+                                        URL: "iclock/DeviceManager",
+                                        Mode: "ESB",
+                                        Handle: "GET"
+                                    },
+                                    Loading: {
+                                        Title: "正在配置考勤机...",
+                                        Show: true
+                                    },
+                                    async: false
+                                };
+
+                                _result = $honesty.AjaxChannel(_options);
+                                if (_result.Code == "1") {
+                                    $honesty.ShowMsg({
+                                        title: "提示", msg: "保存成功", callback: function () {
+                                            $honesty.CloseWin();
+                                        }
+                                    });
+                                }
+                                else {
+                                    $honesty.ShowMsg({
+                                        title: "警告", msg: "保存失败", callback: function () {
+                                            _options = {
+                                                PostData: {
+                                                    Params: {
+                                                        Result: "UpdateInfo",
+                                                        OrganizeID: GetSession("OrganizeID"),
+                                                        CardMachineNum: _CardMachineNum
+                                                    },
+                                                    ProcName: "proc_SOM_ISR_CardMachine",
+                                                    DataType: "Bool",
+                                                    ExecType: "PROC",
+                                                    Mode: "MSSQL"
+                                                }
+                                            };
+                                            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                                            });
+                                        }
+                                    });
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+        });
+    }
+
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "SelectShopName",
+                    OrganizeID: GetSession("OrganizeID")
+                },
+                ProcName: "proc_SOM_ISR_CardMachine",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        $("#CardMachineNum").val(item.CardMachineNum);
+                        _CardMachineNum = item.CardMachineNum;
+                    });
+                }
+            }
+            else {
+                $("#divSave").hide();
+            }
+        })
+    }
+</script>

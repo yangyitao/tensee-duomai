@@ -1,0 +1,307 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>店长自检问题明细</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-input-row .aui-input-addon {
+            width: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div class="aui-content">
+        <p class="aui-padded-5 aui-text-center">巡店问题</p>
+        <div class="aui-form aui-input-form " id="divEmpTarget">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">问题分类</span>
+                <select id="ProblemType" class="aui-input" disabled="disabled">
+                    <option value="">请选择...</option>
+                    <option value="1">商品类</option>
+                    <option value="2">工程类</option>
+                    <option value="3">人事行政类</option>
+                    <option value="4">形象类</option>
+                </select>
+            </div>
+            <div class="aui-input-row" style="padding-right: 3px;">
+                <span class="aui-input-addon">问题描述</span>
+                <textarea id="ProblemDescribe" class="aui-input" style="height: 70px; border: 1px solid #c8c7cc; overflow-y: auto" placeholder="请填写问题描述" readonly="readonly"></textarea>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">要求时间</span>
+                <input id="ExpectDate" type="text" class="aui-input" placeholder="请选择要求完成时间" readonly="readonly" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">执行人</span>
+                <input id="ExcuteUserID" type="text" class="aui-input" placeholder="请选择执行人" readonly="readonly" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">执行时间</span>
+                <input id="ExcuteDate" type="text" class="aui-input" readonly="readonly" />
+            </div>
+            <div class="aui-input-row" style="padding-right: 3px;">
+                <span class="aui-input-addon" style="vertical-align: top;">备注</span>
+                <textarea id="Remark" class="aui-input" style="height: 70px; border: 1px solid #c8c7cc; overflow-y: auto" readonly="readonly"></textarea>
+            </div>
+        </div>
+        <ul class="aui-list-view aui-grid-view" id="ulImgList" style="display: none">
+        </ul>
+    </div>
+    <div id="divFooter" style="height: 40px; display: none"></div>
+    <footer class="aui-nav" id="footer" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7; display: none">
+        <div id="btnSubmit" class="aui-btn aui-btn-block aui-btn-warning aui-iconfont aui-icon-check" style="height: 45px; width: 49%; line-height: 0.9; float: left">
+            保存
+        </div>
+        <div id="btnUpLoad" class="aui-btn aui-btn-block aui-btn-success aui-iconfont aui-icon-camera" style="height: 45px; width: 49%; line-height: 0.9; float: right">
+            上传图片
+        </div>
+    </footer>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _PatrolID, _ID;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _PatrolID = api.pageParam.PatrolID;
+            _ID = api.pageParam.ID;
+
+            if (!_ID) {
+                $("#divFooter").show();
+                $("#footer").show();
+                $("select.aui-input").removeAttr("disabled");
+                $("textarea.aui-input").removeAttr("readonly");
+                $("#ulImgList").show();
+            }
+            LoadData();
+
+            $("#ExpectDate").tap(function () {
+                if (!_ID) {
+                    $honesty.DateTimeSelect({
+                        LevelNum: 2,
+                        Type: "Date",
+                        ControlID: "ExpectDate",
+                        ControlValue: $("#ExpectDate").val()
+                    });
+                }
+            });
+
+            $("#ExcuteUserID").tap(function () {
+                if (!_ID) {
+                    $honesty.Organize({
+                        control: "ExcuteUserID", ismore: "false", typemode: "A",
+                        callback: function () {
+                        }
+                    });
+                }
+            });
+
+            //图片上传
+            $("#btnUpLoad").tap(function () {
+                $honesty.UploadPicture({
+                    callBack: function (ret) {
+                        if (ret.FilePath != "") {
+                            var imageID = new $honesty.GUID().NewGUID();
+                            var _Content = '<li id="' + imageID + '" class="aui-list-view-cell aui-img aui-col-xs-2" style="height:' + (api.frameWidth / 6) + 'px">' +
+                                           '<img data-id="' + imageID + '" data-role="image" class="aui-img-object" style="width:100% !important;height:100% !important;" src="' + $honesty.GetSite() + ret.FilePath + '"></li>';
+                            $("#ulImgList").append(_Content);
+                        }
+                    }
+                })
+            });
+
+            //图片点击
+            $(document).on("tap", "[data-role='image']", function () {
+                var arrImages = new Array();
+                var arrImageID = new Array();
+                var clickID = $(this).data("id");
+                var activeIndex = 0;
+                var IsAdd = true;
+                $("[data-role='image']").each(function () {
+                    arrImages.push($(this).attr("src"));
+                    arrImageID.push($(this).data("id"));
+                    if (clickID == $(this).data("id")) {
+                        IsAdd = false;
+                    }
+                    if (IsAdd) {
+                        activeIndex++;
+                    }
+                });
+
+                var photoBrowser = api.require('photoBrowser');
+                photoBrowser.open({
+                    images: arrImages,
+                    activeIndex: activeIndex,
+                    bgColor: '#000'
+                }, function (ret) {
+                    if (ret) {
+                        if (ret.eventType == "click") {
+                            photoBrowser.clearCache();
+                            photoBrowser.close();
+                        }
+                        else if (ret.eventType == "longPress") {
+                            var index = ret.index;
+                            if (!_ID) {
+                                $honesty.ConfirmWin({
+                                    msg: "是否删除该图片？", callback: function (ret, err) {
+                                        if (ret.buttonIndex == "1") {
+                                            $("#" + arrImageID[index]).remove();
+                                            photoBrowser.clearCache();
+                                            photoBrowser.close();
+                                        }
+                                    }
+                                })
+                            }
+                        }
+                        else if (ret.eventType == "loadImgFail") {
+                            $honesty.ShowToast({ msg: "图片加载失败" });
+                        }
+                    }
+                });
+            });
+
+            $("#btnSubmit").tap(function () {
+                if (CheckInfo()) {
+                    $honesty.ConfirmWin({
+                        msg: "是否提交问题，提交后将不可修改？",
+                        buttons: ["提交", "取消"],
+                        callback: function (ret, err) {
+                            if (ret.buttonIndex == "1") {
+                                var url = "";
+                                $("[data-role='image']").each(function () {
+                                    url += "|" + $(this).attr("src").replace($honesty.GetSite(), "");
+                                });
+                                url = url.replace("|", "");
+                                var _options = {
+                                    PostData: {
+                                        Params: {
+                                            Result: "MaintainInfo",
+                                            PatrolID: _PatrolID,
+                                            ID: _ID || new $honesty.GUID().NewGUID(),
+                                            ProblemType: $("#ProblemType").val(),
+                                            ProblemDescribe: $("#ProblemDescribe").val().trim(),
+                                            FollowUpUserID: GetSession("UserID"),
+                                            ExpectDate: $("#ExpectDate").val(),
+                                            ExcuteUserID: $("#ExcuteUserID").data("listid")[0],
+                                            ExcuteUserName: $("#ExcuteUserID").val(),
+                                            Remark: $("#Remark").val().trim(),
+                                            CreateUserName: GetSession("UserName"),
+                                            Url: url
+                                        },
+                                        ProcName: "proc_SOM_ISR_PS_Problem",
+                                        DataType: "Bool",
+                                        ExecType: "PROC",
+                                        Mode: "MSSQL"
+                                    }
+                                };
+                                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                                    if (_result.Code == "1") {
+                                        if (_result.Data == "True") {
+                                            $honesty.ShowMsg({
+                                                title: "提示", msg: "提交成功", callback: function () {
+                                                    api.sendEvent({
+                                                        name: 'PatrolShop_SelfPatrol_ProblemInfo',
+                                                        extra: {
+                                                            IsTrue: true
+                                                        }
+                                                    });
+                                                    $honesty.CloseWin();
+                                                }
+                                            })
+                                        }
+                                        else {
+                                            $honesty.ShowMsg({ title: "错误", msg: "提交失败" });
+                                        }
+                                    }
+                                });
+
+                            }
+                        }
+                    })
+                }
+            });
+        });
+    };
+
+    function LoadData() {
+        if (_ID) {
+            var _options = {
+                PostData: {
+                    Params: {
+                        Result: "Selectsingle",
+                        PatrolID: _PatrolID,
+                        ID: _ID
+                    },
+                    ProcName: "proc_SOM_ISR_PS_Problem",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        $.each(_result.Data, function (i, item) {
+                            $("#ProblemType").val(item.ProblemType);
+                            $("#ProblemDescribe").val(item.ProblemDescribe);
+                            $("#Remark").val(item.Remark);
+                            $("#CompleteSituation").val(item.CompleteSituation);
+                            $("#ExpectDate").val(item.ExpectDate);
+                            $("#ExcuteDate").val(item.ExcuteDate);
+                            $("#ExcuteUserID").val(item.ExcuteUserName);
+                            $("#ExcuteUserID").attr("oid", item.ExcuteUserID);
+
+                            var arrUrls = "";
+                            if (item.Url != "") {
+                                arrUrls = item.Url.split("|");
+                            }
+                            var _Content = "";
+                            for (var i = 0; i < arrUrls.length; i++) {
+                                var imageID = new $honesty.GUID().NewGUID();
+                                _Content += '<li id="' + imageID + '" class="aui-list-view-cell aui-img aui-col-xs-2" style="height:' + (api.frameWidth / 6) + 'px">' +
+                                           '<img data-id="' + imageID + '" data-role="image" class="aui-img-object" style="width:100% !important;height:100% !important;" src="' + $honesty.GetSite() + arrUrls[i] + '"></li>';
+                            }
+                            $("#ulImgList").html(_Content);
+                            if (arrUrls.length != 0) {
+                                $("#ulImgList").show();
+                            }
+                        });
+                    }
+                }
+            });
+
+        }
+    }
+
+    function CheckInfo() {
+        if ($("#ProblemType").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请选择问题分类" });
+            return false;
+        }
+        else if ($("#ProblemDescribe").val().trim() == "") {
+            $honesty.ShowMsg({
+                title: "警告", msg: "请填写问题描述", callback: function () {
+                    $("#ProblemDescribe").focus();
+                }
+            });
+            return false;
+        }
+        else if ($("#ExpectDate").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请选择要求完成时间" });
+            return false;
+        }
+        else if ($("#ExcuteUserID").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请选择执行人" });
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+</script>
+</html>

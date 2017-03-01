@@ -1,0 +1,207 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>考勤详细</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-list-view-cell {
+            padding: 5px 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="aui-content">
+        <p class="aui-padded-5 aui-text-center">出勤详情</p>
+        <ul class="aui-list-view aui-in" style="margin-bottom: 0px;">
+            <li class="aui-list-view-cell">
+                <label id="ZDate"></label>
+                <p>日期</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="TodayName"></label>
+                <p>班次</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="TodayTime"></label>
+                <p>排班</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="SignTime"></label>
+                <p>签卡</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="FactDay"></label>
+                <p>实出勤</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="FaultInfo"></label>
+                <p>异常</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="FaultMsg"></label>
+                <p>描述</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="FlowProgress"></label>
+                <p>流程状态</p>
+            </li>
+        </ul>
+    </div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _Year, _Month, _Day, _AttendJSON;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _Year = api.pageParam.Year;
+            _Month = api.pageParam.Month;
+            _Day = api.pageParam.Day;
+            _AttendJSON = api.pageParam.AttendJSON;
+            LoadData();
+        });
+    };
+
+    function LoadData() {
+        $("#ZDate").html(_Year + "-" + _Month + "-" + (_AttendJSON.ZDay == "0" ? _Day : _AttendJSON.ZDay));
+        var _Today = "";
+        if (_AttendJSON.TodayTime != "") {
+            var _TodayTime = _AttendJSON.TodayTime.replace(/-/g, "/").split(";");
+            for (var i = 0; i < _TodayTime.length; i++) {
+                if (_Today != "") {
+                    _Today += "<br/>";
+                }
+                if (_TodayTime[i].split("|")[0].length > 0 && _TodayTime[i].split("|")[1].length > 0) {
+                    _Today += new Date(_TodayTime[i].split("|")[0]).Format("hh:mm") + "-" + new Date(_TodayTime[i].split("|")[1]).Format("hh:mm");
+                }
+            }
+        }
+        var _Sign = "";
+        if (_AttendJSON.EffectSignTime != "") {
+            var _SignTime = _AttendJSON.EffectSignTime.replace(/-/g, "/").split(";");
+            for (var i = 0; i < _SignTime.length; i++) {
+                if (_Sign != "") {
+                    _Sign += "<br/>";
+                }
+                if (_SignTime[i].split("|").length > 1) {
+                    if (_SignTime[i].split("|")[0].length > 0 && _SignTime[i].split("|")[1].length > 0) {
+                        _Sign += new Date(_SignTime[i].split("|")[0]).Format("hh:mm") + "-" + new Date(_SignTime[i].split("|")[1]).Format("hh:mm");
+                    }
+                }
+                else if (_SignTime[i].split("|").length == 1) {
+                    if (_SignTime[i].split("|")[0].length > 0) {
+                        _Sign += new Date(_SignTime[i].split("|")[0]).Format("hh:mm");
+                    }
+                    else if (_SignTime[i].split("|")[1].length > 0) {
+                        _Sign += new Date(_SignTime[i].split("|")[1]).Format("hh:mm");
+                    }
+                }
+            }
+            IniData(_Today, _Sign);
+        }
+        else {
+            var _ZDate = (_Year + "-" + (_Month > 10 ? _Month : "0" + _Month) + "-" + (_AttendJSON.ZDay == "0" ? _Day : _AttendJSON.ZDay));
+            var _options = {
+                PostData: {
+                    Params: {
+                        result: "InitEmpSignData",
+                        ZDate: _ZDate,
+                        UserID: GetSession("UserID")
+                    },
+                    ProcName: "proc_SOM_HR_EmpAttendReport",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        $.each(_result.Data, function (i, item) {
+                            if (_Sign != "") {
+                                _Sign += "；";
+                            }
+                            _Sign += item.SignTime;
+                            if (_AttendJSON.TodayTime == "") {
+                                _Today = item.TimeLine;
+                            }
+                        });
+                    }
+                    IniData(_Today, _Sign);
+                }
+            });
+        }
+
+    }
+
+    function IniData(_Today, _Sign) {
+        $("#TodayName").html(_AttendJSON.TodayName || "无");
+        $("#TodayTime").html(_Today || "无");
+        $("#SignTime").html(_Sign || "无");
+        $("#FactDay").html(_AttendJSON.FactDay || "无");
+        var _FaultMsg = "";
+        if (_AttendJSON.TardyCount > 0) {
+            _FaultMsg += (_FaultMsg == "" ? "" : "；") + "迟到早退：" + _AttendJSON.TardyCount + "次";
+        }
+        if (_AttendJSON.AbsentDay > 0) {
+            _FaultMsg += (_FaultMsg == "" ? "" : "；") + "旷工：" + _AttendJSON.AbsentDay + "天";
+        }
+        if (_AttendJSON.BTripDay > 0) {
+            _FaultMsg += "出差：" + _AttendJSON.BTripDay + "天";
+        }
+        if (_AttendJSON.OutDay > 0) {
+            _FaultMsg += "外勤：" + _AttendJSON.OutDay + "时";
+        }
+        if (_AttendJSON.RestOver > 0) {
+            _FaultMsg += "休息加班：" + _AttendJSON.RestOver + "时";
+        }
+        if (_AttendJSON.ExtendOver > 0) {
+            _FaultMsg += "延时加班：" + _AttendJSON.ExtendOver + "天";
+        }
+        if (_AttendJSON.LegalRestOver > 0) {
+            _FaultMsg += "法定休息加班：" + _AttendJSON.LegalRestOver + "时";
+        }
+        if (_AttendJSON.LegalExtendOver > 0) {
+            _FaultMsg += "法定延时加班：" + _AttendJSON.LegalExtendOver + "天";
+        }
+        if (_AttendJSON.AnnualDay > 0) {
+            _FaultMsg += "年假：" + _AttendJSON.AnnualDay + "天";
+        }
+        if (_AttendJSON.MarryDay > 0) {
+            _FaultMsg += "婚假：" + _AttendJSON.MarryDay + "天";
+        }
+        if (_AttendJSON.DeliveryDay > 0) {
+            _FaultMsg += "陪产假：" + _AttendJSON.DeliveryDay + "天";
+        }
+        if (_AttendJSON.CompassionDay > 0) {
+            _FaultMsg += "恩恤假：" + _AttendJSON.CompassionDay + "天";
+        }
+        if (_AttendJSON.AntenatalDay > 0) {
+            _FaultMsg += "产检假：" + _AttendJSON.AntenatalDay + "天";
+        }
+        if (_AttendJSON.MaternityDay > 0) {
+            _FaultMsg += "产假：" + _AttendJSON.MaternityDay + "天";
+        }
+        if (_AttendJSON.SuspensionDay > 0) {
+            _FaultMsg += "停薪留职：" + _AttendJSON.SuspensionDay + "天";
+        }
+        if (_AttendJSON.CasualDay > 0) {
+            _FaultMsg += "事假：" + _AttendJSON.CasualDay + "天";
+        }
+        if (_AttendJSON.SickDay > 0) {
+            _FaultMsg += "病假：" + _AttendJSON.SickDay + "天";
+        }
+        if (_AttendJSON.TakeRestDay > 0) {
+            _FaultMsg += "调休：" + _AttendJSON.TakeRestDay + "天";
+        }
+        $("#FaultMsg").html(_FaultMsg || "无");
+        $("#FaultInfo").html(_AttendJSON.FaultInfo || "无");
+        $("#FlowProgress").html(_AttendJSON.FlowProgress || "无");
+    }
+</script>
+</html>

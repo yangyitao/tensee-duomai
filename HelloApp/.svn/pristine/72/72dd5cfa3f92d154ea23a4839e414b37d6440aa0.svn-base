@@ -1,0 +1,323 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>试卷</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+    <style>
+        body {
+            font-size: 13px;
+        }
+
+        .aui-padded-5 {
+            font-size: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="aui-content">
+        <div id="QuestionList" class="aui-form aui-input-form">
+        </div>
+    </div>
+    <div id="divFooter" style="height: 40px;"></div>
+    <footer class="aui-nav" id="footer" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7;">
+        <div id="btnSave" class="aui-btn aui-btn-block aui-btn-warning" style="height: 45px; width: 100%; line-height: 0.9;">
+            提交
+        </div>
+    </footer>
+</body>
+</html>
+<script src="../../script/api.js" type="text/javascript"></script>
+<script src="../../script/zepto.js" type="text/javascript"></script>
+<script src="../../script/honesty.base.js" type="text/javascript"></script>
+<script type="text/javascript">
+    var _EndDate = new Date, ExamID = 0, AnswerXML = "", ExamTypeArr = [], ScoreJSON = {}, IsSubmit = 0, LastTime = 0, PageScore = 0;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _EndDate = new Date(api.pageParam.EndDate.replace(/-/g, "/"));
+            var NowDate = $honesty.NowDate();
+            LastTime = _EndDate.getTime() - NowDate.getTime();
+            LoadData();
+            setInterval("TimeTick()", 1000);
+            $("#btnSave").tap(function () {
+                var Msg = "";
+                ScoreJSON = {};
+                ExamTypeArr.length = 0;
+                AnswerXML = "<?xml version=\"1.0\" encoding=\"gb2312\"?><root>";
+                PageScore = 0;
+                $.each($("#QuestionList p[data-role='Question']"), function (i, item) {
+                    var ExamType = $(item).attr("data-type");
+                    var AnswerKey = $(item).attr("data-answer");
+                    var QuestionID = $(item).attr("data-id");
+                    var KeyID = $(item).attr("data-keyid");
+                    var AnswerScore = $(item).attr("data-score");
+                    var Answer = "", score = 0;
+                    if (ScoreJSON[ExamType] == undefined) {
+                        ScoreJSON[ExamType] = { type: ExamType, score: 0 };
+                        ExamTypeArr.push(ExamType);
+                    }
+                    $.each($("input[name='" + QuestionID + "']"), function (j, answeritem) {
+                        if ($(answeritem).is(":checked")) {
+                            Answer += $(answeritem).attr("value");
+                        }
+                    });
+                    if (Answer == "") {
+                        Msg = "您第" + (i + 1) + "题未填写，请检查！";
+                        return false;
+                    }
+                    else if (AnswerKey == Answer) {
+                        score = AnswerScore;
+                        PageScore += parseInt(score);
+                        ScoreJSON[ExamType] = { type: ExamType, score: parseInt(ScoreJSON[ExamType].score) + parseInt(score) };
+                    }
+                    AnswerXML += "<Item QuestionID=\"" + KeyID +
+                           "\" Answer=\"" + Answer +
+                           "\" Score=\"" + score +
+                           "\"/>";
+                });
+                AnswerXML += "</root>";
+                if (Msg != "") {
+                    $honesty.ShowMsg({ title: "警告", msg: Msg });
+                    return false;
+                }
+                else {
+                    SubmitExam();
+                }
+            });
+        });
+    };
+
+    function SubmitExam() {
+        IsSubmit = 1;
+        var _options = {
+            PostData: {
+                Params: {
+                    result: "SubmitAnswer",
+                    EmpID: GetSession("UserID"),
+                    ExamID: ExamID,
+                    AnswerXML: AnswerXML,
+                    Score: PageScore
+                },
+                ProcName: "proc_SOM_HR_EmpExam",
+                DataType: "Bool",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            try {
+                if (_result.Code == "1") {
+                    if (_result.Data == "True") {
+                        api.sendEvent({
+                            name: "SubmitExame",
+                            extra: {
+                            }
+                        });
+                        var Msg = "";
+                        $.each(ExamTypeArr, function (i, item) {
+                            Msg += "您的[" + item + "]模块获得：" + ScoreJSON[item].score + "分；";
+                        });
+                        $honesty.ShowMsg({
+                            title: "提示", msg: "考试结束！" + Msg, callback: function () {
+                                $honesty.CloseWin();
+                            }
+                        });
+                    }
+                    else {
+                        $honesty.ShowMsg({ title: "错误", msg: "保存失败" });
+                    }
+                }
+            }
+            catch (e) {
+                alert(e);
+            }
+        });
+    }
+
+    function LoadData() {
+        ExamID = api.pageParam.ExamID;
+        var _options = {
+            PostData: {
+                Params: {
+                    result: "LoadExamQuestion",
+                    ExamID: ExamID,
+                    EmpID: GetSession("UserID")
+                },
+                ProcName: "proc_SOM_HR_EmpExam",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            var pageWidth = (api.winWidth || $(window).width()) - 90;
+            var AnswerType = "";
+            if (_result.Code == "1") {
+                var _Content = "";
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        var AnswerContent = "";
+                        if (item.AnswerA != "") {
+                            if (item.AnswerType == "S" || item.AnswerType == "TF") {
+                                AnswerContent += "<div style=\"float: left\">" +
+                                    "<input name=\"Question_" + item.QuestionID + "\" value=\"A\" class=\"aui-radio aui-radio-warning\" type=\"radio\">" +
+                                    "<div style=\"min-height: 26px;" + (item.AnswerType == "S" ? "width:" + pageWidth + "px;" : "") + " line-height: 26px; margin: 8px 10px 8px -5px; float: left;\">" + item.AnswerA + "</div>" +
+                                    "</div>";
+                            }
+                            else if (item.AnswerType == "C") {
+                                AnswerContent += "<div style=\"float: left\">" +
+                                    "<input name=\"Question_" + item.QuestionID + "\" value=\"A\" class=\"aui-checkbox aui-checkbox-warning\" type=\"checkbox\">" +
+                                    "<div style=\"min-height: 26px;width:" + pageWidth + "px; line-height: 26px; margin: 8px 10px 8px -5px; float: left;\">" + item.AnswerA + "</div>" +
+                                    "</div>";
+                            }
+                        }
+                        if (item.AnswerB != "") {
+                            if (item.AnswerType == "S" || item.AnswerType == "TF") {
+                                AnswerContent += "<div style=\"float: left\">" +
+                                    "<input name=\"Question_" + item.QuestionID + "\" value=\"B\" class=\"aui-radio aui-radio-warning\" type=\"radio\">" +
+                                    "<div style=\"min-height: 26px;" + (item.AnswerType == "S" ? "width:" + pageWidth + "px;" : "") + " line-height: 26px; margin: 8px 10px 8px -5px; float: left;\">" + item.AnswerB + "</div>" +
+                                    "</div>";
+                            }
+                            else if (item.AnswerType == "C") {
+                                AnswerContent += "<div style=\"float: left\">" +
+                                    "<input name=\"Question_" + item.QuestionID + "\" value=\"B\" class=\"aui-checkbox aui-checkbox-warning\" type=\"checkbox\">" +
+                                    "<div style=\"min-height: 26px;width:" + pageWidth + "px; line-height: 26px; margin: 8px 10px 8px -5px; float: left;\">" + item.AnswerB + "</div>" +
+                                    "</div>";
+                            }
+                        }
+                        if (item.AnswerC != "") {
+                            if (item.AnswerType == "S" || item.AnswerType == "TF") {
+                                AnswerContent += "<div style=\"float: left\">" +
+                                    "<input name=\"Question_" + item.QuestionID + "\" value=\"C\" class=\"aui-radio aui-radio-warning\" type=\"radio\">" +
+                                    "<div style=\"min-height: 26px;" + (item.AnswerType == "S" ? "width:" + pageWidth + "px;" : "") + " line-height: 26px; margin: 8px 10px 8px -5px; float: left;\">" + item.AnswerC + "</div>" +
+                                    "</div>";
+                            }
+                            else if (item.AnswerType == "C") {
+                                AnswerContent += "<div style=\"float: left\">" +
+                                    "<input name=\"Question_" + item.QuestionID + "\" value=\"C\" class=\"aui-checkbox aui-checkbox-warning\" type=\"checkbox\">" +
+                                    "<div style=\"min-height: 26px;width:" + pageWidth + "px; line-height: 26px; margin: 8px 10px 8px -5px; float: left;\">" + item.AnswerC + "</div>" +
+                                    "</div>";
+                            }
+                        }
+                        if (item.AnswerD != "") {
+                            if (item.AnswerType == "S" || item.AnswerType == "TF") {
+                                AnswerContent += "<div style=\"float: left\">" +
+                                    "<input name=\"Question_" + item.QuestionID + "\" value=\"D\" class=\"aui-radio aui-radio-warning\" type=\"radio\">" +
+                                    "<div style=\"min-height: 26px;" + (item.AnswerType == "S" ? "width:" + pageWidth + "px;" : "") + " line-height: 26px; margin: 8px 10px 8px -5px; float: left;\">" + item.AnswerD + "</div>" +
+                                    "</div>";
+                            }
+                            else if (item.AnswerType == "C") {
+                                AnswerContent += "<div style=\"float: left\">" +
+                                    "<input name=\"Question_" + item.QuestionID + "\" value=\"D\" class=\"aui-checkbox aui-checkbox-warning\" type=\"checkbox\">" +
+                                    "<div style=\"min-height: 26px;width:" + pageWidth + "px; line-height: 26px; margin: 8px 10px 8px -5px; float: left;\">" + item.AnswerD + "</div>" +
+                                    "</div>";
+                            }
+                        }
+                        if (item.AnswerE != "") {
+                            if (item.AnswerType == "S" || item.AnswerType == "TF") {
+                                AnswerContent += "<div style=\"float: left\">" +
+                                    "<input name=\"Question_" + item.QuestionID + "\" value=\"E\" class=\"aui-radio aui-radio-warning\" type=\"radio\">" +
+                                    "<div style=\"min-height: 26px;" + (item.AnswerType == "S" ? "width:" + pageWidth + "px;" : "") + " line-height: 26px; margin: 8px 10px 8px -5px; float: left;\">" + item.AnswerE + "</div>" +
+                                    "</div>";
+                            }
+                            else if (item.AnswerType == "C") {
+                                AnswerContent += "<div style=\"float: left\">" +
+                                    "<input name=\"Question_" + item.QuestionID + "\" value=\"E\" class=\"aui-checkbox aui-checkbox-warning\" type=\"checkbox\">" +
+                                    "<div style=\"min-height: 26px;width:" + pageWidth + "px; line-height: 26px; margin: 8px 10px 8px -5px; float: left;\">" + item.AnswerE + "</div>" +
+                                    "</div>";
+                            }
+                        }
+                        if (item.AnswerF != "") {
+                            if (item.AnswerType == "S" || item.AnswerType == "TF") {
+                                AnswerContent += "<div style=\"float: left\">" +
+                                    "<input name=\"Question_" + item.QuestionID + "\" value=\"F\" class=\"aui-radio aui-radio-warning\" type=\"radio\">" +
+                                    "<div style=\"min-height: 26px;" + (item.AnswerType == "S" ? "width:" + pageWidth + "px;" : "") + " line-height: 26px; margin: 8px 10px 8px -5px; float: left;\">" + item.AnswerF + "</div>" +
+                                    "</div>";
+                            }
+                            else if (item.AnswerType == "C") {
+                                AnswerContent += "<div style=\"float: left\">" +
+                                    "<input name=\"Question_" + item.QuestionID + "\" value=\"F\" class=\"aui-checkbox aui-checkbox-warning\" type=\"checkbox\">" +
+                                    "<div style=\"min-height: 26px;width:" + pageWidth + "px; line-height: 26px; margin: 8px 10px 8px -5px; float: left;\">" + item.AnswerF + "</div>" +
+                                    "</div>";
+                            }
+                        }
+                        if (item.ExamType != AnswerType) {
+                            AnswerType = item.ExamType;
+                            _Content += "<p class=\"aui-padded-5 aui-text-center\" style=\"color:white;background-color: #f1c40f;\">" + AnswerType + "</p>";
+                        }
+                        _Content += "<p class=\"aui-padded-5\" style=\"background-color: #f4f4f4; color: #3175af\" data-role=\"Question\" data-type=\"" + item.ExamType + "\" data-keyid=\"" + item.QuestionID + "\" data-id=\"Question_" + item.QuestionID + "\" data-score=\"" + item.Score + "\" data-answer=\"" + item.AnswerKey + "\">" + (i + 1) + "、" + item.Question + "</p>" +
+                        "<div class=\"aui-input-row\"><div class=\"aui-counter aui-warning aui-info aui-pull-left\"><div class=\"aui-pull-left\">" +
+                        AnswerContent +
+                        "</div></div></div>";
+                    });
+                    $("#QuestionList").append(_Content);
+                }
+                else {
+                    $("#QuestionList").html("<li style='text-align:center'>试题获取失败，请退回考试列表重新选择考试</li>");
+                }
+                api.parseTapmode();
+            }
+        });
+    }
+
+    function TimeTick() {
+        LastTime = LastTime - 1000;
+        var days = Math.floor(LastTime / (24 * 3600 * 1000));
+        var leave1 = LastTime % (24 * 3600 * 1000);
+        var hours = Math.floor(leave1 / (3600 * 1000));
+        var leave2 = leave1 % (3600 * 1000);
+        var minutes = Math.floor(leave2 / (60 * 1000));
+        var leave3 = leave2 % (60 * 1000);
+        var seconds = Math.round(leave3 / 1000);
+        var hours = (hours + days * 24);
+        if (IsSubmit == 0) {
+            $("#btnSave").html("提交(" + (hours < 10 ? "0" + hours : hours) + ":" + (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds < 10 ? "0" + seconds : seconds) + ")");
+        }
+        else {
+            $("#btnSave").hide();
+        }
+        if (LastTime < 0 && IsSubmit == 0) {
+            IsSubmit = 1;
+            $honesty.ShowMsg({
+                title: "警告", msg: "考试时间到，系统自动默认交卷", callback: function () {
+                    ScoreJSON = {};
+                    ExamTypeArr.length = 0;
+                    AnswerXML = "<?xml version=\"1.0\" encoding=\"gb2312\"?><root>";
+                    PageScore = 0;
+                    $.each($("#QuestionList p[data-role='Question']"), function (i, item) {
+                        var ExamType = $(item).attr("data-type");
+                        var AnswerKey = $(item).attr("data-answer");
+                        var QuestionID = $(item).attr("data-id");
+                        var KeyID = $(item).attr("data-keyid");
+                        var AnswerScore = $(item).attr("data-score");
+                        var Answer = "", score = 0;
+                        if (ScoreJSON[ExamType] == undefined) {
+                            ScoreJSON[ExamType] = { type: ExamType, score: 0 };
+                            ExamTypeArr.push(ExamType);
+                        }
+                        $.each($("input[name='" + QuestionID + "']"), function (j, answeritem) {
+                            if ($(answeritem).is(":checked")) {
+                                Answer += $(answeritem).attr("value");
+                            }
+                        });
+                        if (AnswerKey == Answer) {
+                            score = AnswerScore;
+                            PageScore += parseInt(score);
+                            ScoreJSON[ExamType] = { type: ExamType, score: parseInt(ScoreJSON[ExamType].score) + parseInt(score) };
+                        }
+                        AnswerXML += "<Item QuestionID=\"" + KeyID +
+                               "\" Answer=\"" + Answer +
+                               "\" Score=\"" + score +
+                               "\"/>";
+                    });
+                    AnswerXML += "</root>";
+                    SubmitExam();
+                }
+            });
+        }
+    }
+
+</script>

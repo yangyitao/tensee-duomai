@@ -1,0 +1,177 @@
+﻿<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>HonestyWini</title>
+    <link href="../../css/aui.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <header class="aui-bar aui-bar-nav aui-bar-info" id="aui-header">
+        <a class="aui-btn aui-btn-info aui-pull-left"></a>
+        <div class="aui-title" id="header-title">首页</div>
+        <a class="aui-pull-right">
+            <span tapmode class="aui-iconfont aui-icon-location" id="btnSign">签到</span>
+        </a>
+    </header>
+    <footer class="aui-nav" id="aui-footer">
+        <ul class="aui-bar-tab">
+            <li class="active-warning" id="tabbar1" tapmode onclick="randomSwitchBtn(this,'首页',0)">
+                <span class="aui-iconfont aui-icon-home"></span>
+                <p>首页</p>
+            </li>
+            <li id="tabbar2" tapmode onclick="randomSwitchBtn(this,'业务',1)">
+                <span class="aui-iconfont aui-icon-sponsor"></span>
+                <p>业务</p>
+            </li>
+            <li id="tabbar3" tapmode onclick="randomSwitchBtn(this,'应用',2)">
+                <span class="aui-iconfont aui-icon-apps"></span>
+                <p>应用</p>
+            </li>
+            <li id="tabbar4" tapmode onclick="randomSwitchBtn(this,'会员',3)">
+                <span class="aui-iconfont aui-icon-like"></span>
+                <p>会员</p>
+            </li>
+            <li id="tabbar5" tapmode onclick="randomSwitchBtn(this,'我',4)">
+                <span class="aui-iconfont aui-icon-my"></span>
+                <p>我</p>
+            </li>
+      
+            
+            
+        </ul>
+    </footer>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script src="../../script/zepto.js"></script>
+<script type="text/javascript" src="../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            //Android双击返回退出
+            $honesty.DoubleBack();
+            if (!$honesty.IsLocal()) {
+                if (GetSession("PushKey") != "" && GetSession("PushKey") != null) {
+                    var _options = {
+                        PostData: {
+                            Params: { "result": "InitPushKey", "UserID": GetSession("UserID"), "PushKey": GetSession("PushKey") },
+                            ProcName: "proc_HC_GetUserInfo",
+                            DataType: "Bool",
+                            ExecType: "PROC",
+                            Mode: "MSSQL"
+                        },
+                        Loading: {
+                            Show: false
+                        },
+                    };
+                    $honesty.AjaxChannel(_options);
+                }
+                else {
+                    try {
+                        var jpush = api.require("ajpush");
+                        jpush.getRegistrationId(function (ret, err) {
+                            var _options = {
+                                PostData: {
+                                    Params: { "result": "InitPushKey", "UserID": GetSession("UserID"), "PushKey": ret.id },
+                                    ProcName: "proc_HC_GetUserInfo",
+                                    DataType: "Bool",
+                                    ExecType: "PROC",
+                                    Mode: "MSSQL"
+                                },
+                                Loading: {
+                                    Show: false
+                                }
+                            };
+                            $honesty.AjaxChannel(_options);
+                        });
+                    }
+                    catch (e) {
+                        //alert(e);
+                    }
+                }
+            }
+
+
+            //框架子页面组显示
+            var header = $api.byId('aui-header');
+            $api.fixStatusBar(header);
+            var headerPos = $api.offset(header);
+            var body_h = $api.offset($api.dom('body')).h;
+            var footer_h = $api.offset($api.byId('aui-footer')).h;
+            var arrPage = new Array();
+            if (GetSession("IsForm") == "0") {
+                arrPage.push({ name: 'HomeIndex', url: 'HomeIndex.html', bounces: false });
+            }
+            else {
+                arrPage.push({ name: 'HomeForm', url: 'HomeForm.html', bounces: false });
+            }
+            arrPage.push({ name: 'ISHRIndex', url: 'ISHRIndex.html', bounces: false });
+            arrPage.push({ name: 'AppIndex', url: 'AppIndex.html', bounces: false });
+            arrPage.push({ name: 'YYIndex', url: 'YYIndex.html', bounces: false });
+            arrPage.push({ name: 'UserIndex', url: 'UserIndex.html', bounces: false });
+
+
+            api.openFrameGroup({
+                name: 'footer_tab_main',
+                scrollEnabled: true,
+                rect: { x: 0, y: headerPos.h, w: 'auto', h: api.frameHeight - headerPos.h - footer_h },
+                index: 0,
+                preload: 0,
+                frames: arrPage
+            }, function (ret, err) {
+                var footer = $api.byId('aui-footer');
+                var footerAct = $api.dom(footer, '.aui-bar-tab li.active-warning');
+                $api.removeCls(footerAct, 'active-warning');
+                var name = ret.name;
+                var index = ret.index;
+                if (index == 0) {
+                    $api.text($api.byId("header-title"), "首页");
+                    $api.addCls($api.byId("tabbar1"), "active-warning");
+                } else if (index == 1) {
+                    $api.text($api.byId("header-title"), "业务");
+                    $api.addCls($api.byId("tabbar2"), "active-warning");
+                } else if (index == 2) {
+                    $api.text($api.byId("header-title"), "应用");
+                    $api.addCls($api.byId("tabbar3"), "active-warning");
+                } else if (index == 3) {
+                    $api.text($api.byId("header-title"), "会员");
+                    $api.addCls($api.byId("tabbar4"), "active-warning");
+                } else if (index == 4) {
+                    $api.text($api.byId("header-title"), "我");
+                    $api.addCls($api.byId("tabbar5"), "active-warning");
+                }
+            })
+
+            //签到按钮点击
+            $("#btnSign").tap(function () {
+                $honesty.OpenWin({
+                    name: "Sign_Index",
+                    url: "Sign/Index.html",
+                    title: "签到"
+                });
+            });
+        });
+    }
+
+    //关闭窗口点击
+    function closeWin() {
+        api.closeWin();
+    }
+
+    //工具栏点击
+    function randomSwitchBtn(obj, name, index) {
+        $api.text($api.byId('header-title'), name);
+        var footer = $api.byId('aui-footer');
+        var footerAct = $api.dom(footer, '.aui-bar-tab li.active-warning');
+        $api.removeCls(footerAct, 'active-warning');
+        $api.addCls(obj, 'active-warning');
+        api.setFrameGroupIndex({
+            name: 'footer_tab_main',
+            index: index,
+            scroll: true
+        });
+
+    }
+</script>
+</html>

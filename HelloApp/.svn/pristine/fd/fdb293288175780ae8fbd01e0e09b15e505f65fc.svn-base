@@ -1,0 +1,920 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>入职申请流程</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div id="main">
+        <div id="divContractInfo" class="aui-content">
+            <p class="aui-padded-5 aui-text-center">合同信息</p>
+            <div class="aui-form aui-input-form aui-input-flow" id="divGoodsTarget">
+                <div class="aui-input-row">
+                    <span class="aui-input-addon" style="width: 92px !important; text-align: right;">合同日期</span>
+                    <input id="ContractBegin" type="text" class="aui-input" style="width: 85px; text-align: center" placeholder="开始日期" readonly="readonly" />
+                    <input type="text" class="aui-input" style="width: 25px" readonly="readonly" placeholder="—" />
+                    <input id="ContractEnd" type="text" class="aui-input" style="width: 85px; text-align: center" placeholder="结束日期" readonly="readonly" />
+                </div>
+                <div class="aui-input-row">
+                    <span class="aui-input-addon" style="width: 92px !important; text-align: right;">合同年限</span>
+                    <input id="ContractYear" type="text" class="aui-input" placeholder="小计" readonly="readonly" />
+                </div>
+                <div class="aui-input-row">
+                    <span class="aui-input-addon" style="width: 92px !important; text-align: right;">合同性质</span>
+                    <select id="ContractNature" class="aui-input">
+                        <option value="01">固定期限劳动合同</option>
+                        <option value="02">无固定期劳动合同</option>
+                    </select>
+                </div>
+                <div class="aui-input-row">
+                    <span class="aui-input-addon" style="width: 92px !important; text-align: right;">是否店铺领导</span>
+                    <select id="IsLeader" class="aui-input">
+                        <option value="">请选择...</option>
+                        <option value="否">否</option>
+                        <option value="是">是</option>
+                    </select>
+                </div>
+                <div class="aui-input-row">
+                    <span class="aui-input-addon" style="width: 92px !important; text-align: right;">实际入职日期</span>
+                    <input id="FactInDate" type="text" class="aui-input" placeholder="请选择实际入职日期！" readonly="readonly" />
+                </div>
+                <div class="aui-input-row">
+                    <span class="aui-input-addon" style="width: 92px !important; text-align: right;">是否直接转正</span>
+                    <select id="IsOffer" class="aui-input">
+                        <option value="">请选择...</option>
+                        <option value="否">否</option>
+                        <option value="是">是</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; padding-left: 12px">基本资料》</p>
+        <div class="aui-card" style="margin-bottom: 0px; position: relative">
+            <ul class="aui-list-view aui-list-flow" style="margin-bottom: 0px;">
+                <li class="aui-list-view-cell">
+                    <label id="InfoEmpName">姓名：—</label>
+                    <p id="InfoEmpCode">工号：—</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="InfoTelPhone">—</label>
+                    <p>联系方式</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="InfoInDate">—</label>
+                    <p>入职日期</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="InfoEmpPosition">—</label>
+                    <p>入职岗位</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="InfoDeptName">—</label>
+                    <p>入职店铺</p>
+                </li>
+                <li class="aui-list-view-cell" id="btnInfo">
+                    <p style="text-align: center">点击查看详情</p>
+                </li>
+            </ul>
+            <div style="position: absolute; height: 180px; width: 130px; right: 3px; top: 5px">
+                <img id="imgEmpPicture" src="../../image/head_defalt.png" style="width: 100%; height: 147px; border-radius: 6px; background-color: #FFFFFF" />
+                <div id="btnUpload" class="aui-btn aui-btn-block aui-btn-warning aui-iconfont aui-icon-camera" style="height: 47px; width: 100%; line-height: 1; display: none">
+                    上传图片
+                </div>
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-center" style="color: #3175af">家庭成员</p>
+        <div id="InfoFamilyList">
+        </div>
+        <div data-role="" style="width: 100%; padding-left: 10px; padding-right: 10px;">
+            <div data-role="Family" data-text="家庭成员" data-control="Add" tapmode class="aui-btn aui-btn-block aui-btn-warning aui-iconfont aui-icon-add1" style="padding: 10px;">
+                新增家庭成员
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-center" style="color: #3175af">学历背景</p>
+        <div id="InfoEducationList">
+        </div>
+        <div style="width: 100%; padding-left: 10px; padding-right: 10px;">
+            <div data-role="Education" data-text="学历背景" data-control="Add" tapmode class="aui-btn aui-btn-block aui-btn-warning aui-iconfont aui-icon-add1" style="padding: 10px;">
+                新增学历背景
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-center" style="color: #3175af">社会培训经历</p>
+        <div id="InfoTrainingList">
+        </div>
+        <div style="width: 100%; padding-left: 10px; padding-right: 10px;">
+            <div data-role="Training" data-text="社会培训经历" data-control="Add" tapmode class="aui-btn aui-btn-block aui-btn-warning aui-iconfont aui-icon-add1" style="padding: 10px;">
+                新增社会培训经历
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-center" style="color: #3175af">工作经历背景</p>
+        <div id="InfoJobList">
+        </div>
+        <div style="width: 100%; padding-left: 10px; padding-right: 10px;">
+            <div data-role="Job" data-text="工作经历背景" data-control="Add" tapmode class="aui-btn aui-btn-block aui-btn-warning aui-iconfont aui-icon-add1" style="padding: 10px;">
+                新增工作经历背景
+            </div>
+        </div>
+        <div style="height: 100px"></div>
+    </div>
+</body>
+</html>
+<script src="../../script/api.js"></script>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script src="../../script/honesty.flow.js"></script>
+<script type="text/javascript">
+    var EmpID = "";
+    var JSONFamily = [], JSONEducation = [], JSONTraining = [], JSONJob = [];
+    var EmpEntry = {};
+    var IsFinish = false;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            $honestyFlow.InitFlow({ Async: false });
+            var InstanceID = $honestyFlow.GetFlowInfo("instanceid");
+            if (api.pageParam.instanceid != undefined) {
+                EmpID = InstanceID;
+            }
+            InitBase();
+            $("#btnUpload").tap(function () {
+                $honesty.UploadPicture({
+                    callBack: function (ret) {
+                        if (ret.FilePath != "") {
+                            $("#imgEmpPicture").attr("src", $honesty.GetSite() + ret.FilePath);
+                            $("#imgEmpPicture").attr("data-value", ret.FilePath);
+                        }
+                    }
+                })
+            });
+
+            $("#ContractBegin,#ContractEnd").tap(function () {
+                $honesty.DateTimeSelect({
+                    Type: "Date",
+                    ControlID: $(this).attr("id"),
+                    ControlValue: $(this).val(),
+                    onchange: function (ret) {
+                        if (ret) {
+                            if ($("#ContractBegin").val() != "" && $("#ContractEnd").val() != "") {
+                                $("#ContractYear").val(new Date($("#ContractEnd").val().replace(/-/g, "/")).getYear() - new Date($("#ContractBegin").val().replace(/-/g, "/")).getYear());
+                            }
+                        }
+                    }
+                });
+            });
+
+            $("div[data-control='Add']").tap(function () {
+                var _role = $(this).attr("data-role");
+                $honesty.OpenWin({
+                    title: $(this).attr("data-text"),
+                    name: "HRFlow_EmpEntry_" + _role,
+                    url: "HRFlow/EmpEntry/" + _role + ".html",
+                    pageParam: {
+                        ID: EmpID,
+                        StepName: $honestyFlow.GetFlowInfo("stepname")
+                    }
+                });
+            });
+
+            $("#btnInfo").tap(function () {
+                $honesty.OpenWin({
+                    title: "基础资料完善",
+                    name: "HRFlow_EmpEntry_Info",
+                    url: "HRFlow/EmpEntry/Info.html",
+                    pageParam: {
+                        ID: EmpID,
+                        StepName: $honestyFlow.GetFlowInfo("stepname"),
+                        SN: $honestyFlow.GetFlowInfo("sn"),
+                        IsRead: $honestyFlow.GetFlowInfo("isread")
+                    }
+                });
+            });
+
+            $("#btnPause").unbind("tap").tap(function () {
+                if (SaveData()) {
+                    $honestyFlow.PauseFlow();
+                }
+            });
+
+            $("#btnSend").unbind("tap").tap(function () {
+                if ($("#imgEmpPicture").attr("src") == "../../image/head_defalt.png") {
+                    $honesty.ShowMsg({ title: "警告", msg: "请先上传头像!" });
+                    return false;
+                }
+                if (!IsFinish) {
+                    $honesty.ShowMsg({ title: "警告", msg: "请点击查看详情完善您的个人信息!" });
+                    return false;
+                }
+                if ($("#InfoFamilyList div").length < 1) {
+                    $honesty.ShowMsg({ title: "警告", msg: "请维护家庭主要成员信息!" });
+                    return false;
+                }
+                if ($("#InfoEducationList div").length < 1) {
+                    $honesty.ShowMsg({ title: "警告", msg: "请维护学历背景!" });
+                    return false;
+                }
+                if (SaveData()) {
+                    if ($honestyFlow.GetFlowInfo("stepname") == "提交资料") {
+                        var EmpCode = "";
+                        if ($("#InfoEmpCode").attr("data-value") == "" || $("#InfoEmpCode").attr("data-value") == undefined) {
+                            var _options = {
+                                PostData: {
+                                    Params:
+                                        {
+                                            sysId: "sys",
+                                            type: "emplo",
+                                            length: "6"
+                                        },
+                                    URL: "employeeInfo/getEmployeeCodeById",
+                                    Mode: "ESB",
+                                    Handle: "GET"
+                                },
+                                Loading: {
+                                    Title: "工号生成中...",
+                                    Show: true
+                                },
+                                async: false
+                            };
+                            try {
+                                _result = $honesty.AjaxChannel(_options);
+                                if (_result.Code == "1") {
+                                    if (_result.Data.empCode != "" && _result.Data.empCode != undefined) {
+                                        EmpCode = parseInt(_result.Data.empCode);
+                                        var _options = {
+                                            PostData: {
+                                                Params:
+                                                    {
+                                                        result: "CreateEmpCode",
+                                                        EmpCode: EmpCode,
+                                                        EmpID: EmpID
+                                                    },
+                                                ProcName: "proc_SOM_HR_EmpInfo",
+                                                DataType: "Bool",
+                                                ExecType: "PROC",
+                                                Mode: "MSSQL"
+                                            },
+                                            Loading: {
+                                                Title: "工号生成中...",
+                                                Show: true
+                                            },
+                                            async: false
+                                        };
+                                        _result = $honesty.AjaxChannel(_options);
+                                        if (_result.Data != "True") {
+                                            $honesty.ShowMsg({ title: "警告", msg: "SOM端创建工号失败，请联系管理员!" });
+                                            return false;
+                                        }
+                                        else {
+                                            $("#InfoEmpCode").html("工号：" + EmpCode);
+                                            $("#InfoEmpCode").attr("data-value", EmpCode);
+                                            SetSession("UserCode", EmpCode);
+                                        }
+                                    }
+                                    else {
+                                        $honesty.ShowMsg({ title: "警告", msg: "ESB端创建工号失败，请联系管理员!" });
+                                        return false;
+                                    }
+                                }
+                                else {
+                                    $honesty.ShowMsg({ title: "警告", msg: "ESB端创建工号失败，请联系管理员!" });
+                                    return false;
+                                }
+                            }
+                            catch (e) {
+                                $honesty.ShowMsg({ title: "警告", msg: "ESB端创建工号失败，请联系管理员!" });
+                                return false;
+                            }
+                        }
+                        else {
+                            EmpCode = $("#InfoEmpCode").attr("data-value");
+                        }
+                        $honesty.ConfirmWin({
+                            title: "提示",
+                            msg: "请牢记您的工号：" + EmpCode,
+                            buttons: ["确认", "取消"],
+                            callback: function (ret, err) {
+                                if (ret.buttonIndex == 1) {
+                                    $honestyFlow.SendFlow({
+                                        Callback: function () {
+                                            var _options = {
+                                                PostData: {
+                                                    Params: {
+                                                        result: "ModifyState",
+                                                        ApplyState: "1",
+                                                        EmpID: EmpID,
+                                                        EmpPhoto: $("#imgEmpPicture").attr("data-value")
+                                                    },
+                                                    ProcName: "proc_SOM_HR_EmpInfo",
+                                                    DataType: "Bool",
+                                                    ExecType: "PROC",
+                                                    Mode: "MSSQL"
+                                                },
+                                                async: false
+                                            };
+                                            $honesty.AjaxChannel(_options);
+                                            $honesty.CloseWin();
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    }
+                    else {
+                        $honestyFlow.SendFlow();
+                    }
+                }
+            });
+
+            $("#btnBack").unbind("tap").tap(function () {
+                $honestyFlow.BackFlow({
+                    Callback: function () {
+                        switch ($honestyFlow.GetFlowInfo("stepname")) {
+                            case "店长审核":
+                            case "领导审批":
+                            case "华南区经审批":
+                            case "联营管理审批":
+                                var _options = {
+                                    PostData: {
+                                        Params: {
+                                            result: "ModifyState",
+                                            ApplyState: "0",
+                                            EmpID: EmpID
+                                        },
+                                        ProcName: "proc_SOM_HR_EmpInfo",
+                                        DataType: "Bool",
+                                        ExecType: "PROC",
+                                        Mode: "MSSQL"
+                                    },
+                                    async: false
+                                };
+                                $honesty.AjaxChannel(_options);
+                                break;
+                        }
+                    }
+                });
+            });
+
+            $("#btnComplete").unbind("tap").tap(function () {
+                if (SaveData()) {
+                    EmpEntry.empInfo["contractBegin"] = new Date($("#ContractBegin").attr("value").replace(/-/g, "/")).Format("yyyyMMdd");
+                    EmpEntry.empInfo["contractEnd"] = new Date($("#ContractEnd").attr("value").replace(/-/g, "/")).Format("yyyyMMdd");
+                    EmpEntry.empInfo["contractYear"] = $("#ContractYear").val();
+                    EmpEntry.empInfo["factIndate"] = new Date($("#FactInDate").attr("value").replace(/-/g, "/")).Format("yyyyMMdd");
+                    EmpEntry.empInfo["isOffer"] = $("#IsOffer").val();
+                    EmpEntry["empFamily"] = JSONFamily;
+                    EmpEntry["empEducation"] = JSONEducation;
+                    EmpEntry["empTraining"] = JSONTraining;
+                    EmpEntry["empJob"] = JSONJob;
+                    try {
+                        var _options = {
+                            PostData: {
+                                Params: EmpEntry,
+                                URL: "employeeInfo/createEmployee",
+                                Mode: "ESB",
+                                Handle: "POST"
+                            },
+                            Loading: {
+                                Title: "提交数据至SAP中...",
+                                Show: true
+                            }
+                        };
+                        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                            if (_result.Code == "1") {
+                                if (_result.Data.returnCode == "000") {
+                                    $honestyFlow.CompleteFlow({
+                                        Callback: function () {
+                                            var _options = {
+                                                PostData: {
+                                                    Params:
+                                                        {
+                                                            result: "ModifyState",
+                                                            ApplyState: "2",
+                                                            EmpID: EmpID
+                                                        },
+                                                    ProcName: "proc_SOM_HR_EmpInfo",
+                                                    DataType: "Bool",
+                                                    ExecType: "PROC",
+                                                    Mode: "MSSQL"
+                                                },
+                                                Loading: {
+                                                    Title: "人员状态更新中...",
+                                                    Show: true
+                                                },
+                                                async: false
+                                            };
+                                            $honesty.AjaxChannel(_options);
+                                            $honesty.CloseWin();
+                                        }
+                                    });
+                                }
+                                else {
+                                    $honesty.ShowMsg({ title: "警告", msg: _result.Data.returnMsg });
+                                }
+                            }
+                        });
+                    }
+                    catch (e) {
+                        $honesty.ShowMsg({ title: "警告", msg: "提交人员数据至SAP出现网络异常!" });
+                    }
+                }
+            });
+            api.addEventListener({
+                name: "HRFlow_EmpEntry_EmpInfo"
+            }, function (ret) {
+                if (ret && ret.value) {
+                    $("#InfoInDate").html(ret.value.InDate);
+                    $("#InfoEmpPosition").html(ret.value.EmpPosition);
+                    $("#InfoDeptName").html(ret.value.DeptName);
+                    IsFinish = true;
+                }
+            });
+
+            api.addEventListener({
+                name: "HRFlow_EmpEntry_OtherInfo"
+            }, function (ret) {
+                if (ret && ret.value) {
+                    var _Content = ReturnList(ret.value);
+                    if (ret.value.IsNew) {
+                        $("#Info" + ret.value.Type + "List").append(_Content);
+                    }
+                    else {
+                        $("#" + ret.value.ID).html(_Content);
+                    }
+                    api.parseTapmode();
+                }
+            });
+        });
+    };
+    function InitBase() {
+        if (EmpID != "") {
+            var _options = {
+                PostData: {
+                    Params: {
+                        result: "InitEmpInfo",
+                        EmpID: EmpID
+                    },
+                    ProcName: "proc_SOM_HR_EmpInfo",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        $.each(_result.Data, function (i, item) {
+                            if (GetSession("UserID") == "" || GetSession("UserID") == null) {
+                                SetSession("UserID", EmpID);
+                                SetSession("UserName", item.EmpName);
+                            }
+                            $("#flow_button").attr("title", item.EmpName + "的" + $("#flow_button").attr("flowname") + "(" + $("#flow_button").attr("sn") + ")");
+                            $("#InfoEmpName").html("姓名：" + item.EmpName);
+                            $("#InfoEmpCode").html("工号：" + item.EmpCode);
+                            $("#InfoEmpCode").attr("data-value", item.EmpCode);
+                            $("#InfoTelPhone").html(item.TelPhone);
+                            item.InDate = (item.InDate == "" ? $honesty.NowDate().Format("yyyy-MM-dd") : item.InDate);
+                            $("#InfoInDate").html(item.InDate);
+                            $("#InfoEmpPosition").html(GetPosition(item.EmpPosition == "" ? "H4" : item.EmpPosition));
+                            $("#InfoDeptName").html(item.DeptName);
+                            $("#InDate").val(item.InDate);
+                            $("#ContractBegin").val(item.ContractBegin);
+                            $("#ContractEnd").val(item.ContractEnd);
+                            $("#ContractYear").val(item.ContractYear);
+                            if (item.ContractBegin == "" && item.InDate != "") {
+                                $("#ContractBegin").val(item.InDate);
+                                var _Year = new Date(item.InDate.replace(/-/g, "/"));
+                                _Year.addYears(3);
+                                $("#ContractEnd").val(new Date(_Year).Format("yyyy-MM-dd"));
+                                $("#ContractYear").val("3");
+                            }
+                            $("#ContractNature").val(item.ContractNature);
+                            if (item.ContractNature == "") {
+                                $("#ContractNature").val("01");
+                            }
+                            if (item.IsLeader != "") {
+                                $("#IsLeader").val(item.IsLeader);
+                            }
+                            if (item.EmpPhoto != "") {
+                                $("#imgEmpPicture").attr("src", $honesty.GetSite() + item.EmpPhoto);
+                                $("#imgEmpPicture").attr("data-value", item.EmpPhoto);
+                            }
+                            if (item.Education != "") {
+                                IsFinish = true;
+                            }
+                            EmpEntry = {
+                                "empInfo": {
+                                    "sn": $honestyFlow.GetFlowInfo("sn"),
+                                    "empCode": item.EmpCode,
+                                    "deviceSN": item.CardSN,
+                                    "empID": item.EmpID,
+                                    "empName": item.EmpName,
+                                    "createDate": new Date(item.WriteDate.replace(/-/g, "/")).Format("yyyyMMdd"),
+                                    "indentityCode": item.IdentityCode,
+                                    "birthDate": new Date(item.BirthDate.replace(/-/g, "/")).Format("yyyyMMdd"),
+                                    "sex": item.Sex,
+                                    "sexCode": (item.Sex == "女" ? "1" : "0"),
+                                    "age": item.Age,
+                                    "education": item.Education,
+                                    "inDate": new Date(item.InDate.replace(/-/g, "/")).Format("yyyyMMdd"),
+                                    "native": item.Native,
+                                    "nation": item.Nation,
+                                    "nature": item.Nature,
+                                    "bankProvince": item.BankProvince,
+                                    "bankCity": item.BankCity,
+                                    "politicsStatus": item.PoliticsStatus,
+                                    "isMarry": (item.IsMarry == "否" ? "0" : "1"),
+                                    "isBear": (item.IsBear == "否" ? "0" : "1"),
+                                    "bloodType": item.BloodType,
+                                    "weight": item.Weight,
+                                    "height": item.Height,
+                                    "clothesSize": item.ClothesSize,
+                                    "trousersSize": item.TrousersSize,
+                                    "shoeSize": item.ShoeSize,
+                                    "telPhone": item.TelPhone,
+                                    "email": item.Email,
+                                    "empPosition": item.EmpPosition,
+                                    "school": item.School,
+                                    "major": item.Major,
+                                    "address": item.Address,
+                                    "identityAddress": item.IdentityAddress,
+                                    "recruitment": item.Recruitment,
+                                    "urgencyName": item.UrgencyName,
+                                    "urgencyPhone": item.UrgencyPhone,
+                                    "urgencyUnit": item.UrgencyUnit,
+                                    "urgencyDuty": item.UrgencyDuty,
+                                    "urgencyAddress": item.UrgencyAddress,
+                                    "sapCode": item.SapCode,
+                                    "shopCode": item.ShopCode,
+                                    "bankName": item.BankName,
+                                    "bankCode": item.BankCode,
+                                    "workDate": new Date(item.WorkDate.replace(/-/g, "/")).Format("yyyyMMdd"),
+                                    "isResume": (item.IsResume == "否" ? "0" : "1"),
+                                    "sickNote": item.SickNote,
+                                    "oldCode": item.OldCode
+                                }
+                            }
+                        })
+                    }
+                }
+            });
+
+            var _options = {
+                PostData: {
+                    Params: {
+                        result: "InitEmpOtherInfo",
+                        EmpID: EmpID
+                    },
+                    ProcName: "proc_SOM_HR_EmpInfo",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        $.each(_result.Data, function (i, item) {
+                            var ListInfo = {};
+                            switch (item.Type) {
+                                case "Family":
+                                    ListInfo = {
+                                        Type: item.Type,
+                                        ID: item.ID,
+                                        UserName: item.Column1,
+                                        TelPhone: item.Column2,
+                                        RelationShip: item.Column3,
+                                        RelationShipTxt: GetRelationShip(item.Column3),
+                                        WorkUnit: item.Column4,
+                                        Job: item.Column5
+                                    };
+                                    JSONFamily.push({
+                                        "id": item.ID,
+                                        "empId": EmpID,
+                                        "userName": item.Column1,
+                                        "relationShip": item.Column3,
+                                        "telPhone": item.Column2,
+                                        "workUnit": item.Column4,
+                                        "job": item.Column5
+                                    });
+                                    break;
+                                case "Education":
+                                    ListInfo = {
+                                        Type: item.Type,
+                                        ID: item.ID,
+                                        BeginDate: item.Column1,
+                                        EndDate: item.Column2,
+                                        School: item.Column3,
+                                        Major: item.Column4,
+                                        Diploma: item.Column5,
+                                        Education: item.Column6
+                                    };
+                                    JSONEducation.push({
+                                        "id": item.ID,
+                                        "empId": EmpID,
+                                        "beginDate": new Date(item.Column1.replace(/-/g, "/")).Format("yyyyMMdd"),
+                                        "endDate": new Date(item.Column2.replace(/-/g, "/")).Format("yyyyMMdd"),
+                                        "school": item.Column3,
+                                        "major": item.Column4,
+                                        "diploma": item.Column5,
+                                        "education": item.Column6
+                                    });
+                                    break;
+                                case "Training":
+                                    ListInfo = {
+                                        Type: item.Type,
+                                        ID: item.ID,
+                                        BeginDate: item.Column1,
+                                        EndDate: item.Column2,
+                                        TrainingName: item.Column3,
+                                        Course: item.Column4,
+                                        ProveFile: item.Column5
+                                    };
+                                    JSONTraining.push({
+                                        "id": item.ID,
+                                        "empId": EmpID,
+                                        "beginDate": new Date(item.Column1.replace(/-/g, "/")).Format("yyyyMMdd"),
+                                        "endDate": new Date(item.Column2.replace(/-/g, "/")).Format("yyyyMMdd"),
+                                        "trainingName": item.Column3,
+                                        "course": item.Column4,
+                                        "proveFile": item.Column5
+                                    });
+                                    break;
+                                case "Job":
+                                    ListInfo = {
+                                        Type: item.Type,
+                                        ID: item.ID,
+                                        BeginDate: item.Column1,
+                                        EndDate: item.Column2,
+                                        UnitName: item.Column3,
+                                        DeptPosition: item.Column4,
+                                        ProvePhone: item.Column5,
+                                        LeaveReason: item.Column6
+                                    };
+                                    JSONJob.push({
+                                        "id": item.ID,
+                                        "empId": EmpID,
+                                        "beginDate": new Date(item.Column1.replace(/-/g, "/")).Format("yyyyMMdd"),
+                                        "endDate": new Date(item.Column2.replace(/-/g, "/")).Format("yyyyMMdd"),
+                                        "unitName": item.Column3,
+                                        "deptPosition": item.Column4,
+                                        "provePhone": item.Column5,
+                                        "leaveReason": item.Column6
+                                    });
+                                    break;
+                            }
+                            $("#Info" + item.Type + "List").append(ReturnList(ListInfo));
+                        });
+                    }
+                }
+            });
+        }
+        else {
+            EmpID = $honestyFlow.GetFlowInfo("instanceid");
+            $("#InfoEmpName").html("姓名：" + GetSession("UserName"));
+            SetSession("UserID", EmpID);
+            SetSession("UserName", GetSession("UserName"));
+            $("#InfoEmpCode").attr("data-value", "");
+            $("#InfoTelPhone").html(GetSession("TelPhone"));
+            $("#InfoInDate").html($honesty.NowDate().Format("yyyy-MM-dd"));
+            $("#InfoEmpPosition").html(GetSession("Position"));
+            $("#InfoDeptName").html(GetSession("ShopName"));
+        }
+        if ($honestyFlow.GetFlowInfo("stepname") == "提交资料" && $honestyFlow.GetFlowInfo("isread") == "false") {
+            $("#btnUpload").show();
+        }
+        else {
+            $("div[data-control='Add']").hide();
+        }
+        if ($honestyFlow.GetFlowInfo("stepname") == "HR专员审批" || $honestyFlow.GetFlowInfo("stepname") == "HR经理审批") {
+            $("#divContractInfo").show();
+        }
+    }
+
+    function SaveData() {
+        if ($honestyFlow.GetFlowInfo("stepname") == "提交资料") {
+            var _options = {
+                PostData: {
+                    Params: {
+                        result: "ModifyState",
+                        ApplyState: "0",
+                        EmpID: EmpID,
+                        EmpPhoto: $("#imgEmpPicture").attr("data-value")
+                    },
+                    ProcName: "proc_SOM_HR_EmpInfo",
+                    DataType: "Bool",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                async: false
+            };
+            var _result = $honesty.AjaxChannel(_options);
+            if (_result.Code == "1") {
+                if (_result.Data == "True") {
+                    return true
+                }
+                else {
+                    $honesty.ShowMsg({ title: "错误", msg: "业务数据保存失败!" });
+                    return false;
+                }
+            }
+            else {
+                return false;
+            }
+        }
+        else if ($honestyFlow.GetFlowInfo("stepname") == "HR专员审批" || $honestyFlow.GetFlowInfo("stepname") == "HR经理审批") {
+            if ($("#ContractBegin").val() == "") {
+                $honesty.ShowMsg({ title: "错误", msg: "请选择合同开始日期!" });
+                return false;
+            }
+            if ($("#ContractEnd").val() == "") {
+                $honesty.ShowMsg({ title: "错误", msg: "请选择合同结束日期!" });
+                ShowMsg("请选择合同结束日期!", "E");
+                return false;
+            }
+            if (Date.parse($("#ContractEnd").val().replace(/-/g, "/")) < Date.parse($("#ContractBegin").val().replace(/-/g, "/"))) {
+                $honesty.ShowMsg({ title: "错误", msg: "开始日期大于结束日期!" });
+                return false;
+            }
+            if ($("#ContractNature").val() == "") {
+                $honesty.ShowMsg({ title: "错误", msg: "请选择合同性质!" });
+                return false;
+            }
+            if ($("#IsLeader").val() == "") {
+                $honesty.ShowMsg({ title: "错误", msg: "请选择是否为店铺领导!" });
+                return false;
+            }
+            if ($("#FactInDate").val() == "") {
+                $honesty.ShowMsg({ title: "错误", msg: "请选择实际入职日期!" });
+                return false;
+            }
+            if ($("#IsOffer").val() == "") {
+                $honesty.ShowMsg({ title: "错误", msg: "请选择是否直接转正为正式员工!" });
+                return false;
+            }
+            var _options = {
+                PostData: {
+                    Params: {
+                        result: "ContractSave",
+                        ContractBegin: $("#ContractBegin").val(),
+                        ContractEnd: $("#ContractEnd").val(),
+                        ContractNature: $("#ContractNature").val(),
+                        EmpID: EmpID,
+                        IsLeader: $("#IsLeader").val(),
+                        FactInDate: $("#FactInDate").val(),
+                        IsOffer: $("#IsOffer").val()
+                    },
+                    ProcName: "proc_SOM_HR_EmpInfo",
+                    DataType: "Bool",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                async: false
+            };
+            var _result = $honesty.AjaxChannel(_options);
+            if (_result.Code == "1") {
+                if (_result.Data == "True") {
+                    return true
+                }
+                else {
+                    $honesty.ShowMsg({ title: "错误", msg: "合同数据更新失败!" });
+                    return false;
+                }
+            }
+            else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function DelInfo(id, role) {
+        $("[data-id]").css("pointer-events", "none");
+        setTimeout(function () {
+            $("[data-id]").css("pointer-events", "auto");
+        }, 350);
+        $honesty.ConfirmWin({
+            title: "提示",
+            msg: "是否要删除该条明细记录?",
+            buttons: ["确认", "取消"],
+            callback: function (ret, err) {
+                if (ret.buttonIndex == 1) {
+                    var _ItemXML = "<root><Item ID=\"" + id + "\" /></root>";
+                    var _options = {
+                        PostData: {
+                            Params: {
+                                result: "DeleteEmp" + role,
+                                ItemXML: _ItemXML
+                            },
+                            ProcName: "proc_SOM_HR_Emp" + role,
+                            DataType: "Bool",
+                            ExecType: "PROC",
+                            Mode: "MSSQL"
+                        }
+                    };
+
+                    $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                        if (_result.Code == "1") {
+                            if (_result.Data == "True") {
+                                $("#" + id).remove();
+                            }
+                            else {
+                                $honesty.ShowMsg({ title: "错误", msg: "删除数据失败!" });
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    function ShowInfo(options) {
+        $honesty.OpenWin({
+            title: options.PageName,
+            name: "HRFlow_EmpEntry_" + options.Type,
+            url: "HRFlow/EmpEntry/" + options.Type + ".html",
+            pageParam: {
+                ID: EmpID,
+                StepName: $honestyFlow.GetFlowInfo("stepname"),
+                ListInfo: options
+            }
+        });
+    }
+
+    function ReturnList(options) {
+        var defaults = {
+            Type: "",
+            ID: "",
+            UserName: "",
+            RelationShip: "",
+            RelationShipTxt: "",
+            TelPhone: "",
+            WorkUnit: "",
+            BeginDate: "",
+            EndDate: "",
+            School: "",
+            Major: "",
+            Diploma: "",
+            DiplomaTxt: "",
+            Education: "",
+            EducationTxt: "",
+            TrainingName: "",
+            Course: "",
+            ProveFile: "",
+            UnitName: "",
+            DeptPosition: "",
+            ProvePhone: "",
+            LeaveReason: ""
+        }
+        _opts = $.extend(defaults, options);
+        var _result = "<div id='" + _opts.ID + "' class='aui-card aui-noborder' style='pointer-events:auto' >" +
+           ($honestyFlow.GetFlowInfo("stepname") == "提交资料" && $honestyFlow.GetFlowInfo("isread") == "false" ? "<div data-role='divDel' tapmode onclick=\"DelInfo(\'" + _opts.ID + "\',\'" + _opts.Type + "\')\"  style='position: absolute; right: -.2em; top: -.6em; zoom: 2;z-index:2' class='aui-iconfont aui-icon-roundclosefill aui-text-danger'></div>" : "");
+        switch (_opts.Type) {
+            case "Family":
+                _result += "<div class='aui-form' data-id=\'" + _opts.ID + "\' tapmode  onclick='ShowInfo({ID:\"" + _opts.ID + "\",UserName:\"" + _opts.UserName + "\",RelationShip:\"" + _opts.RelationShip + "\",TelPhone:\"" + _opts.TelPhone + "\",WorkUnit:\"" + _opts.WorkUnit + "\",Job:\"" + _opts.Job + "\",Type:\"" + _opts.Type + "\",PageName:\"家庭成员\"})'>" +
+               "<div class='aui-input-row'>" +
+               "<span class='aui-input-addon aui-label-title'>" + _opts.RelationShipTxt + "</span>" +
+               "<div class='aui-div' style='padding: 5px;'>" + _opts.UserName + "</div></div>" +
+               "<div class='aui-input-row'>" +
+               "<span class='aui-input-addon aui-label-title'>联系电话：</span>" +
+               "<div class='aui-div' style='padding: 5px;'>" + _opts.TelPhone + "</div></div>";
+                break;
+            case "Education":
+                _result += "<div class='aui-form' data-id=\'" + _opts.ID + "\' tapmode  onclick='ShowInfo({ID:\"" + _opts.ID + "\",School:\"" + _opts.School + "\",Major:\"" + _opts.Major + "\",Diploma:\"" + _opts.Diploma + "\",Education:\"" + _opts.Education + "\",BeginDate:\"" + _opts.BeginDate + "\",EndDate:\"" + _opts.EndDate + "\",Type:\"" + _opts.Type + "\",PageName:\"学历背景\"})'>" +
+               "<div class='aui-input-row'>" +
+               "<span class='aui-input-addon aui-label-title'>日期：</span>" +
+               "<div class='aui-div' style='padding: 5px;'>" + _opts.BeginDate + "至" + _opts.EndDate + "</div></div>" +
+               "<div class='aui-input-row'>" +
+               "<span class='aui-input-addon aui-label-title'>学校名称：</span>" +
+               "<div class='aui-div' style='padding: 5px;'>" + _opts.School + "</div></div>";
+                break;
+            case "Training":
+                _result += "<div class='aui-form' data-id=\'" + _opts.ID + "\' tapmode  onclick='ShowInfo({ID:\"" + _opts.ID + "\",TrainingName:\"" + _opts.TrainingName + "\",Course:\"" + _opts.Course + "\",ProveFile:\"" + _opts.ProveFile + "\",BeginDate:\"" + _opts.BeginDate + "\",EndDate:\"" + _opts.EndDate + "\",Type:\"" + _opts.Type + "\",PageName:\"社会培训经历\"})'>" +
+               "<div class='aui-input-row'>" +
+               "<span class='aui-input-addon aui-label-title'>日期：</span>" +
+               "<div class='aui-div' style='padding: 5px;'>" + _opts.BeginDate + "至" + _opts.EndDate + "</div></div>" +
+               "<div class='aui-input-row'>" +
+               "<span class='aui-input-addon aui-label-title'>培训机构：</span>" +
+               "<div class='aui-div' style='padding: 5px;'>" + _opts.TrainingName + "</div></div>" +
+               "<div class='aui-input-row'>" +
+               "<span class='aui-input-addon aui-label-title'>培训课程：</span>" +
+               "<div class='aui-div' style='padding: 5px;'>" + _opts.Course + "</div></div>";
+                break;
+            case "Job":
+                _result += "<div class='aui-form' data-id=\'" + _opts.ID + "\' tapmode  onclick='ShowInfo({ID:\"" + _opts.ID + "\",UnitName:\"" + _opts.UnitName + "\",DeptPosition:\"" + _opts.DeptPosition + "\",ProvePhone:\"" + _opts.ProvePhone + "\",LeaveReason:\"" + _opts.LeaveReason + "\",BeginDate:\"" + _opts.BeginDate + "\",EndDate:\"" + _opts.EndDate + "\",Type:\"" + _opts.Type + "\",PageName:\"工作经历背景\"})'>" +
+               "<div class='aui-input-row'>" +
+               "<span class='aui-input-addon aui-label-title'>日期：</span>" +
+               "<div class='aui-div' style='padding: 5px;'>" + _opts.BeginDate + "至" + _opts.EndDate + "</div></div>" +
+               "<div class='aui-input-row'>" +
+               "<span class='aui-input-addon aui-label-title'>工作单位：</span>" +
+               "<div class='aui-div' style='padding: 5px;'>" + _opts.UnitName + "</div></div>" +
+               "<div class='aui-input-row'>" +
+               "<span class='aui-input-addon aui-label-title'>部门职务：</span>" +
+               "<div class='aui-div' style='padding: 5px;'>" + _opts.DeptPosition + "</div></div>";
+                break;
+        }
+        _result += "</div></div>";
+        return _result;
+    }
+</script>

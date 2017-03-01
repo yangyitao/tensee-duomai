@@ -1,0 +1,186 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>店铺编制</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-list-view-cell {
+            padding: 5px;
+        }
+
+            .aui-list-view-cell table {
+                width: 100%;
+                text-align: center;
+                border-collapse: collapse;
+                font-size: 15px;
+            }
+
+                .aui-list-view-cell table td {
+                    border: 1px dotted #c8c7cc;
+                }
+    </style>
+</head>
+<body>
+    <div class="aui-content">
+        <div id="BodyDiv" class="aui-content aui-card">
+            <ul class="aui-list-view">
+                <li class="aui-list-view-cell title"></li>
+                <li class='aui-list-view-cell'>
+                    <table style="">
+                        <tr>
+                            <td>
+                                <div style="width: 80px">
+                                    <table>
+                                        <tr style="height: 30px; background-color: rgb(219,239,243)">
+                                            <td></td>
+                                        </tr>
+                                    </table>
+                                    <table id="FormsContent">
+                                    </table>
+                                </div>
+                            </td>
+                            <td>
+                                <div id="TabDiv" style="overflow-x: auto; width: 300px">
+                                    <table style="width: 400px">
+                                        <tr style="height: 30px; font-size: 13px !important; background-color: rgb(219,239,243)">
+                                            <td style="width: 80px">计划编制</td>
+                                            <td style="width: 80px">储备编制</td>
+                                            <td style="width: 80px">现有人数</td>
+                                            <td style="width: 80px">满编率</td>
+                                            <td style="width: 80px">储备满编率</td>
+                                        </tr>
+                                    </table>
+                                    <table id="FormsInfo" style="width: 400px">
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </li>
+            </ul>
+        </div>
+        <div id="Div1" class="aui-content aui-card">
+            <ul class="aui-list-view">
+                <li class="aui-list-view-cell title"></li>
+                <li class='aui-list-view-cell'>
+                    <table style="">
+                        <thead>
+                            <tr style="height: 30px; background-color: rgb(219,239,243)">
+                                <td>薪资档级
+                                </td>
+                                <td>补贴金额
+                                </td>
+                                <td>编制数
+                                </td>
+                                <td>达成率条件
+                                </td>
+                            </tr>
+                        </thead>
+                        <tbody id="WageDiv">
+                        </tbody>
+                    </table>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div style="height: 10px"></div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $("#TabDiv").width($("#BodyDiv").width() - 80);
+        var _UserID = GetSession("UserID");
+        var _ContentInfo = "";
+        var _ContentPosition = "";
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "LoadData",
+                    OrganizeID: api.pageParam.OrganizeID,
+                    UserID: _UserID
+                },
+                ProcName: "proc_SOM_ISR_ShopOrganization",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    var _Osum = 0;
+                    var _Rsum = 0;
+                    var _Esum = 0;
+                    $.each(_result.Data, function (i, item) {
+                        var _Kip1 = "";
+                        var _Kip2 = "";
+                        if (Number(item.OZpeople) == 0 && Number(item.Existingpeople) == 0) {
+                            _Kip1 = "0.0%";
+                        }
+                        if (Number(item.OZpeople) == 0 && Number(item.Existingpeople) != 0) {
+                            _Kip1 = "编制外";
+                        }
+                        if (Number(item.OZpeople) != 0) {
+                            _Kip1 = (Number(item.Existingpeople) / Number(item.OZpeople) * 100).toFixed(1) + "%";
+                        }
+
+                        if ((Number(item.OZpeople) + Number(item.reserveCount)) == 0 && Number(item.Existingpeople) == 0) {
+                            _Kip2 = "0.0%";
+                        }
+                        if ((Number(item.OZpeople) + Number(item.reserveCount)) == 0 && Number(item.Existingpeople) != 0) {
+                            _Kip2 = "编制外";
+                        }
+                        if ((Number(item.OZpeople) + Number(item.reserveCount)) != 0) {
+                            _Kip2 = (Number(item.Existingpeople) / (Number(item.OZpeople) + Number(item.reserveCount)) * 100).toFixed(1) + "%";
+                        }
+
+                        _ContentPosition += "<tr style='font-size: 13px !important'><td>" + item.Post + "</td></tr>";
+                        _ContentInfo += "<tr style='font-size: 13px !important'><td style='width: 80px'>" + item.OZpeople + "</td><td style='width: 80px'>" + item.reserveCount + "</td><td style='width: 80px'>" + item.Existingpeople + "</td>"
+                                 + "<td style='width: 80px'>" + _Kip1 + "</td><td style='width: 80px'>" + _Kip2 + "</td></tr>";
+                        _Osum += Number(item.OZpeople);
+                        _Rsum += Number(item.reserveCount);
+                        _Esum += Number(item.Existingpeople);
+                    })
+                }
+                _ContentPosition += "<tr style='font-size: 13px !important;background-color: rgb(219,239,243)'><td>总计</td></tr>";
+                _ContentInfo += "<tr style='font-size: 13px !important;background-color: rgb(219,239,243)'><td style='width: 80px'>" + _Osum + "</td><td style='width: 80px'>" + _Rsum + "</td><td style='width: 80px'>" + _Esum + "</td>"
+                                 + "<td style='width: 80px'>" + (_Osum == 0 ? 0 : (_Esum / _Osum * 100).toFixed(1)) + "%</td><td style='width: 80px'>" + (_Osum == 0 ? 0 : ((_Esum + _Rsum) / _Osum * 100).toFixed(1)) + "%</td></tr>";
+                $("#FormsContent").html(_ContentPosition);
+                $("#FormsInfo").html(_ContentInfo);
+            }
+        })
+
+
+        var _ContentWage = "";
+        $("#WageDiv").html("");
+        var _Wage = {
+            PostData: {
+                Params: {
+                    Result: "InitWageLevel",
+                    OrganizeID: api.pageParam.OrganizeID
+                },
+                ProcName: "proc_SOM_ISR_ShopInfo",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+        $.when($honesty.AjaxChannel(_Wage)).done(function (_results) {
+            if (_results.Code == "1") {
+                if (_results.Data.length > 0) {
+                    $.each(_results.Data, function (i, item) {
+                        _ContentWage += "<tr><td>" + item.LevelText + "</td><td>" + item.WageMoney + "</td><td>" + item.EmpCount + "</td><td>" + item.MinTarget + "</td></tr>"
+                    })
+                    $("#WageDiv").html(_ContentWage);
+                }
+            }
+        })
+    }
+</script>
+</html>

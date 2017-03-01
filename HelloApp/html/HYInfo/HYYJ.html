@@ -1,0 +1,78 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+        content="width = 320,minimum-scale =1,maximum-scale = 1.3 ,user-scalable =no" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>会员业绩排名</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div style="height: 10px;"></div>
+    <div class="aui-content-padded" id="divTab2">
+        <div class="aui-tab">
+            <ul class="aui-tab-nav aui-tab-border">
+                <li data-role="title" class="active" data-index="0">销售贡献</li>
+                <li data-role="title" data-index="1">客单件</li>
+                <li data-role="title" data-index="2">客单价</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/api.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            var y = $honesty.RangeTop(120);
+            api.openFrameGroup({
+                name: 'HYYJ',
+                scrollEnabled: false,
+                rect: { x: 0, y: y, w: 'auto', h: 'auto' },
+                index: 0,
+                preload: 0,
+                frames:
+                [{
+                    name: 'HYYJ1',
+                    url: 'HYYJ1.html',
+                    bounces: false,
+                    pageParam: {
+                    }
+                }, {
+                    name: 'HYYJ2',
+                    url: 'HYYJ2.html',
+                    bounces: false,
+                    pageParam: {
+                    }
+
+                }, {
+                    name: 'HYYJ3',
+                    url: 'HYYJ3.html',
+                    bounces: false,
+                    pageParam: {
+                    }
+
+                }]
+
+            });
+
+        });
+
+    }
+
+    $("[data-role='title']").tap(function () {
+        if (!$(this).hasClass("active")) {
+            $("[data-role='title']").removeClass("active");
+            $(this).addClass("active");
+            api.setFrameGroupIndex({
+                name: 'HYYJ',
+                index: $(this).attr("data-index"),
+                scroll: true
+            });
+        }
+    });
+</script>

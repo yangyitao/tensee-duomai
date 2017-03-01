@@ -1,0 +1,104 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>问题跟进选择</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-input-row .aui-input-addon {
+            width: 90px;
+        }
+    </style>
+</head>
+<body>
+    <div style="height: 10px;"></div>
+    <div class="aui-content aui-card">
+        <div class="aui-form aui-input-form">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">类型</span>
+                <select id="FollowOrExcute" class="aui-input">
+                    <option value="1">我的执行</option>
+                    <option value="2">我的跟进</option>
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">完成状态</span>
+                <select id="Status" class="aui-input">
+                    <option value="1">未完成</option>
+                    <option value="2">已完成</option>
+                    <option value="3">全部</option>
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">起始日期</span>
+                <input id="StartDate" type="text" class="aui-input" readonly="readonly" placeholder="请选择要求完成起始日期" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">截止日期</span>
+                <input id="EndDate" type="text" class="aui-input" readonly="readonly" placeholder="请选择要求完成截止日期" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">店铺名称</span>
+                <input id="ShopName" type="text" class="aui-input" placeholder="请输入要查询的店铺名称" />
+            </div>
+            <div class="aui-btn-row">
+                <div id="btnSearch" class="aui-btn aui-btn-block aui-btn-warning">
+                    查询
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            //开始时间点击
+            $("#StartDate").tap(function () {
+                $honesty.DateTimeSelect({
+                    LevelNum: 2,
+                    Type: "Date",
+                    ControlID: "StartDate",
+                    ControlValue: $("#StartDate").val()
+                });
+            });
+            //结束时间点击
+            $("#EndDate").tap(function () {
+                $honesty.DateTimeSelect({
+                    LevelNum: 2,
+                    Type: "Date",
+                    ControlID: "EndDate",
+                    ControlValue: $("#EndDate").val()
+                });
+            });
+
+
+
+            //查询按钮点击
+            $("#btnSearch").tap(function () {
+                $honesty.OpenWin({
+                    name: "PatrolShop_ProblemFollow_ProblemFollow",
+                    url: "PatrolShop/ProblemFollow/ProblemFollow.html",
+                    title: "问题跟进",
+                    LevelNum: 2,
+                    pageParam: {
+                        StartDate: $("#StartDate").val(),
+                        EndDate: $("#EndDate").val(),
+                        ShopName: $("#ShopName").val().trim().trim(),
+                        Type: $("#FollowOrExcute").val(),
+                        Status: $("#Status").val(),
+                    }
+                });
+            });
+
+
+        });
+
+    }
+</script>
+</html>

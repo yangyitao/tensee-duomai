@@ -1,0 +1,173 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>会员分析</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style type="text/css">
+        select {
+            margin-bottom: 0px;
+            border: 0;
+        }
+
+        table.gridtable {
+            font-family: verdana,arial,sans-serif;
+            color: #333333;
+            border-width: 1px;
+            border-color: #666666;
+            border-collapse: collapse;
+            text-align: center;
+            font-size: 13px;
+        }
+
+            table.gridtable th {
+                border-width: 1px;
+                border-style: solid;
+                border-color: rgba(200,199,204,.5);
+                background-color: #dedede;
+                text-align: center;
+                height: 45px;
+            }
+
+            table.gridtable td {
+                border-width: 1px;
+                border-style: solid;
+                border-color: rgba(216, 216, 216, 0.5);
+                background-color: #ffffff;
+                text-align: center;
+                height: 45px;
+            }
+
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        .aui-content {
+            background: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div id="FromScheduling" class="aui-content" style="margin-bottom: 0px;">
+        <table style="table-layout: fixed;">
+            <tr>
+                <td style="padding: 0px; margin: 0px; vertical-align: top;">
+                    <div id="divSchedulingLeft">
+                        <div style="width: 70px">
+                            <table class="gridtable">
+                                <tr>
+                                    <th style="width: 70px">客户编号</th>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="divFixScheduling" style="width: 70px; overflow: hidden">
+                        <table class="gridtable" id="FormsName">
+                            <tr>
+                                <td style="width: 70px">12</td>
+                            </tr>
+                            <tr>
+                                <td style="width: 70px">13</td>
+                            </tr>
+                            <tr>
+                                <td style="width: 70px">14</td>
+                            </tr>
+                            <tr>
+                                <td style="width: 70px">15</td>
+                            </tr>
+                            <tr>
+                                <td style="width: 70px">16</td>
+                            </tr>
+                        </table>
+                    </div>
+                </td>
+                <td style="padding: 0px; margin: 0px; border: 0px;">
+                    <div id="DivType" style="overflow-x: scroll;">
+                        <div id="divDate" style="overflow: hidden;">
+                            <table id="TypeTable" class="gridtable" style="overflow: auto; width: 530px">
+                                <tr id="FormsType">
+                                    <th style="width: 140px">最近一次购买</th>
+                                    <th style="width: 70px">购买频率</th>
+                                    <th style="width: 70px">消费金额</th>
+                                    <th style="width: 70px">R</th>
+                                    <th style="width: 70px">F</th>
+                                    <th style="width: 70px">M</th>
+                                    <th style="width: 70px">RFM得分</th>
+                                </tr>
+                            </table>
+                        </div>
+                        <div id="divTypeBody" style="overflow: auto">
+                            <table class="gridtable" id="FormsContent" style="overflow: auto; width: 530px">
+                                <tr>
+                                    <td style="width: 131px">2016/01/01</td>
+                                    <td style="width: 70px">3</td>
+                                    <td style="width: 70px">28634</td>
+                                    <td style="width: 70px">2</td>
+                                    <td style="width: 70px">5</td>
+                                    <td style="width: 70px">7</td>
+                                    <td style="width: 70px">14</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 131px">2016/01/03</td>
+                                    <td style="width: 70px">3</td>
+                                    <td style="width: 70px">55549</td>
+                                    <td style="width: 70px">5</td>
+                                    <td style="width: 70px">5</td>
+                                    <td style="width: 70px">5</td>
+                                    <td style="width: 70px">15</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 131px">2016/02/01</td>
+                                    <td style="width: 70px">2</td>
+                                    <td style="width: 70px">998</td>
+                                    <td style="width: 70px">1</td>
+                                    <td style="width: 70px">5</td>
+                                    <td style="width: 70px">5</td>
+                                    <td style="width: 70px">11</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 131px">206/04/02</td>
+                                    <td style="width: 70px">5</td>
+                                    <td style="width: 70px">1888</td>
+                                    <td style="width: 70px">3</td>
+                                    <td style="width: 70px">6</td>
+                                    <td style="width: 70px">1</td>
+                                    <td style="width: 70px">0</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 131px">2016/04/31</td>
+                                    <td style="width: 70px">7</td>
+                                    <td style="width: 70px">57923</td>
+                                    <td style="width: 70px">1</td>
+                                    <td style="width: 70px">5</td>
+                                    <td style="width: 70px">9</td>
+                                    <td style="width: 70px">15</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/api.js"></script>
+<script src="../../script/honesty.base.js"></script>
+
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            $("#divTypeBody").scroll(function () {
+                $("#divDate").scrollLeft($("#divTypeBody").scrollLeft());
+                $("#divFixScheduling").scrollTop($("#divTypeBody").scrollTop());
+            });
+            $("#DivType").width($("#FromScheduling").width() - $("#divSchedulingLeft").width() - 7);
+            $("#divFixScheduling,#divTypeBody").height(api.frameHeight - 53);
+        });
+    }
+</script>

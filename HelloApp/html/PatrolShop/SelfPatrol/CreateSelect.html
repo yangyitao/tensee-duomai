@@ -1,0 +1,100 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>店长自检创建查询</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="aui-tab" id="divTab" style="display: none">
+        <ul id="TopBar" class="aui-tab-nav">
+            <li data-index="0" class="active">查询</li>
+            <li data-index="1">新建</li>
+            <li data-index="2" style="display: none">授权</li>
+        </ul>
+    </div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _OrganizeID, _IsEdit;
+    var _PatrolType = "FB2FF376-DF40-42C2-8B2F-4BAEC838B9E7";
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _OrganizeID = api.pageParam.OrganizeID;
+
+
+            LoadData();
+
+            //Tab点击
+            $("#TopBar").children("li").tap(function () {
+                $("#TopBar").find(".active").removeClass("active");
+                $(this).addClass("active");
+
+                api.setFrameGroupIndex({
+                    name: 'SelfPatrol_Tab',
+                    index: $(this).data("index"),
+                    scroll: true
+                });
+            });
+        });
+    };
+
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "IsEdit",
+                    OrganizeID: GetSession("OrganizeID"),
+                    EmpID: GetSession("UserID")
+                },
+                ProcName: "proc_SOM_ISR_PatrolShop",
+                DataType: "Text",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                _IsEdit = _result.Data;
+
+                var h = $honesty.RangeTop(45);
+                var arrFrame = new Array();
+                arrFrame.push({ name: 'PatrolShop_SelfPatrol_Select', url: 'Select.html', bounces: false, pageParam: { OrganizeID: _OrganizeID, PatrolType: _PatrolType } });
+
+                if (( _OrganizeID.toUpperCase() == GetSession("OrganizeID").toUpperCase() && GetSession("IsLeader") == "1") || _IsEdit == "1") {
+                    arrFrame.push({ name: 'PatrolShop_SelfPatrol_Create', url: 'Create.html', bounces: false, pageParam: { OrganizeID: _OrganizeID, PatrolType: _PatrolType } });
+                    $("#divTab").show();
+                    h += 45;
+                }
+
+                if ( _OrganizeID.toUpperCase() == GetSession("OrganizeID").toUpperCase() && GetSession("IsLeader") == "1") {
+                    arrFrame.push({ name: 'PatrolShop_SelfPatrol_Assign', url: 'Assign.html', bounces: false, pageParam: { OrganizeID: _OrganizeID, PatrolType: _PatrolType } });
+                    $("[data-index='2']").show();
+                }
+                api.openFrameGroup({
+                    name: 'SelfPatrol_Tab',
+                    scrollEnabled: true,
+                    rect: { x: 0, y: h, w: 'auto', h: 'auto' },
+                    index: 0,
+                    preload: 0,
+                    frames: arrFrame
+                },
+                 function (ret, err) {
+                     var index = ret.index;
+                     $("#TopBar").find(".active").removeClass("active");
+                     $("[data-index='" + index + "']").addClass("active");
+                 });
+
+            }
+            else {
+                $honesty.CloseWin();
+            }
+        });
+    }
+</script>
+</html>

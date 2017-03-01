@@ -1,0 +1,222 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>区域汇总表</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        body {
+            background: #fff;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        td, th {
+            padding: 0;
+        }
+
+        .aui-list-view-cell {
+            padding: 5px;
+        }
+
+        .form {
+            width: 100%;
+            text-align: center;
+            font-size: 13px;
+            border-collapse: collapse;
+        }
+
+            .form td, .form th {
+                border: 1px solid rgba(216, 216, 216, 0.1);
+                height: 35px;
+                letter-spacing: 0.4px;
+            }
+
+            .form th {
+                font-weight: 400;
+            }
+
+            .form tbody td {
+                color: #8f8f94;
+                height: 40px;
+            }
+
+            .form thead tr:last-child td {
+                border-bottom: 1px solid rgba(216, 216, 216, 0.5);
+            }
+
+        ::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="aui-content" style="margin-bottom: 0px;">
+        <table style="table-layout: fixed;">
+            <tr>
+                <td>
+                    <table class="form" style="width: 150px">
+                        <thead>
+                            <tr>
+                                <td style="width: 150px">店铺名称</td>
+                            </tr>
+                        </thead>
+                    </table>
+                </td>
+                <td>
+                    <div id="divTitle" style="width: 200px; overflow-x: scroll">
+                        <table class="form" style="width: 550px;">
+                            <thead>
+                                <tr>
+                                    <td style="width: 65px">目标</td>
+                                    <td style="width: 65px">实际</td>
+                                    <td style="width: 60px">达成</td>
+                                    <td style="width: 60px">折扣</td>
+                                    <td style="width: 60px">客单件</td>
+                                    <td style="width: 60px">客单价</td>
+                                    <td style="width: 60px">同比</td>
+                                    <td style="width: 60px">环比</td>
+                                    <td style="width: 60px">VIP占比</td>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div id="divShopName" style="width: 150px; overflow: hidden;">
+                        <table class="form" style="width: 150px">
+                            <tbody id="tbShopName">
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+                <td>
+                    <div id="divBody" style="width: 200px; overflow-x: scroll;">
+                        <table class="form" style="width: 550px;">
+                            <tbody id="tbList">
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>
+
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _Year, _Month;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _Year = api.pageParam.Year;
+            _Month = api.pageParam.Month;
+
+            $("#divBody").width(window.screen.width - 150);
+            $("#divTitle").width(window.screen.width - 150);
+            $("#divBody").height(api.frameHeight - $("#divTitle").height());
+            $("#divShopName").height(api.frameHeight - $("#divTitle").height());
+
+            LoadData();
+
+            $("#divBody").scroll(function () {
+                $("#divTitle").scrollLeft($("#divBody").scrollLeft());
+                $("#divShopName").scrollTop($("#divBody").scrollTop());
+            });
+        });
+
+    }
+
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "GetSaleSum",
+                    Year: _Year,
+                    Month: _Month,
+                    UserID: GetSession("UserID")
+                },
+                ProcName: "proc_SaleForm",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    var _Content = "";
+                    var _ShopList = "";
+                    var tagetSale = 0, actualSale = 0,
+                        tagSale = 0, clothesNum = 0, orderNum = 0,
+                        lastSale = 0, preSale = 0, vipSale = 0;
+                    var actualSale1 = 0;
+                    $.each(_result.Data, function (i, item) {
+                        _ShopList += '<tr><td style="width: 150px;text-align:left;font-size:11px">' + item.ShopName + '</td></tr>';
+                        _Content += '<tr onclick=\"ItemClick(\'' + item.DeptName + item.AreaName + '\')\">' +
+                                    '<td style="width: 65px">' + item.TargetSale + '</td>' +
+                                    '<td style="width: 65px">' + item.ActualSale + '</td>' +
+                                    '<td style="width: 60px">' + item.SaleRate + '%</td>' +
+                                    '<td style="width: 60px">' + item.DiscountPercent + '%</td>' +
+                                    '<td style="width: 60px">' + item.CustomerSingle + '</td>' +
+                                    '<td style="width: 60px">' + item.CustomerUnitPrice + '</td>' +
+                                    '<td style="width: 60px">' + item.YearOnYear + '%</td>' +
+                                    '<td style="width: 60px">' + item.QuarterOnQuarter + '%</td>' +
+                                    '<td style="width: 60px">' + item.VIPProportion + '%</td>' +
+                                    '</tr>';
+                        tagetSale += Number(item.TargetSale);
+                        actualSale += Number(item.ActualSale);
+                        tagSale += (item.DiscountPercent == "0" ? 0 : Number(item.ActualSale) / Number(item.DiscountPercent) * 100);
+                        clothesNum += Number(item.ClothesNum);
+                        orderNum += Number(item.OrderNum);
+                        if (item.YearOnYear != "0") {
+                            actualSale1 += Number(item.ActualSale);
+                            lastSale += Number(item.ActualSale) / (((Number(item.YearOnYear) + 100) / 100) == 0 ? 1 : ((Number(item.YearOnYear) + 100) / 100));
+                        }
+                        if (item.QuarterOnQuarter != "0") {
+                            preSale += Number(item.ActualSale) / (((Number(item.QuarterOnQuarter) + 100) / 100) == 0 ? 1 : ((Number(item.QuarterOnQuarter) + 100) / 100));
+                        }
+                        vipSale += Number(item.VIPProportion) * Number(item.ActualSale) / 100;
+                    });
+                    _ShopList += '<tr><td style="width: 150px;font-size:12px;background:rgb(240,240,240)">汇总</td></tr>';
+                    _Content += '<tr  style="background:rgb(240,240,240)">' +
+                                '<td style="width: 65px">' + tagetSale + '</td>' +
+                                '<td style="width: 65px">' + actualSale + '</td>' +
+                                '<td style="width: 60px">' + (tagetSale == 0 ? 0 : (actualSale / tagetSale * 100).toFixed(0)) + '%</td>' +
+                                '<td style="width: 60px">' + (tagetSale == 0 ? 0 : (actualSale / tagSale * 100).toFixed(0)) + '%</td>' +
+                                '<td style="width: 60px">' + (orderNum == 0 ? 0 : (clothesNum / orderNum).toFixed(1)) + '</td>' +
+                                '<td style="width: 60px">' + (orderNum == 0 ? 0 : (actualSale / orderNum).toFixed(0)) + '</td>' +
+                                '<td style="width: 60px">' + (lastSale == 0 ? 0 : (actualSale1 / lastSale * 100 - 100).toFixed(0)) + '%</td>' +
+                                '<td style="width: 60px">' + (preSale == 0 ? 0 : (actualSale / preSale * 100 - 100).toFixed(0)) + '%</td>' +
+                                '<td style="width: 60px">' + (actualSale == 0 ? 0 : (vipSale / actualSale * 100).toFixed(0)) + '%</td>' +
+                                '</tr>';
+
+                    $("#tbList").html(_Content);
+                    $("#tbShopName").html(_ShopList);
+                }
+                else {
+                    $("#tbList").html('<tr><td style="text-align:left">尊敬的用户，您好，无销售数据</td></tr>');
+                }
+            }
+        });
+    }
+
+    function ItemClick(title) {
+        var e = event || window.event;
+        var obj = api.require('bubbleMenu');
+        obj.open({
+            centerX: api.frameWidth / 2,
+            centerY: e.clientY + $honesty.RangeTop(45),
+            btnArray: [{ title: title, length: (title.length * 20 > api.frameWidth - 50 ? api.frameWidth - 50 : title.length * 20) }],
+        });
+    }
+</script>

@@ -1,0 +1,215 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>横统计</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style type="text/css">
+        select {
+            margin-bottom: 0px;
+            border: 0;
+        }
+
+        table.gridtable {
+            font-family: verdana,arial,sans-serif;
+            color: #333333;
+            border-width: 1px;
+            border-color: #666666;
+            border-collapse: collapse;
+            text-align: center;
+            font-size: 13px;
+        }
+
+            table.gridtable th {
+                border-width: 1px;
+                border-style: solid;
+                border-color: rgba(200,199,204,.5);
+                background-color: #dedede;
+                text-align: center;
+                height: 45px;
+            }
+
+            table.gridtable td {
+                border-width: 1px;
+                border-style: solid;
+                border-color: rgba(216, 216, 216, 0.5);
+                background-color: #ffffff;
+                text-align: center;
+                height: 45px;
+            }
+
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        .aui-content {
+            background: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div id="FromScheduling" class="aui-content" style="margin-bottom:0px;">
+        <table style="table-layout: fixed;">
+            <tr>
+                <td style="padding: 0px; margin: 0px; vertical-align: top;">
+                    <div id="divSchedulingLeft">
+                        <div style="width: 70px">
+                            <table class="gridtable">
+                                <tr>
+                                    <th style="width: 70px">姓名</th>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="divFixScheduling" style="width: 70px; overflow: hidden">
+                        <table class="gridtable" id="FormsName">
+                        </table>
+                    </div>
+                </td>
+                <td style="padding: 0px; margin: 0px; border: 0px;">
+                    <div id="DivType" style="overflow-x: scroll;">
+                        <div id="divDate" style="overflow: hidden;">
+                            <table id="TypeTable" class="gridtable" style="overflow: auto;">
+                                <tr id="FormsType">
+                                </tr>
+                            </table>
+                        </div>
+                        <div id="divTypeBody" style="overflow: auto">
+                            <table class="gridtable" id="FormsContent" style="overflow: auto;">
+                            </table>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+
+<script type="text/javascript">
+    var _year, _month, _week, _OrganizeID;
+    var _UserID = GetSession("UserID");
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _OrganizeID = api.pageParam.OrganizeID;
+            _year = api.pageParam.Year;
+            _month = api.pageParam.Month;
+            _week = api.pageParam.Week;
+            $("#divTypeBody").scroll(function () {
+                $("#divDate").scrollLeft($("#divTypeBody").scrollLeft());
+                $("#divFixScheduling").scrollTop($("#divTypeBody").scrollTop());
+            });
+            $("#DivType").width($("#FromScheduling").width() - $("#divSchedulingLeft").width() - 7);
+            $("#divFixScheduling,#divTypeBody").height(api.frameHeight - 53);
+            GetInfo();
+        });
+        function GetInfo() {
+            var _ContentType = "";
+            var _Content = "";
+            //获取所有店铺所有班次
+            var _Type = {
+                PostData: {
+                    Params: { "Result": "SelectShopType", "UserID": _UserID, "OrganizeID": _OrganizeID },
+                    ProcName: "proc_SOM_ISR_Scheduling",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                async: false
+            };
+            var _resultType = $honesty.AjaxChannel(_Type);
+
+
+            var _TableWidth = 0;
+            $("#FormsType").html("");
+            if (_resultType["Data"].length > 0) {
+                $.each(_resultType["Data"], function (i, item) {
+                    _ContentType += "<th style='width:50px' title='" + item.Num + "'>" + item.Title + "</td>"
+                    _TableWidth += 50;
+                });
+            }
+            $("#TypeTable").width(_TableWidth + "px");
+            $("#FormsContent").width(_TableWidth + "px");
+            $("#FormsType").html(_ContentType);
+
+            var _ContentName = "";
+            //获取所有店铺所有人员
+            var _People = {
+                PostData: {
+                    Params: { "Result": "SelectPeople", "UserID": _UserID, "OrganizeID": _OrganizeID },
+                    ProcName: "proc_SOM_ISR_Meetting",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                async: false
+            };
+            var _resultPeople = $honesty.AjaxChannel(_People);
+            $("#FormsName").html("");
+            if (_resultPeople["Data"].length > 0) {
+                $.each(_resultPeople["Data"], function (i, item) {
+                    _ContentName += "<tr title ='" + item.UserID + "' ><td style='width:70px'>" + item.Name + "</td></tr>";
+                    _Content += "<tr>";
+                    for (var i = 0; i < _resultType["Data"].length; i++) {
+                        _Content += "<td style='width:50px'><input type='text'style='margin-bottom: 0px;;padding:0;border:0;text-align:center'readonly='true'  value=''/></td>";
+                    }
+                    _Content += "</tr>"
+                });
+                $("#FormsContent").html(_Content);
+            }
+            $("#FormsName").html(_ContentName);
+
+            //获取店铺人员排班数据
+            LoadData();
+        }
+
+        function LoadData() {
+            var _Typelist = $("#FormsType").children();
+            var _Countlist = $("#FormsContent").children();
+            var _Namelist = $("#FormsName").children();
+
+            var _parames = {
+                PostData: {
+                    Params: { "Result": "LoadInfo", "OrganizeID": _OrganizeID, "Year": _year, "Month": _month, "Week": _week },
+                    ProcName: "proc_SOM_ISR_Scheduling",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                async: false
+            };
+            var _CountTable = $honesty.AjaxChannel(_parames);
+            for (var j = 0 ; j < _Namelist.length; j++) {
+                var _UserName = $(_Namelist[j]).attr("title");
+                var _Sum = $(_Countlist[j]).children("td").children();
+
+                for (var i = 0; i < _Typelist.length; i++) {
+
+                    var count = 0;
+
+                    if (_CountTable["Data"].length > 0) {
+                        $.each(_CountTable["Data"], function (k, item) {
+                            var _typeID = $(_Typelist[i]).attr("title");
+                            //alert(_typeID);
+                            if (item.Num == _typeID && item.UserCode == _UserName) {
+                                count += 1;
+                            }
+                        });
+                    }
+                    $(_Sum[i]).val(count);
+                    if ($(_Sum[i]).val() == 0) {
+                        $(_Sum[i]).val("");
+                    }
+                }
+
+            }
+
+        }
+    }
+</script>

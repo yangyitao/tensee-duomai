@@ -1,0 +1,182 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>Vip目标（月计划报表）</title>
+    <link href="../../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .form {
+            width: 100%;
+            text-align: center;
+            font-size: 14px;
+            border-collapse: collapse;
+        }
+
+            .form td, .form th {
+                border-bottom: 1px solid rgba(216, 216, 216, 0.1);
+                height: 35px;
+                letter-spacing: 0.4px;
+            }
+
+            .form th {
+                font-weight: 400;
+            }
+
+            .form td {
+                color: #8f8f94;
+            }
+
+                .form td:first-child {
+                    color: #000;
+                }
+    </style>
+</head>
+<body>
+    <div class="aui-content">
+        <ul class="aui-list-view" style="margin-bottom: 0">
+            <li class="aui-list-view-cell" style="padding: 3px;">
+                <table class="form">
+                    <tr>
+                        <th style="width: 100px;">生日VIP</th>
+                        <th>目标人数</th>
+                        <th>实际人数</th>
+                    </tr>
+                    <tr>
+                        <td>金卡</td>
+                        <td id="GoldenCardSale1"></td>
+                        <td id="GoldenCardSale2"></td>
+                    </tr>
+                    <tr>
+                        <td>银卡</td>
+                        <td id="SilverCardSale1"></td>
+                        <td id="SilverCardSale2"></td>
+                    </tr>
+                    <tr>
+                        <td>积分卡</td>
+                        <td id="IntegalCardSale1"></td>
+                        <td id="IntegalCardSale2"></td>
+                    </tr>
+                    <tr>
+                        <th>升级VIP</th>
+                        <th>目标人数</th>
+                        <th>实际人数</th>
+                    </tr>
+                    <tr>
+                        <td>金卡</td>
+                        <td id="GoldenCardNum1"></td>
+                        <td id="GoldenCardNum2"></td>
+                    </tr>
+                    <tr>
+                        <td>银卡</td>
+                        <td id="SilverCardNum1"></td>
+                        <td id="SilverCardNum2"></td>
+                    </tr>
+                    <tr>
+                        <th>新VIP</th>
+                        <th>目标人数</th>
+                        <th>实际人数</th>
+                    </tr>
+                    <tr>
+                        <td>积分卡</td>
+                        <td id="NewIntegalNum1"></td>
+                        <td id="NewIntegalNum2"></td>
+                    </tr>
+                    <tr>
+                        <td>将失效卡激活</td>
+                        <td id="NewVIPNum1"></td>
+                        <td id="NewVIPNum2"></td>
+                    </tr>
+                    <tr>
+                        <th>KPI</th>
+                        <th>目标</th>
+                        <th>实际</th>
+                    </tr>
+                    <tr>
+                        <td>客单价</td>
+                        <td id="CustomerUnitPrice1"></td>
+                        <td id="CustomerUnitPrice2"></td>
+                    </tr>
+                    <tr>
+                        <td>客单件</td>
+                        <td id="CustomerSingle1"></td>
+                        <td id="CustomerSingle2"></td>
+                    </tr>
+                    <tr>
+                        <td>单数</td>
+                        <td id="OrderNum1"></td>
+                        <td id="OrderNum2"></td>
+                    </tr>
+                    <tr>
+                        <td>件数</td>
+                        <td id="ClothesNum1"></td>
+                        <td id="ClothesNum2"></td>
+                    </tr>
+                </table>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>
+<script src="../../../../script/zepto.js"></script>
+<script src="../../../../script/api.js"></script>
+<script src="../../../../script/honesty.base.js"></script>
+
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            LoadData();
+
+            //下拉刷新
+            api.setRefreshHeaderInfo({
+                visible: true,
+                loadingImg: 'widget://image/refresh.png',
+                bgColor: '#fff',
+                textColor: '#000',
+                textDown: '下拉刷新...',
+                textUp: '松开刷新...',
+                showTime: true
+            }, function (ret, err) {
+                LoadData();
+                api.refreshHeaderLoadDone();
+            });
+        });
+    }
+
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "FormVIPTarget",
+                    MonthID: api.pageParam.MonthID
+                },
+                ProcName: "proc_SOM_ISR_MonthSale",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        $("#GoldenCardSale" + item.ID).html(item.GoldenCardSale);
+                        $("#SilverCardSale" + item.ID).html(item.SilverCardSale);
+                        $("#IntegalCardSale" + item.ID).html(item.IntegalCardSale);
+                        $("#GoldenCardNum" + item.ID).html(item.GoldenCardNum);
+                        $("#SilverCardNum" + item.ID).html(item.SilverCardNum);
+                        $("#NewIntegalNum" + item.ID).html(item.NewIntegalNum);
+                        $("#NewVIPNum" + item.ID).html(item.NewVIPNum);
+                        $("#CustomerUnitPrice" + item.ID).html(item.CustomerUnitPrice);
+                        $("#CustomerSingle" + item.ID).html(item.CustomerSingle);
+                        $("#OrderNum" + item.ID).html(item.OrderNum);
+                        $("#ClothesNum" + item.ID).html(item.ClothesNum);
+                    });
+                }
+            }
+        });
+    }
+</script>

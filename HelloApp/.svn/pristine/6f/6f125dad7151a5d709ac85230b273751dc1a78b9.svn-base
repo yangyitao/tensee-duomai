@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>晋升申请流程</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-input-row .aui-input-addon {
+            width: 120px;
+            color: #8f8f94;
+            text-align: left;
+        }
+
+        .aui-input-form .aui-input-row .aui-input-addon {
+            padding-left: 8px;
+            font-weight: 300;
+            font-size: 13px;
+        }
+
+        .aui-list-view-cell {
+            padding: 5px 15px;
+        }
+
+        .aui-label-title {
+            text-align: right;
+            width: 90px;
+        }
+    </style>
+</head>
+<body>
+    <input id="RankInfo" type="hidden" />
+    <input id="EmpID" type="hidden" />
+    <input id="PromoteID" type="hidden" />
+    <input id="PromoteLevelDesc" type="hidden" />
+    <input id="positionDate" type="hidden" />
+    <input id="NewEmpLevel" type="hidden" />
+    <input id="NewLevelDesc" type="hidden" />
+    <input id="PromoteMonth" type="hidden" />
+    <input id="ProIsInstead" type="hidden" />
+    <input id="PromoteSapCode" type="hidden" />
+    <div id="main">
+        <p class="aui-padded-5 aui-text-center" style="color: #3175af; font-size: 16px;">晋升申请流程</p>
+        <div class="aui-card" style="margin-bottom: 0px;">
+            <ul class="aui-list-view" style="margin-bottom: 0px;">
+                <li class="aui-list-view-cell">
+                    <label id="InfoSN"></label>
+                    <p>单号</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="InfoEmpName"></label>
+                    <p>姓名</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="InfoWriteDate"></label>
+                    <p>日期</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="InfoEmpCode"></label>
+                    <p>工号</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoAreaName"></label>
+                    <p>大区</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoProvince"></label>
+                    <p>区域</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoEmpPosition"></label>
+                    <p>岗位</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoSapCode"></label>
+                    <p>店铺代码</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoShopName"></label>
+                    <p>店铺名称</p>
+                </li>
+                <li data-role="colspan" data-show="hide" class="aui-list-view-cell" id="liBaseMore">
+                    <p style="text-align: center">点击显示详情</p>
+                </li>
+            </ul>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; margin: 0 10px; font-size: 15px;">晋升员工基本信息</p>
+        <div class="aui-card aui-input-form" style="margin-bottom: 0px;">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">晋升员工工号</span>
+                <input id="PromoteCode" type="text" class="aui-input aui-important" placeholder="请输入员工工号" readonly="readonly" onchange="UserInfo()" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">晋升员工姓名</span>
+                <input id="PromoteName" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">所在店铺</span>
+                <input id="PromoteShopName" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">现任岗位</span>
+                <input id="PromotePosition" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">入司时间</span>
+                <input id="PromoteInDate" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; margin: 0 10px; font-size: 15px;">晋升信息</p>
+        <div class="aui-card aui-input-form" style="margin-bottom: 0px;" id="Div1">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">晋升类型</span>
+                <select class="aui-input aui-important" id="PromoteType" disabled="disabled">
+                    <option value="">请选择</option>
+                    <option value="晋升">晋升</option>
+                    <option value="破格晋升">破格晋升</option>
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">晋升岗位</span>
+                <select class="aui-input aui-important" id="NewPosition" disabled="disabled">
+                    <option value="">请选择</option>
+                    <option value="H4">导购</option>
+                    <option value="H1">高级导购</option>
+                    <option value="F3">初级店长</option>
+                    <option value="F2">中级店长</option>
+                    <option value="F1">高级店长</option>
+                    <option value="E1">店经理</option>
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">申请晋升时间</span>
+                <input id="PromoteDate" type="text" class="aui-input aui-important" placeholder="请输入申请晋升时间" readonly="true" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">现任职位岗龄(月)</span>
+                <input id="PositionAge" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; margin: 0 10px; font-size: 15px;">晋升员工业绩达成情况</p>
+        <div class="aui-card aui-input-form" style="margin-bottom: 0px;">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">业绩达成率(累计)</span>
+                <input id="AchieveRate" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon" style="vertical-align: top">业绩排名情况</span>
+                <textarea id="Ranking" class="aui-input" style="height: 70px; overflow-y: auto;" readonly="readonly"></textarea>
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; margin: 0 10px; font-size: 15px;">晋升员工其他考核项</p>
+        <div class="aui-card aui-input-form" id="Div2">
+            <div class="aui-input-row" name="shopowner" style="display: none">
+                <span class="aui-input-addon">店长综合能力<br />
+                    考核成绩</span>
+                <input id="Performance" type="text" class="aui-input aui-important" placeholder="请填写绩效成绩" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">陈列结果</span>
+                <select class="aui-input aui-important" id="Exhibit">
+                    <option value="">请选择</option>
+                    <option value="否">合格</option>
+                    <option value="是">不合格</option>
+                </select>
+            </div>
+
+            <div class="aui-input-row" name="shopowner" style="display: none">
+                <span class="aui-input-addon">储备人员培养人数</span>
+                <input id="TrainCount" type="text" class="aui-input aui-important" placeholder="请填写培养人数" />
+            </div>
+            <div class="aui-input-row" name="shopguide" style="display: none">
+                <span class="aui-input-addon">储备店长训练营</span>
+                <input id="TestSubject" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">上级评价</span>
+                <input id="Appraise" type="text" class="aui-input aui-important" placeholder="请填写评价内容" />
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; margin: 0 10px; font-size: 15px;">晋升员工个人考勤</p>
+        <div class="aui-card aui-input-form" style="margin-bottom: 0px;" id="Div3">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">迟到/早退次数</span>
+                <input id="Tardy" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">旷工天数</span>
+                <input id="Absent" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">事假天数</span>
+                <input id="Casual" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">病假天数</span>
+                <input id="Sick" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-btn-row">
+                <div class="aui-btn aui-btn-success" id="btnSlaves" style="float: left">上传附件</div>
+                <table class="aui-salves" id="tbSlaves">
+                </table>
+            </div>
+        </div>
+        <div style="height: 100px"></div>
+    </div>
+</body>
+<script src="../../script/api.js"></script>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script src="../../script/honesty.flow.js"></script>
+<script src="../../script/honesty.valid.js"></script>
+<script type="text/javascript">
+    var arry = ["E1", "F1", "F2", "F3", "H1", "H4"];
+    var IsRead = false;
+    var _ContentList = "";
+    var PromoteID = "";
+    var Isleader = GetSession("IsLeader");
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            $honestyFlow.InitFlow({ Async: false, wapflowpage: "HRFlow/EmpPromote" });
+            var InstanceID = $honestyFlow.GetFlowInfo("instanceid");
+            if (api.pageParam.instanceid != undefined) {
+                PromoteID = InstanceID;
+            }
+            //基本信息点击展示隐藏
+            $("#liBaseMore").tap(function () {
+                $("[data-role='baseMore']").fadeToggle(200);
+                if ($("#liBaseMore").attr("data-show") == "hide") {
+                    $("#liBaseMore").children("p").html("点击收起");
+                    $("#liBaseMore").attr("data-show", "show");
+                }
+                else {
+                    $("#liBaseMore").children("p").html("点击显示详情");
+                    $("#liBaseMore").attr("data-show", "hide");
+                }
+            });
+            InitBase();
+            if ($honestyFlow.GetFlowInfo("stepname") == "发起晋升申请") {
+                $("#PromoteDate").val("");
+                $("#PromoteDate").tap(function () {
+                    $honesty.DateTimeSelect({
+                        LevelNum: 1,
+                        Type: "Date",
+                        ControlID: "PromoteDate",
+                        ControlValue: $("#PromoteDate").val(),
+                        onchange: function (ret) {
+                            var test = new Date($("#PromoteDate").val()).Format("yyyy-MM-dd").split("-");
+                            $("#PromoteDate").val(test[0] + "/" + test[1] + "/01");
+                            if (ret) {
+                                PromoteDate();
+                            }
+                        }
+                    });
+                });
+                $("#PromoteCode,#Performance,#TrainCount,#Appraise").removeAttr("readonly", "");
+                $("#PromoteType,#Exhibit,#NewPosition").removeAttr("disabled", "");
+            }
+            //点击排行情况                
+            $("#Ranking").tap(function () {
+                if (_ContentList != "") {
+                    api.openFrame({
+                        name: 'Ranking',
+                        url: 'Ranking.html',
+                        bounces: false,
+                        pageParam: {
+                            ContentList: _ContentList,
+                            NewLevelDesc: $("#NewLevelDesc").val()
+                        },
+                        rect: {
+                            x: 0,
+                            y: 0,
+                            w: 'auto',
+                            h: 'auto'
+                        },
+                        animation: {
+                            type: "push",
+                            subType: "from_right",
+                            duration: 300
+                        }
+                    });
+                    api.bringFrameToFront({
+                        from: 'Ranking'
+                    });
+                }
+            })
+
+            $("#NewPosition").change(function () {
+                if ($("#PromoteType").val() != "") {
+                    $("#NewEmpLevel").val($("#NewPosition").val().substring(0, 1));
+                    $("#NewLevelDesc").val($("#NewPosition").val());
+                }
+                else {
+                    $("#NewPosition").val("");
+                    $honesty.ShowMsg({ msg: "请先选择晋升类型！", title: "警告" });
+                }
+            });
+
+            $("#PromoteType").change(function () {
+                if ($("#PromoteCode").val() != "") {
+                    var ProLv = $.inArray($("#PromoteLevelDesc").val(), arry);
+                    var _ProIsInstead = $("#ProIsInstead").val();
+                    if ($("#PromoteType").val() == "晋升") {
+                        if (ProLv == 4 || (ProLv == 5 && _ProIsInstead != "True")) {
+                            $("#NewPosition").val(arry[ProLv - 1]);
+                            $("#NewEmpLevel").val(arry[ProLv - 1].substring(0, 1));
+                            $("#NewLevelDesc").val(arry[ProLv - 1]);
+                            $("#NewPosition").attr("disabled", "disabled");
+                            if (ProLv == 4) {
+                                $("div[name='shopguide']").css("display", "");
+                                var _parames = {
+                                    PostData: {
+                                        Params: {
+                                            result: "GetTrainResults",
+                                            UserCode: $("#PromoteCode").val()
+                                        },
+                                        ProcName: "proc_SOM_ISR_TrainResults",
+                                        DataType: "DataTable",
+                                        ExecType: "PROC",
+                                        Mode: "MSSQL"
+                                    },
+                                    async: false
+                                };
+                                var _table = $honesty.AjaxChannel(_parames);
+                                if (_table.Data.length > 0) {
+                                    $.each(_table.Data, function (i, item) {
+                                        $("#TestSubject").val(item.Result)
+
+                                    });
+                                }
+                            }
+                        }
+                        else if (ProLv == 5 && _ProIsInstead == "True") {
+                            $("div[name='shopguide']").css("display", "");
+                            $("#NewPosition").val(arry[ProLv - 2]);
+                            $("#NewEmpLevel").val(arry[ProLv - 2].substring(0, 1));
+                            $("#NewLevelDesc").val(arry[ProLv - 2]);
+                            $("#NewPosition").attr("disabled", "disabled");
+                            var _parames = {
+                                PostData: {
+                                    Params: {
+                                        result: "GetTrainResults",
+                                        UserCode: $("#PromoteCode").val()
+                                    },
+                                    ProcName: "proc_SOM_ISR_TrainResults",
+                                    DataType: "DataTable",
+                                    ExecType: "PROC",
+                                    Mode: "MSSQL"
+                                },
+                                async: false
+                            };
+                            var _table = $honesty.AjaxChannel(_parames);
+                            if (_table.Data.length > 0) {
+                                $.each(_table.Data, function (i, item) {
+                                    alert(item.Result);
+                                    $("#TestSubject").val(item.Result)
+                                });
+                            }
+                        }
+                        else {
+                            $("#NewPosition").removeAttr("disabled", "");
+                            for (var i = 0 ; i <= ProLv; i++) {
+                                $("#NewPosition option:eq(" + i + ")").attr("disabled", "disabled");
+                            }
+                            $("div[name='shopowner']").css("display", "");
+                        }
+                    }
+                    if ($("#PromoteType").val() == "破格晋升") {
+                        $("#NewPosition").val("");
+                        $("#NewPosition").removeAttr("disabled", "");
+                        for (var i = 0 ; i <= 6 - ProLv; i++) {
+                            $("#NewPosition option:eq(" + i + ")").attr("disabled", "disabled");
+                        }
+                    }
+                }
+                else {
+                    $honesty.ShowMsg({ msg: "请先输入晋升员工工号！", title: "警告" });
+                }
+            });
+            $("#btnSlaves").tap(function () {
+                $honesty.UploadSlaves("tbSlaves");
+            });
+
+            //提交
+            $("#btnSend").unbind("tap").tap(function () {
+
+                if ($("#PromoteID").val() == "") {
+                    $honesty.ShowMsg({ msg: "请先填写工号！", title: "警告", });
+                }
+                else
+                    if (SaveData()) {
+                        $honestyFlow.SendFlow();
+                    }
+            });
+            //暂存
+            $("#btnPause").unbind("tap").tap(function () {
+                if ($("#PromoteID").val() == "") {
+                    $honesty.ShowMsg({ msg: "请先填写工号！", title: "警告", });
+                }
+                else
+                    if (SaveData()) {
+                        $honestyFlow.PauseFlow();
+                    }
+            });
+            //完成
+            $("#btnComplete").unbind("tap").tap(function () {
+                var NowDate = $honesty.NowDate();
+                var EmpPromote = {
+                    PostData: {
+                        ITable: {
+                            "PTI_JSBD": [{
+                                ZEMID: $("#EmpID").val(),
+                                ZLSDH: $honestyFlow.GetFlowInfo("sn"),
+                                ZTBRQ: NowDate,
+                                ZJSID: $("#PromoteID").val(),
+                                ZJSGW: $("#NewLevelDesc").val(),
+                                ZSPRQ: NowDate,
+                                ZSPSJ: NowDate,
+                                ZJSRQ: $("#PromoteDate").val(),
+                                Z_SAPCODE: $("#PromoteSapCode").val(),
+                                ZXQGW: $("#PromoteLevelDesc").val(),
+                            }]
+                        },
+                        Export: [
+                            "POC_RETURN_ID",
+                            "POC_RETURN_DESC"
+                        ],
+                        FunctionName: "ZHR_FM_JS_INPUT",
+                        Mode: "RFC"
+                    },
+                    async: false
+                };
+                var _result = $honesty.AjaxChannel(EmpPromote);
+                if (_result.Code == "1") {
+                    if (_result.Data.Export.POC_RETURN_ID == "000") {
+                        $honestyFlow.CompleteFlow();
+                    }
+                    else {
+                        $honesty.ShowMsg({ msg: _result.Data.Export.POC_RETURN_DESC, title: "警告" });
+                    }
+                }
+            });
+        })
+    };
+    //加载基础信息
+    function InitBase() {
+        if ($honestyFlow.GetFlowInfo("isread") == "false") {
+            IsRead = true;
+        }
+        if (PromoteID != "") {
+            var _options = {
+                PostData: {
+                    Params: {
+                        Result: "InitEmpPromote",
+                        ID: PromoteID
+                    },
+                    ProcName: "proc_SOM_HR_EmpPromote",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        $.each(_result.Data, function (i, item) {
+                            $("#InfoWriteDate").html(item.WriteDate);
+                            $("#InfoEmpCode").html(item.EmpCode);
+                            $("#InfoEmpName").html(item.EmpName);
+                            $("#InfoAreaName").html(item.AreaName);
+                            $("#InfoProvince").html(item.Province);
+                            $("#InfoShopName").html(item.ShopName);
+                            $("#InfoEmpPosition").html(item.EmpPosition);
+                            $("#InfoSapCode").html(item.SapCode);
+                            //加载附件列表
+                            $honesty.InitSlaves({
+                                con_id: "tbSlaves", dataname: "tbSlaves", move: IsRead, files: item.Slaves
+                            });
+                            $("#PromoteCode").val(item.PromoteCode);
+                            $("#PromoteName").val(item.PromoteName);
+                            $("#PromoteShopName").val(item.PromoteShopName);
+                            $("#PromoteInDate").val(item.PromoteInDate);
+                            $("#PositionAge").val(item.PositionAge);
+                            $("#PromotePosition").val(item.PromotePosition);
+                            $("#PromoteType").val(item.PromoteType);
+                            $("#PromoteDate").val(item.PromoteDate);
+                            $("#NewPosition").val(item.NewLevelDesc);
+                            //$("#AgeAccord").val(item.AgeAccord);
+                            $("#TrainScore").val(item.TrainScore);
+                            $("#Exhibit").val(item.Exhibit);
+                            $("#Performance").val(item.Performance);
+                            $("#TrainCount").val(item.TrainCount);
+                            $("#Tardy").val(item.Tardy);
+                            $("#Absent").val(item.Absent);
+                            $("#AchieveRate").val(item.AchieveRate);
+                            $("#Ranking").val(item.Ranking);
+                            $("#RankInfo").val(item.RankInfo);
+                            $("#Appraise").val(item.Appraise);
+                            $("#EmpID").val(item.EmpID);
+                            $("#Casual").val(item.Casual);
+                            $("#Sick").val(item.Sick);
+                            $("#PromoteID").val(item.PromoteID);
+                            $("#PromoteLevelDesc").val(item.PromoteLevelDesc);
+                            $("#PromoteSapCode").val(item.PromoteSapCode);
+                            $("#NewEmpLevel").val(item.NewEmpLevel);
+                            $("#NewLevelDesc").val(item.NewLevelDesc);
+                            $("#TestSubject").val(item.TestSubject);
+
+                        });
+                        _ContentList = "";
+                        var trList = $("#RankInfo").val().split("|");
+                        for (var i = 0 ; i < trList.length; i++) {
+                            var tdList = trList[i].split(",");
+                            if ($("#NewLevelDesc").val() == "H1") {
+                                _ContentList += "<tr><td>" + tdList[0] + "</td><td>" + tdList[1] + "</td><td>" + tdList[2] + "</td><td>" + tdList[3] + "</td><td>" + tdList[4] + "</td><tr>";
+                            }
+                            else {
+                                _ContentList += "<tr><td>" + tdList[0] + "</td><td>" + tdList[1] + "</td><td>" + tdList[2] + "</td><td>" + tdList[3] + "</td><tr>";
+                            }
+                        }
+                        if ($("#NewLevelDesc") == "F3") {
+                            $("div[name='shopowner']").css("display", "none");
+                            $("div[name='shopguide']").css("display", "");
+                        }
+                        else {
+                            $("div[name='shopowner']").css("display", "");
+                            $("div[name='shopguide']").css("display", "none");
+                        }
+                        var ProLv = $.inArray($("#PromoteLevelDesc").val(), arry);
+                        for (var i = 0 ; i <= ProLv; i++) {
+                            $("#NewPosition option:eq(" + i + ")").attr("disabled", "disabled");
+                        }
+                    }
+                    if (IsRead) {
+                        $("#divMain input").attr("readonly", "readonly");
+                        $("#divMain select").attr("disabled", "disabled");
+                        $("#btnSlaves,#btnClear").hide();
+                    }
+                }
+            })
+        }
+        else {
+            PromoteID = $honestyFlow.GetFlowInfo("instanceid");
+            $("#InfoWriteDate").html($honesty.NowDate().Format("yyyy-MM-dd"));
+            $("#InfoEmpCode").html(GetSession("UserCode"));
+            $("#InfoEmpName").html(GetSession("UserName"));
+            $("#InfoAreaName").html(GetSession("AreaName"));
+            $("#InfoProvince").html(GetSession("Province"));
+            $("#InfoShopName").html(GetSession("ShopName"));
+            $("#InfoEmpPosition").html(GetSession("Position"));
+            $("#InfoSapCode").html(GetSession("SapCode"));
+        }
+    }
+    //工号
+    function UserInfo() {
+        $("#Div1 input").val("");
+        $("#Div1 select").val("");
+        $("#Div2 input").val("");
+        $("#Div2 select").val("");
+        $("#Div3 input").val("");
+
+        if ($("#PromoteCode").val() == GetSession("UserCode")) {
+            $honesty.ShowMsg({ msg: "不可发起本人的晋升流程！", title: "警告" });
+            $("#PromoteCode").val("");
+            return false;
+        }
+        $honesty.GetUserInfo({
+            account: $("#PromoteCode").val(), callback: function (ret) {
+                if (ret.Code == 1) {
+                    if (GetSession("EmpLevel") == "F") {
+                        if (GetSession("OrganizeID") != ret.Data.OrganizeID) {
+                            $("#PromoteCode").val("");
+                            $honesty.ShowMsg({ msg: "该员工不是本店员工,请重新输入工号！", title: "警告" });
+                            return false;
+                        }
+                    }
+                    if (ret.Data.IsInstead == "True" && ret.Data.LevelDesc == "H4") {
+                        $("#PromotePosition").val(ret.Data.Position + "(代班)");
+                    }
+                    else {
+                        $("#PromotePosition").val(ret.Data.Position);
+                    }
+                    $("#PromoteName").val(ret.Data.UserName);
+                    $("#PromoteShopName").val(ret.Data.ShopName);
+                    $("#PromoteInDate").val(ret.Data.CreateDate);
+                    $("#PromoteLevelDesc").val(ret.Data.LevelDesc);
+                    $("#PromoteSapCode").val(ret.Data.SapCode);
+                    $("#ProIsInstead").val(ret.Data.IsInstead);
+                    $("#PromoteID").val(ret.Data.UserID);
+                }
+                else {
+                    $honesty.ShowMsg({
+                        msg: "该工号不存在！", title: "警告", callback: function () {
+                            $("#PromoteCode").val("");
+                        }
+                    });
+                }
+            }
+        })
+    }
+    //晋升时间
+    function PromoteDate() {
+        var _Date = new Date($("#PromoteDate").val());
+        var _PromoteDate = _Date.getFullYear() + "/" + (_Date.getMonth() + 1) + "/" + "01";
+        $("#PromoteDate").val(new Date(_PromoteDate).Format("yyyy/MM/dd"));
+        if ($("#PromoteID").val() != "") {
+            if ($("#PromoteType").val() == "") {
+                $honesty.ShowMsg({
+                    msg: "请先选择晋升类型！", title: "警告", callback: function () {
+                        $("#PromoteDate").val("");
+                    }
+                });
+            }
+            else if ($("#NewPosition").val() == "") {
+                $honesty.ShowMsg({
+                    msg: "请先选择晋升后岗位！", title: "警告", callback: function () {
+                        $("#PromoteDate").val("");
+                    }
+                });
+            }
+            else {
+                var _options = {
+                    PostData: {
+                        Import: {
+                            I_DATE1: $("#PromoteDate").val(),
+                            I_EMPID: $("#PromoteID").val(),
+                        },
+                        Export: [
+                            "O_DATE2",
+                            "O_GL",
+                            "POC_RETURN_DESC",
+                            "POC_RETURN_ID"
+                        ],
+                        FunctionName: "ZHR_FM_GLHQ",
+                        Mode: "RFC"
+                    },
+                    async: false
+                };
+                var _result = $honesty.AjaxChannel(_options);
+                if (_result.Code == "1") {
+                    $("#PositionAge").val(_result.Data.Export.O_GL);
+                    $("#positionDate").val(_result.Data.Export.O_DATE2);
+                    if ($("#PromoteType").val() == "晋升") {
+                        switch ($("#NewPosition").val()) {
+                            case "H1":
+                                if ($("#PositionAge").val() < 6) {
+                                    $honesty.ShowMsg({
+                                        msg: "岗龄不符合，请重新确认！", title: "警告", callback: function () {
+                                            $("#PromoteDate").val("");
+                                        }
+                                    });
+                                    return false
+                                }
+                                break;
+                            case "F3":
+                                if ($("#PositionAge").val() < 6) {
+                                    $honesty.ShowMsg({
+                                        msg: "岗龄不符合，请重新确认！", title: "警告", callback: function () {
+                                            $("#PromoteDate").val("");
+                                        }
+                                    });
+                                    return false
+                                }
+                                break;
+
+                            case "F2":
+                                if ($("#PositionAge").val() < 6) {
+                                    $honesty.ShowMsg({
+                                        msg: "岗龄不符合，请重新确认！", title: "警告", callback: function () {
+                                            $("#PromoteDate").val("");
+                                        }
+                                    });
+                                    return false
+                                }
+                                break;
+                            case "F1":
+                                if ($("#PositionAge").val() < 3) {
+                                    $honesty.ShowMsg({
+                                        msg: "岗龄不符合，请重新确认！", title: "警告", callback: function () {
+                                            $("#PromoteDate").val("");
+                                        }
+                                    });
+                                    return false
+                                }
+                                break;
+                            case "E1":
+                                if (($("#PromoteLevelDesc").val() == "F3" && $("#PositionAge").val() < 12) || ($("#PromoteLevelDesc").val() == "F2" && $("#PositionAge").val() < 9) || ($("#PromoteLevelDesc").val() == "F1" && $("#PositionAge").val() < 6)) {
+                                    $honesty.ShowMsg({
+                                        msg: "岗龄不符合，请重新确认！", title: "警告", callback: function () {
+                                            $("#PromoteDate").val("");
+                                        }
+                                    });
+                                    return false
+                                }
+                                break;
+                        }
+                    }
+                    var _JMonth = _Date.getMonth() + 1;
+                    var _JYear = _Date.getFullYear();
+                    var _SDate = new Date($("#positionDate").val());
+                    var _SYear = _SDate.getFullYear();
+                    var _SMonth = _SDate.getMonth() + 1;
+                    //获取考勤数据
+                    var _options = {
+                        PostData: {
+                            Params: {
+                                Result: "InitDayAttend",
+                                EmpID: $("#PromoteID").val(),
+                                JYear: _JYear,
+                                JMonth: _JMonth,
+                                SYear: _SYear,
+                                SMonth: _SMonth,
+                                PromoteLevelDesc: $("#PromoteLevelDesc").val()
+                            },
+                            ProcName: "proc_SOM_HR_EmpPromote",
+                            DataType: "DataTable",
+                            ExecType: "PROC",
+                            Mode: "MSSQL"
+                        },
+                        async: false
+                    };
+                    var _result = $honesty.AjaxChannel(_options);
+                    if (_result.Code == "1") {
+                        if (_result.Data.length > 0) {
+                            $.each(_result.Data, function (i, item) {
+                                $("#Tardy").val(item.TardyCount)
+                                $("#Absent").val(item.AbsentDay);
+                                $("#Casual").val(item.CasualDay);
+                                $("#Sick").val(item.SickDay);
+                            });
+                        }
+                    }
+
+                    //获取业绩达成率
+                    var _optionsKip = {
+                        PostData: {
+                            Params: {
+                                result: "GetSaleKip",
+                                EmpID: $("#PromoteID").val(),
+                                ApplyDate: $("#PromoteDate").val()
+                            },
+                            ProcName: "proc_SOM_HR_EmpTransfer",
+                            DataType: "DataTable",
+                            ExecType: "PROC",
+                            Mode: "MSSQL"
+                        },
+                        async: false
+                    };
+                    var _resultKip = $honesty.AjaxChannel(_optionsKip);
+                    if (_resultKip.Code == "1") {
+                        var Sumrate = 0;
+                        var Counts = 0;
+                        var Content = "";
+                        _ContentList = "";
+                        var _RankInfo = "";
+                        Ranking = "";
+                        if (_resultKip.Data.length > 0) {
+                            if ($("#NewPosition").val() == "H1" || $("#PromoteType").val() == "晋升") {
+                                $.each(_resultKip.Data, function (i, item) {
+                                    if (item.WageLevel == "1") {
+                                        if (i != _resultKip.Data.length - 1) {
+                                            _RankInfo += item.ZYear + "," + item.ZMonth + "," + item.OrgRank + "," + item.AreaRank + "," + item.WageLevel + "|";
+                                        }
+                                        else {
+                                            _RankInfo += item.ZYear + "," + item.ZMonth + "," + item.OrgRank + "," + item.AreaRank + "," + item.WageLevel;
+                                        }
+                                        _ContentList += "<tr style=' font-size: 13px'><td>" + item.ZYear + "</td><td>" + item.ZMonth + "</td><td>" + item.OrgRank + "</td><td>" + item.AreaRank + "</td><td>" + item.WageLevel + "</td><tr>"
+                                        Sumrate += Number(item.rate);
+                                        Content += item.ZYear + "年" + item.ZMonth + "月该员工在当前店铺排名为" + item.OrgRank + ",大区同级别员工中排名为" + item.AreaRank + ",薪资档级为" + item.WageLevel + "\n";
+                                        Counts++;
+                                    }
+                                    else {
+                                        $honesty.ShowMsg({ msg: "薪资档级未满足晋升条件！", title: "警告" });
+                                        return false;
+                                    }
+                                });
+                            }
+                            else {
+                                $.each(_resultKip.Data, function (i, item) {
+                                    if (i != _resultKip.Data.length - 1) {
+                                        _RankInfo += item.ZYear + "," + item.ZMonth + "," + item.OrgRank + "," + item.AreaRank + "," + item.WageLevel + "|";
+                                    }
+                                    else {
+                                        _RankInfo += item.ZYear + "," + item.ZMonth + "," + item.OrgRank + "," + item.AreaRank + "," + item.WageLevel;
+                                    }
+                                    _ContentList += "<tr style=' font-size: 13px'><td>" + item.ZYear + "</td><td>" + item.ZMonth + "</td><td>" + item.OrgRank + "</td><td>" + item.AreaRank + "</td><tr>"
+                                    Sumrate += Number(item.rate);
+                                    Content += item.ZYear + "年" + item.ZMonth + "月该员工在当前店铺排名为" + item.OrgRank + ",大区同级别员工中排名为" + item.AreaRank + "\n";
+                                    Counts++;
+                                });
+                            }
+                            $("#Ranking").val(Content);
+                            $("#AchieveRate").val(Number((Sumrate / Counts)).toFixed(2) + "%");
+                            $("#RankInfo").val(_RankInfo);
+                        }
+                        else {
+                            $honesty.ShowMsg({ msg: "暂无该员工业绩", title: "警告" });
+                        }
+                    }
+                }
+            }
+        }
+        else {
+            $honesty.ShowMsg({
+                msg: "请选择晋升员工工号！", title: "警告", callback: function () {
+                    $("#PromoteDate").val("");
+                }
+            });
+        }
+    }
+    function SaveData() {
+        if ($honestyFlow.GetFlowInfo("stepname") == "发起晋升申请") {
+            var _options = {
+                PostData: {
+                    Params: {
+                        Result: "IsPromoteStatus",
+                        EmpID: GetSession("UserID"),
+                        PromoteID: $("#PromoteID").val(),
+                        SN: $("#InfoSN").html()
+                    },
+                    ProcName: "proc_SOM_HR_EmpPromote",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                async: false
+            };
+            var _result = $honesty.AjaxChannel(_options);
+            var _Erre = true;
+            if (_result.Data.length > 0) {
+                $.each(_result.Data, function (i, item) {
+                    $honesty.ShowMsg({ msg: "相同的晋升申请流程已存在，请先完成！流程信息：" + item.SN, title: "警告" });
+                    _Erre = false;
+                });
+            }
+            else {
+                if (_Erre == false) {
+                    return false;
+                }
+                if ($("#PromoteCode").val() == "") {
+                    $honesty.ShowMsg({ msg: "请填写员工工号", title: "警告" });
+                    return false;
+                }
+                if ($("#PromoteDate").val() == "") {
+                    $honesty.ShowMsg({ msg: "请选择晋升时间", title: "警告" });
+                    return false;
+                }
+                if ($.trim($("#TrainScore").val()) == "") {
+                    $("#TrainScore").val(0);
+                }
+
+                if ($("#PromoteType").val() == "晋升") {
+                    var AchieveRate = $("#AchieveRate").val().split("%");
+                    if ($("#NewLevelDesc").val() < 'F3') {
+                        if (AchieveRate < 80) {
+                            $honesty.ShowMsg({ msg: "业绩达成率没达到80%，晋升条件不符!", title: "警告" });
+                            return false;
+                        }
+                    }
+                    if ($("#NewLevelDesc").val() == "F3") {
+                        if ($("#TestSubject").val() != "通过") {
+                            $honesty.ShowMsg({ msg: "储备店长训练营未通过，不能提交", title: "警告" });
+                            return false;
+                        }
+                    }
+                    if ($("#Exhibit").val() == "") {
+                        $honesty.ShowMsg({ msg: "请选择陈列结果", title: "警告" });
+                        return false;
+                    }
+                    if ($("#Ranking").val() == "") {
+                        $honesty.ShowMsg({ msg: "薪资档级不符合晋升要求！", title: "警告" });
+                        return false;
+                    }
+                    if ($("#PromoteLevelDesc").val() <= 'G1') {
+                        if ($("#Performance").val() == "") {
+                            $honesty.ShowMsg({ msg: "请填写转正综合绩效成绩", title: "警告" });
+                            return false;
+                        }
+                        if ($("#TrainCount").val() == "") {
+                            $honesty.ShowMsg({ msg: "请填写储备人员培养人数", title: "警告" });
+                            return false;
+                        }
+                        if (valid_int($.trim($("#TrainCount").val()))) {
+                            $honesty.ShowMsg({ msg: "培养人数为数字", title: "警告" });
+                            return false;
+                        }
+                    }
+                }
+                var Slaves = "";
+                $.each($("#tbSlaves tr[dataname='tbSlaves']"), function (i, item) {
+                    Slaves += $(item).attr("value") + "|";
+                });
+                if ($.trim($("#TrainCount").val()) == "") {
+                    $("#TrainCount").val(0);
+                }
+                if ($("#Performance").val() == "") {
+                    $("#Performance").val(0);
+                }
+                if ($("#Tardy").val() == "") {
+                    $("#Tardy").val(0);
+                }
+                if ($("#Casual").val() == "") {
+                    $("#Casual").val(0.0);
+                }
+                if ($("#Sick").val() == "") {
+                    $("#Sick").val(0.0);
+                }
+                if ($("#Absent").val() == "") {
+                    $("#Absent").val(0);
+                }
+                if ($("#Leave").val() == "") {
+                    $("#Leave").val(0);
+                }
+                if ($("#Ranking").val() == "") {
+                    $("#Ranking").val(0);
+                }
+                var _options = {
+                    PostData: {
+                        Params: {
+                            Result: "ModifyEmpPromote",
+                            ID: PromoteID,
+                            SN: $honestyFlow.GetFlowInfo("SN"),
+                            EmpID: GetSession("UserID"),
+                            EmpCode: GetSession("UserCode"),
+                            EmpName: GetSession("UserName"),
+                            OrganizeID: GetSession("OrganizeID"),
+                            AreaName: GetSession("AreaName"),
+                            Province: GetSession("Province"),
+                            CompanyName: GetSession("CompanyCode"),
+                            ShopCode: GetSession("ShopCode"),
+                            SapCode: GetSession("SapCode"),
+                            ShopName: GetSession("ShopName"),
+                            EmpPosition: GetSession("Position"),
+                            EmpLevel: GetSession("EmpLevel"),
+                            LevelDesc: GetSession("LevelDesc"),
+                            PromoteID: $("#PromoteID").val(),
+                            PromoteCode: $("#PromoteCode").val(),
+                            PromoteName: $("#PromoteName").val(),
+                            PromoteShopName: $("#PromoteShopName").val(),
+                            PromoteInDate: $("#PromoteInDate").val(),
+                            PositionAge: $("#PositionAge").val(),
+                            PromotePosition: $("#PromotePosition").val(),
+                            PromoteLevelDesc: $("#PromoteLevelDesc").val(),
+                            PromoteSapCode: $("#PromoteSapCode").val(),
+                            PromoteType: $("#PromoteType").val(),
+                            PromoteDate: $("#PromoteDate").val(),
+                            NewPosition: $("#NewPosition").find("option:selected").text(),
+                            NewEmpLevel: $("#NewEmpLevel").val(),
+                            NewLevelDesc: $("#NewLevelDesc").val(),
+                            TrainScore: $("#TrainScore").val(),
+                            Exhibit: $("#Exhibit").val(),
+                            TrainState: $("#TrainState").val(),          ///储备店长训练情况
+                            Performance: $.trim($("#Performance").val()),
+                            TestSubject: $("#TestSubject").val(),
+                            TrainCount: $.trim($("#TrainCount").val()),
+                            Tardy: $("#Tardy").val(),
+                            Absent: $("#Absent").val(),
+                            Sick: $("#Sick").val(),
+                            Casual: $("#Casual").val(),
+                            AchieveRate: $("#AchieveRate").val(),
+                            Ranking: $("#Ranking").val(),
+                            RankInfo: $("#RankInfo").val(),
+                            Appraise: $("#Appraise").val(),
+                            Slaves: Slaves,
+                            Title: $honestyFlow.GetFlowInfo("title"),
+                        },
+                        ProcName: "proc_SOM_HR_EmpPromote",
+                        DataType: "Bool",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    },
+                    async: false
+                };
+                var _result = $honesty.AjaxChannel(_options);
+                if (_result.Code == "1") {
+                    if (_result.Data == "True") {
+                        return true;
+                    }
+                    else {
+                        $honesty.ShowMsg({ msg: "业务数据保存失败", title: "警告" });
+                        return false;
+                    }
+                }
+            }
+        }
+        else {
+            return true;
+        }
+    }
+</script>
+</html>

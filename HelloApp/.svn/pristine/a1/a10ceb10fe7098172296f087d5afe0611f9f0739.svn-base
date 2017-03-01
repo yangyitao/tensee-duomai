@@ -1,0 +1,194 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>店铺销售</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        body {
+            background: #fff;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        td, th {
+            padding: 0;
+        }
+
+        .aui-list-view-cell {
+            padding: 5px;
+        }
+
+        .form {
+            width: 100%;
+            text-align: center;
+            font-size: 13px;
+            border-collapse: collapse;
+        }
+
+            .form td, .form th {
+                border: 1px solid rgba(216, 216, 216, 0.1);
+                height: 35px;
+                letter-spacing: 0.4px;
+            }
+
+            .form th {
+                font-weight: 400;
+            }
+
+            .form tbody td {
+                color: #8f8f94;
+                height: 40px;
+            }
+
+            .form thead tr:last-child td {
+                border-bottom: 1px solid rgba(216, 216, 216, 0.5);
+            }
+
+        ::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="aui-content" style="margin-bottom: 0px;">
+        <table style="table-layout: fixed;">
+            <tr>
+                <td>
+                    <table class="form" style="width: 150px">
+                        <thead>
+                            <tr>
+                                <td style="width: 150px">店铺名称</td>
+                            </tr>
+                        </thead>
+                    </table>
+                </td>
+                <td>
+                    <div id="divTitle" style="overflow-x: scroll">
+                        <table class="form" style="width: 440px">
+                            <thead>
+                                <tr>
+                                    <td style="width: 70px">月目标</td>
+                                    <td style="width: 70px">月实际</td>
+                                    <td style="width: 80px">达成</td>
+                                    <td style="width: 80px">同比</td>
+                                    <td style="width: 70px">折扣</td>
+                                    <td style="width: 70px">昨日销售</td>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div id="divShopName" style="width: 150px; overflow: hidden;">
+                        <table class="form" style="min-width: 150px">
+                            <tbody id="tbShopName">
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+                <td>
+                    <div id="divBody" style="width: 200px; overflow-x: scroll;">
+                        <table class="form" style="width: 440px">
+                            <tbody id="tbList">
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>
+
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+
+            $("#divBody").width(window.screen.width - 150);
+            $("#divTitle").width(window.screen.width - 150);
+            $("#divBody").height(api.frameHeight - $("#divTitle").height());
+            $("#divShopName").height(api.frameHeight - $("#divTitle").height());
+
+            LoadData();
+
+            $("#divBody").scroll(function () {
+                $("#divTitle").scrollLeft($("#divBody").scrollLeft());
+                $("#divShopName").scrollTop($("#divBody").scrollTop());
+            });
+        });
+
+    }
+
+    function LoadData() {
+        var _options = {};
+        if (GetSession("Form_SalePower").indexOf("All") >= 0) {
+            _options = {
+                PostData: {
+                    Params: { "Result": "GetShopForm_All" },
+                    ProcName: "proc_Index_SaleForm",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+        }
+        else if (GetSession("Form_SalePower").indexOf("Regional") >= 0) {
+            _options = {
+                PostData: {
+                    Params: { "Result": "GetShopForm_Regional", "Regional": GetSession("AreaName") },
+                    ProcName: "proc_Index_SaleForm",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+        }
+        else {
+            _options = {
+                PostData: {
+                    Params: { "Result": "GetShopForm_Online", "UserID": GetSession("UserID") },
+                    ProcName: "proc_Index_SaleForm",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+        }
+
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    var _Content = "";
+                    var _ShopList = "";
+                    $.each(_result.Data, function (i, item) {
+                        _ShopList += '<tr><td style="width: 150px;text-align:left;font-size:11px">' + item.ShopName + '</td></tr>'
+                        _Content += '<tr>' +
+                                    '<td style="width: 70px">' + item.MonthTargetSale + '</td>' +
+                                    '<td style="width: 70px;color:#000">' + item.MonthActualSale + '</td>' +
+                                    '<td style="width: 80px;color:#3175af">' + item.SaleRate + '%</td>' +
+                                    '<td style="width: 80px">' + item.YearOnYear + '%</td>' +
+                                    '<td style="width: 70px">' + item.Discount + '%</td>' +
+                                    '<td style="width: 70px">' + item.DayActualSale + '</td>' +
+                                    '</tr>';
+                    });
+                    $("#tbList").html(_Content);
+                    $("#tbShopName").html(_ShopList);
+                }
+                else {
+                    $("#tbList").html('<tr><td style="text-align:left">尊敬的用户，您好，无销售数据</td></tr>');
+                }
+            }
+        });
+    }
+</script>

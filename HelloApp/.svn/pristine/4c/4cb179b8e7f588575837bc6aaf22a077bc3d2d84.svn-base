@@ -1,0 +1,101 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>员工目标（月计划）</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="aui-content">
+        <p class="aui-padded-5 aui-text-center">员工列表</p>
+        <ul class="aui-list-view aui-in" id="ulEmpList">
+        </ul>
+    </div>
+</body>
+</html>
+
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _MonthID, _IsSend, _IsSubmit, _IsLeader;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _MonthID = api.pageParam.MonthID;
+            _IsSend = api.pageParam.IsSend;
+            _IsSubmit = api.pageParam.IsSubmit;
+            _IsLeader = api.pageParam.IsLeader;
+
+            LoadData();
+
+        });
+
+        //本月目标保存监听事件
+        api.addEventListener({
+            name: 'Sale_MonthSale_EmpTargetInfo'
+        }, function (ret) {
+            if (ret && ret.value) {
+                if ($("[data-empid='" + ret.value.EmpID + "']").hasClass("aui-badge-danger"))
+                {
+                    $("[data-empid='" + ret.value.EmpID + "']").removeClass("aui-badge-danger");
+                    $("[data-empid='" + ret.value.EmpID + "']").addClass("aui-badge-success");
+                    $("[data-empid='" + ret.value.EmpID + "']").html("span").html("已维护");
+                }
+            }
+        });
+
+    }
+
+    //数据加载函数
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "GetEmpList",
+                    MonthID: _MonthID
+                },
+                ProcName: "PROC_SOM_ISR_MS_EmpTarget",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                var _Content = "";
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        _Content += "<li class='aui-list-view-cell' tapmode onclick=\"EmpClick(\'" + item.UserID + "\')\"><a class='aui-arrow-right'>" +
+                                    "<label>" + item.Name + "</label><p>" + item.Title + "</p>" +
+                                    "<span class='aui-badge " + (item.ID == "" ? "aui-badge-danger" : "aui-badge-success") + "' data-empid='" + item.UserID + "'>" +
+                                    (item.ID == "" ? "未维护" : "已维护") + "</span></a></li>";
+                    });
+                }
+                $("#ulEmpList").html(_Content);
+                api.parseTapmode();
+            }
+        });
+    }
+
+    //员工列表点击
+    function EmpClick(empID) {
+        
+        $honesty.OpenWin({
+            name: "Sale_MonthSale_EmpTargetInfo",
+            url: "Sale/MonthSale/EmpTargetInfo.html",
+            title: "月计划",
+            LevelNum: 2,
+            pageParam: {
+                MonthID: _MonthID,
+                IsSend: _IsSend,
+                EmpID: empID,
+                IsSubmit: _IsSubmit,
+                IsLeader: _IsLeader
+            }
+        });
+    }
+</script>

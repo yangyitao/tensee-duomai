@@ -1,0 +1,90 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>通知信息主页面</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div style="height: 10px;"></div>
+    <div class="aui-content-padded" id="divTab">
+        <div class="aui-tab">
+            <ul class="aui-tab-nav aui-tab-border" id="ulTab">
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            var y = $honesty.RangeTop(110);
+            var frames = [];
+            var _options = {
+                PostData: {
+                    Params: {
+                        result: "InitPType"
+                    },
+                    ProcName: "proc_SOM_ISR_InformInfo",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                async: false
+            };
+            var _result = $honesty.AjaxChannel(_options);
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        frames.push(
+                            {
+                                name: item.ID,
+                                url: "InformList.html",
+                                bounces: false,
+                                pageParam: {
+                                    Date1: api.pageParam.StartDate,
+                                    Date2: api.pageParam.EndDate,
+                                    InfoTitle: api.pageParam.Title,
+                                    InfoPType: item.ID,
+                                    UserName: api.pageParam.CreateName,
+                                    PTypeName: item.Title
+                                }
+                            });
+                        $("#ulTab").append('<li data-role="title" ' + (i == 0 ? 'class="active"' : "") + ' data-index="' + i + '">' + item.Title + '</li>');
+                    });
+                    $("[data-role='title']").unbind("tap").tap(function () {
+                        if (!$(this).hasClass("active")) {
+                            $("[data-role='title']").removeClass("active");
+                            $(this).addClass("active");
+                            api.setFrameGroupIndex({
+                                name: "Info_Inform_Tab",
+                                index: $(this).attr("data-index"),
+                                scroll: true
+                            });
+                        }
+                    });
+                }
+            }
+            api.openFrameGroup({
+                name: "Info_Inform_Tab",
+                scrollEnabled: true,
+                rect: { x: 0, y: y, w: "auto", h: "auto" },
+                index: 0,
+                preload: 0,
+                frames: frames
+            },
+             function (ret, err) {
+                 var index = ret.index;
+                 $("#ulTab").find(".active").removeClass("active");
+                 $("[data-index='" + index + "']").addClass("active");
+             });
+        });
+    }
+</script>

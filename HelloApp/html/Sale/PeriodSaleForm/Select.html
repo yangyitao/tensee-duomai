@@ -1,0 +1,94 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>时段报数报表查询</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-input-row .aui-input-addon {
+            width: 80px;
+        }
+    </style>
+</head>
+<body>
+    <div style="height: 10px;"></div>
+    <div class="aui-content aui-card">
+        <div class="aui-form aui-input-form">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">店铺</span>
+                <input id="OrganizeID" type="text" class="aui-input" placeholder="点击选择店铺" readonly="readonly" />
+            </div>
+            <div class="aui-btn-row">
+                <div id="btnSearch" class="aui-btn aui-btn-block aui-btn-info">
+                    查询
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _Date;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _Date = $honesty.NowDate();
+            //初始化日期
+            $("#StartDate").val(_Date.Format("yyyy-MM-dd") + " 00:00");
+            $("#EndDate").val(_Date.Format("yyyy-MM-dd hh:mm"));
+
+            //日期点击
+            $("#StartDate").tap(function () {
+                $honesty.DateTimeSelect({
+                    LevelNum: 2,
+                    Type: "DateTime",
+                    ControlID: "StartDate",
+                    ControlValue: $("#StartDate").val()
+                });
+            });
+            $("#EndDate").tap(function () {
+                $honesty.DateTimeSelect({
+                    LevelNum: 2,
+                    Type: "DateTime",
+                    ControlID: "EndDate",
+                    ControlValue: $("#EndDate").val()
+                });
+            });
+
+            $("#OrganizeID").tap(function () {
+                $honesty.Organize({
+                    control: "OrganizeID", ismore: "false", typemode: "S", isowner: true,
+                    callback: function () {
+                    }
+                });
+            });
+
+
+            //查询按钮点击
+            $("#btnSearch").tap(function () {
+                $honesty.OpenWin({
+                    title: "时段报数",
+                    name: "Sale_PeriodSaleForm_PeriodSaleForm",
+                    url: "Sale/PeriodSaleForm/PeriodSaleForm.html",
+                    LevelNum: 2,
+                    pageParam: {
+                        OrganizeID: ($("#OrganizeID").data("listid") != "" && $("#OrganizeID").data("listid") != undefined) ? $("#OrganizeID").data("listid")[0] : ""
+                    }
+                });
+            });
+
+
+        });
+
+    }
+
+
+
+
+
+</script>
+</html>

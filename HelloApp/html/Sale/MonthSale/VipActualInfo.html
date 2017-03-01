@@ -1,0 +1,345 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>VIP实际信息维护（月计划）</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-input-row .aui-input-addon {
+            width: 80px;
+        }
+    </style>
+</head>
+<body>
+    <div class="aui-content">
+        <p class="aui-padded-5 aui-text-center">生日VIP</p>
+        <div class="aui-form aui-input-form" data-role="vipTarget">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">金卡</span>
+                <input id="GoldenCardSale" type="text" class="aui-input" placeholder="请输入正整数" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">银卡</span>
+                <input id="SilverCardSale" type="text" class="aui-input" placeholder="请输入正整数" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">积分卡</span>
+                <input id="IntegalCardSale" type="text" class="aui-input" placeholder="请输入正整数" />
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-center">升级VIP</p>
+        <div class="aui-form aui-input-form" data-role="vipTarget">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">金卡</span>
+                <input id="GoldenCardNum" type="text" class="aui-input" placeholder="请输入正整数" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">银卡</span>
+                <input id="SilverCardNum" type="text" class="aui-input" placeholder="请输入正整数" />
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-center">新VIP</p>
+        <div class="aui-form aui-input-form" data-role="vipTarget">
+            <div class="aui-input-row">
+                <span class="aui-input-addon" style="width: 130px;">积分卡</span>
+                <input id="NewIntegalNum" type="text" class="aui-input" placeholder="请输入正整数" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon" style="width: 130px;">将失效卡的激活</span>
+                <input id="NewVIPNum" type="text" class="aui-input" placeholder="请输入正整数" />
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-center">KPI</p>
+        <div class="aui-form aui-input-form aui-input-disabled" data-role="vipTarget">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">客单件</span>
+                <input id="CustomerSingle" type="text" class="aui-input" placeholder="请输入一位小数或正整数" readonly="readonly" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">客单价</span>
+                <input id="CustomerUnitPrice" type="text" class="aui-input" placeholder="请输入正整数" readonly="readonly" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">单数</span>
+                <input id="OrderNum" type="text" class="aui-input" placeholder="请输入正整数" readonly="readonly" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">件数</span>
+                <input id="ClothesNum" type="text" class="aui-input" placeholder="请输入正整数" readonly="readonly" />
+            </div>
+            
+        </div>
+    </div>
+
+    <div id="divFooter" style="height:40px; display:none" ></div>
+    <footer class="aui-nav" id="footer" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7; display: none">
+        <div id="btnSave" class="aui-btn aui-btn-block aui-btn-info" style="height: 45px; width: 100%; line-height: 0.9;">
+            保存
+        </div>
+    </footer>
+</body>
+</html>
+
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script src="../../../script/honesty.valid.js"></script>
+<script type="text/javascript">
+    var _MonthID, _IsSend, _IsLeader;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _MonthID = api.pageParam.MonthID;
+            _IsSend = api.pageParam.IsSend;
+            _IsLeader = api.pageParam.IsLeader;
+
+            if (_IsSend == "True" && _IsLeader == "False") {
+                $(".aui-input").attr("readonly", "readonly");
+                $("[data-role='vipTarget']").addClass("aui-input-disabled");
+            }
+            else {
+                $("#footer").css("display", "");
+                $("#divFooter").css("display", "");
+            }
+            LoadData();
+
+            //保存按钮点击
+            $("#btnSave").tap(function () {
+                if (CheckInfo()) {
+                    var _options = {
+                        PostData: {
+                            Params: {
+                                Result: "ModifyInfo",
+                                MonthID: _MonthID,
+                                ID: "2",
+                                GoldenCardSale: $("#GoldenCardSale").val().trim(),
+                                SilverCardSale: $("#SilverCardSale").val().trim(),
+                                IntegalCardSale: $("#IntegalCardSale").val().trim(),
+                                GoldenCardNum: $("#GoldenCardNum").val().trim(),
+                                SilverCardNum: $("#SilverCardNum").val().trim(),
+                                NewIntegalNum: $("#NewIntegalNum").val().trim(),
+                                NewVIPNum: $("#NewVIPNum").val().trim(),
+                                CustomerUnitPrice: $("#CustomerUnitPrice").val().trim(),
+                                CustomerSingle: $("#CustomerSingle").val().trim(),
+                                OrderNum: $("#OrderNum").val().trim(),
+                                ClothesNum: $("#ClothesNum").val().trim(),
+                                CreateUserID: GetSession("UserID"),
+                                CreateName: GetSession("UserName")
+                            },
+                            ProcName: "proc_SOM_ISR_MS_VIPTarget",
+                            DataType: "Bool",
+                            ExecType: "PROC",
+                            Mode: "MSSQL"
+                        }
+                    };
+                    $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                        if (_result.Code == "1") {
+                            if (_result.Data == "True") {
+                                $honesty.ShowMsg({
+                                    title: "提示",
+                                    msg: "保存成功"
+                                })
+                            }
+                            else {
+                                $honesty.ShowMsg({ title: "错误", msg: "保存失败" });
+                            }
+                        }
+
+                    });
+                }
+            });
+
+        });
+    }
+
+    //数据加载函数
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "GetInfo",
+                    MonthID: _MonthID,
+                    ID: "2"
+                },
+                ProcName: "proc_SOM_ISR_MS_VIPTarget",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        $("#GoldenCardSale").val(item.GoldenCardSale);
+                        $("#SilverCardSale").val(item.SilverCardSale);
+                        $("#IntegalCardSale").val(item.IntegalCardSale);
+                        $("#GoldenCardNum").val(item.GoldenCardNum);
+                        $("#SilverCardNum").val(item.SilverCardNum);
+                        $("#NewIntegalNum").val(item.NewIntegalNum);
+                        $("#NewVIPNum").val(item.NewVIPNum);
+                        $("#CustomerUnitPrice").val(item.CustomerUnitPrice);
+                        $("#CustomerSingle").val(item.CustomerSingle);
+                        $("#OrderNum").val(item.OrderNum);
+                        $("#ClothesNum").val(item.ClothesNum);
+                    });
+                }
+            }
+            else {
+                $("#footer").css("display", "none");
+            }
+        });
+    }
+
+    //验证函数
+    function CheckInfo() {
+        if ($("#GoldenCardSale").val().trim() == "") {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "金卡生日目标人数不能为空",
+                callback: function () {
+                    $("#GoldenCardSale").focus()
+                }
+            });
+            return false;
+        }
+        else if (valid_int($("#GoldenCardSale").val().trim())) {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "金卡生日目标人数不为整数",
+                callback: function () {
+                    $("#GoldenCardSale").focus()
+                }
+            });
+            return false;
+        }
+        else if ($("#SilverCardSale").val().trim() == "") {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "银卡生日目标人数不能为空",
+                callback: function () {
+                    $("#SilverCardSale").focus()
+                }
+            });
+            return false;
+        }
+        else if (valid_int($("#SilverCardSale").val().trim())) {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "银卡生日目标人数不为整数",
+                callback: function () {
+                    $("#SilverCardSale").focus()
+                }
+            });
+            return false;
+        }
+        else if ($("#IntegalCardSale").val().trim() == "") {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "积分卡生日目标人数不能为空",
+                callback: function () {
+                    $("#IntegalCardSale").focus()
+                }
+            });
+            return false;
+        }
+        else if (valid_int($("#IntegalCardSale").val().trim())) {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "积分卡生日目标人数不为整数",
+                callback: function () {
+                    $("#IntegalCardSale").focus()
+                }
+            });
+            return false;
+        }
+        else if ($("#GoldenCardNum").val().trim() == "") {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "金卡升级目标人数不能为空",
+                callback: function () {
+                    $("#GoldenCardNum").focus()
+                }
+            });
+            return false;
+        }
+        else if (valid_int($("#GoldenCardNum").val().trim())) {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "金卡升级目标人数不为整数",
+                callback: function () {
+                    $("#GoldenCardNum").focus()
+                }
+            });
+            return false;
+        }
+        else if ($("#SilverCardNum").val().trim() == "") {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "银卡升级目标人数不能为空",
+                callback: function () {
+                    $("#SilverCardNum").focus()
+                }
+            });
+            return false;
+        }
+        else if (valid_int($("#SilverCardNum").val().trim())) {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "银卡升级目标人数不为整数",
+                callback: function () {
+                    $("#SilverCardNum").focus()
+                }
+            });
+            return false;
+        }
+        else if ($("#NewIntegalNum").val().trim() == "") {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "新积分卡目标人数不能为空",
+                callback: function () {
+                    $("#NewIntegalNum").focus()
+                }
+            });
+            return false;
+        }
+        else if (valid_int($("#NewIntegalNum").val().trim())) {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "新积分卡目标人数不为整数",
+                callback: function () {
+                    $("#NewIntegalNum").focus()
+                }
+            });
+            return false;
+        }
+        else if ($("#NewVIPNum").val().trim() == "") {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "将失效卡的激活人数不能为空",
+                callback: function () {
+                    $("#NewVIPNum").focus()
+                }
+            });
+            return false;
+        }
+        else if (valid_int($("#NewVIPNum").val().trim())) {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "将失效卡的激活人数不为整数",
+                callback: function () {
+                    $("#NewVIPNum").focus()
+                }
+            });
+            return false;
+        }
+        else {
+            return true;
+        }
+
+
+    }
+</script>

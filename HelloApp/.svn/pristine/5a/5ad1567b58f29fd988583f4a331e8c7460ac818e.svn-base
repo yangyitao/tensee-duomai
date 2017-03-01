@@ -1,0 +1,595 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>日销售计划</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .sale-header {
+            background: url('../../../image/Sale.jpg') no-repeat;
+            background-size: cover;
+            min-height: 200px;
+            position: relative;
+        }
+
+        .sale-info {
+            position: relative;
+            padding: 20px 0;
+            width: 100%;
+            bottom: 0;
+            text-align: center;
+        }
+
+            .sale-info p.ratename {
+                margin-top: 15px;
+                color: #ffffff;
+                font-size: 16px;
+            }
+
+            .sale-info p.ratevalue {
+                margin-top: 5px;
+                color: #ffffff;
+                font-size: 30px;
+            }
+
+        .aui-grid-nine li {
+            padding: 5px 10px;
+        }
+
+            .aui-grid-nine li p:first-child {
+                font-weight: bold;
+            }
+    </style>
+</head>
+<body>
+    <div class="aui-content sale-header" style="margin-bottom: 0px;">
+        <div class="sale-info" id="divForm">
+            <p class="ratename" id="pShopName"></p>
+            <p class="ratename" id="pShopCode"></p>
+            <p class="ratename" id="pTitle"></p>
+            <p class="ratevalue" id="pRate"></p>
+        </div>
+    </div>
+    <ul class="aui-grid-nine">
+        <li class="aui-col-xs-6 aui-text-center">
+            <p>本日计划</p>
+            <p id="pTargetSale"></p>
+        </li>
+        <li class="aui-col-xs-6 aui-text-center">
+            <p>本日销售</p>
+            <p id="pActualSale"></p>
+        </li>
+    </ul>
+    <p class="aui-padded-5 aui-text-center" id="pTodayDate"></p>
+    <ul class="aui-grid-nine">
+        <li class="aui-col-xs-3 aui-text-center" data-role="block" data-url="Sale/DaySale/SaleAnalyse" data-name="Sale_DaySale_SaleAnalyse">
+            <span class="aui-iconfont aui-icon-sponsor aui-text-blue"></span>
+            <p>目标计划</p>
+            <span id="spSaleAnalyse"></span>
+        </li>
+        <li class="aui-col-xs-3 aui-text-center" data-role="block" data-url="Sale/DaySale/SaleSummary" data-name="Sale_DaySale_SaleSummary">
+            <span class="aui-iconfont aui-icon-list aui-text-danger"></span>
+            <p>总结</p>
+            <span id="spSaleSummary"></span>
+        </li>
+        <li class="aui-col-xs-3 aui-text-center" data-leader="true" style="display: none" id="liCreate">
+            <span class="aui-iconfont aui-icon-down aui-text-info"></span>
+            <p>生成实际</p>
+            <span id="spIsCreate"></span>
+        </li>
+        <li class="aui-col-xs-3 aui-text-center" data-leader="true" style="display: none" id="liShare">
+            <span class="aui-iconfont aui-icon-share aui-text-success"></span>
+            <p>分享</p>
+            <span id="spIsSend"></span>
+        </li>
+    </ul>
+    <p class="aui-padded-5 aui-text-center" id="pTomorrowDate" data-role="tomorrow" style="display: none"></p>
+    <ul class="aui-grid-nine" data-role="tomorrow" style="display: none">
+        <li class="aui-col-xs-6 aui-text-center" data-role="block1" data-url="Sale/DaySale/TomorrowSale" data-name="Sale_DaySale_TomorrowSale">
+            <span class="aui-iconfont aui-icon-sponsor aui-text-default"></span>
+            <p>目标计划</p>
+        </li>
+        <li class="aui-col-xs-6 aui-text-center" data-role="block1" data-url="Sale/DaySale/EmpAnalyse" data-name="Sale_DaySale_EmpAnalyse">
+            <span class="aui-iconfont aui-icon-friend aui-text-default"></span>
+            <p>员工目标</p>
+        </li>
+    </ul>
+    <div style="height: 40px;"></div>
+</body>
+</html>
+
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script src="../../../script/honesty.flow.js"></script>
+<script type="text/javascript">
+    var _DayID, _OrganizeID, _ShopCode, _Date, _IsLeader,
+    _WeekNum, _BeginDate, _EndDate, _TodayDate,
+    _WeekNum1, _BeginDate1, _EndDate1, _TomorrowDate;
+    var _TomorrowID = "";
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _Date = $honesty.NowDate();
+            _DayID = api.pageParam.DayID;
+            _OrganizeID = api.pageParam.OrganizeID;
+            _ShopCode = api.pageParam.ShopCode;
+            _WeekNum = api.pageParam.WeekNum;
+            _BeginDate = api.pageParam.BeginDate;
+            _EndDate = api.pageParam.EndDate;
+            _TodayDate = api.pageParam.TodayDate;
+            _WeekNum1 = api.pageParam.WeekNum1;
+            _BeginDate1 = api.pageParam.BeginDate1;
+            _EndDate1 = api.pageParam.EndDate1;
+            _TomorrowDate = api.pageParam.TomorrowDate;
+            
+            if ( _OrganizeID.toUpperCase() == GetSession("OrganizeID").toUpperCase() && GetSession("IsLeader") != "0") {
+                _IsLeader = "True";
+            }
+            else {
+                _IsLeader = "False";
+            }
+            $("#pTodayDate").html(_TodayDate);
+            $("#pTomorrowDate").html(_TomorrowDate);
+            if (_TodayDate < _Date.Format("yyyy-MM-dd") || (_Date.Format("yyyy-MM-dd") == _TodayDate && _Date.getHours() > 11)) {
+                $("[data-role='tomorrow']").show();
+            }
+            if (_IsLeader == "True") {
+                $("[data-leader='true']").show();
+            }
+            else {
+                $("[data-role='block']").removeClass("aui-col-xs-3");
+                $("[data-role='block']").addClass("aui-col-xs-6");
+            }
+            LoadData();
+
+
+            //模块点击
+            $("[data-role='block']").tap(function () {
+                $honesty.OpenWin({
+                    name: $(this).attr("data-name"),
+                    url: $(this).attr("data-url") + ".html",
+                    title: "日计划",
+                    LevelNum: 2,
+                    pageParam: {
+                        DayID: _DayID,
+                        IsLeader: _IsLeader,
+                        TodayDate: _TodayDate
+                    }
+                });
+            });
+            //明日模块点击
+            $("[data-role='block1']").tap(function () {
+                CreateTomorrow($(this).attr("data-name"), $(this).attr("data-url") + ".html")
+            });
+
+            //报表点击
+            $("#divForm").tap(function () {
+                $honesty.OpenWin({
+                    name: "Sale_DaySale_DaySaleForm_Index",
+                    url: "Sale/DaySale/DaySaleForm/Index.html",
+                    title: "日计划报表",
+                    LevelNum: 2,
+                    pageParam: {
+                        DayID: _DayID,
+                        IsLeader: _IsLeader,
+                        TodayDate: _TodayDate
+                    }
+                });
+            });
+
+            //生成实际数据点击
+            $("#liCreate").tap(function () {
+                CreateSale();
+            })
+
+            //分享数据
+            $("#liShare").tap(function () {
+                var _options = {
+                    PostData: {
+                        Params: {
+                            Result: "SelectTorrow",
+                            OrganizeID: _OrganizeID,
+                            ShopCode: _ShopCode,
+                            TodayDate: _TodayDate
+                        },
+                        ProcName: "proc_SOM_ISR_DS_Title",
+                        DataType: "Text",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    }, async: false
+                };
+                var isExist = $honesty.AjaxChannel(_options);
+                _options = {
+                    PostData: {
+                        Params: {
+                            Result: "IsInterface",
+                            DayID: _DayID
+                        },
+                        ProcName: "proc_SOM_ISR_DS_Title",
+                        DataType: "Text",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    }, async: false
+                };
+                var isInterface = $honesty.AjaxChannel(_options);
+                if (isInterface.Data == "False") {
+                    $honesty.ShowMsg({ title: "提示", msg: "请先生成实际销售数据" })
+                }
+                else if (isExist.Data == "0") {
+                    $honesty.ShowMsg({ title: "提示", msg: _TomorrowDate + "销售目标及计划未维护请先维护" })
+                }
+                else {
+                    _options = {
+                        PostData: {
+                            Params: {
+                                Result: "IsSend",
+                                DayID: _DayID
+                            },
+                            ProcName: "proc_SOM_ISR_DS_Title",
+                            DataType: "Bool",
+                            ExecType: "PROC",
+                            Mode: "MSSQL"
+                        }
+                    };
+
+                    $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                        if (_result.Code == "1") {
+                            var wx = api.require('wx');
+                            wx.shareWebpage({
+                                scene: 'session',
+                                title: _ShopCode + "日结报数",
+                                description: $("#pShopName").html() + " " + _TodayDate + "日结报数",
+                                thumb: "widget://res/img/weixin.png",
+                                contentUrl: $honesty.GetSite() + "/SOM/SharePage/DaySale?ID=" + _DayID,
+                            }, function (ret, err) {
+                                if (ret.status) {
+                                    $honesty.ShowToast({ msg: '分享成功' });
+                                }
+                            });
+                        }
+                    });
+
+                }
+
+
+            })
+
+            //本月目标保存监听事件
+            api.addEventListener({
+                name: 'Sale_DaySale_SaleAnalyse'
+            }, function (ret) {
+                if (ret && ret.value) {
+                    $("#pTargetSale").html(ret.value.TargetSale);
+                    $("#pRate").html((ret.value.TargetSale == "0" ? "0" : (Number($("#pActualSale").html()) / Number(ret.value.TargetSale) * 100).toFixed(0)) + "%");
+                    if ($("#spSaleAnalyse").hasClass("aui-superscript-danger")) {
+                        $("#spSaleAnalyse").removeClass("aui-superscript-danger");
+                        $("#spSaleAnalyse").addClass("aui-superscript-success");
+                    }
+                }
+            });
+            //销售总结监听事件
+            api.addEventListener({
+                name: 'Sale_DaySale_SaleSummary'
+            }, function (ret) {
+                if (ret && ret.value) {
+                    if ($("#spSaleSummary").hasClass("aui-superscript-danger")) {
+                        $("#spSaleSummary").removeClass("aui-superscript-danger");
+                        $("#spSaleSummary").addClass("aui-superscript-success");
+                    }
+                }
+            });
+
+        });
+    }
+
+    //初始化数据函数
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "GetMainInfo",
+                    DayID: _DayID
+                },
+                ProcName: "proc_SOM_ISR_DS_Title",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        $("#pShopCode").html(_ShopCode);
+                        $("#pShopName").html(item.ShopName);
+                        $("#pTitle").html(_TodayDate + "日达成率");
+                        $("#pRate").html(item.Rate + "%");
+                        $("#pTargetSale").html(item.TargetSale);
+                        $("#pActualSale").html(item.ActualSale);
+                        $("#spSaleAnalyse").addClass((item.TargetSale == "0" ? "aui-superscript-danger" : "aui-superscript-success"));
+                        $("#spEmpAnalyse").addClass((item.EmpAnalyse == "0" ? "aui-superscript-danger" : "aui-superscript-success"));
+                        $("#spSaleSummary").addClass((item.SaleSummary == "" ? "aui-superscript-danger" : "aui-superscript-success"));
+                        $("#spIsCreate").addClass((item.InterfaceDate == "" ? "aui-superscript-danger" : "aui-superscript-success"));
+                        $("#spIsSend").addClass((item.IsSend == "False" ? "aui-superscript-danger" : "aui-superscript-success"));
+                    });
+                }
+            }
+            else {
+                $honesty.CloseWin();
+            }
+        });
+    }
+
+    function CreateTomorrow(name, url) {
+        if (_TomorrowID == "") {
+            var _options = {
+                PostData: {
+                    Params: {
+                        Result: "SelectID",
+                        OrganizeID: _OrganizeID,
+                        ShopCode: _ShopCode,
+                        TodayDate: _TomorrowDate
+                    },
+                    ProcName: "proc_SOM_ISR_DS_Title",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        $.each(_result.Data, function (i, item) {
+                            _TomorrowID = item.DayID
+                            $honesty.OpenWin({
+                                name: name,
+                                url: url,
+                                title: "日计划",
+                                LevelNum: 2,
+                                pageParam: {
+                                    DayID: _TomorrowID,
+                                    IsLeader: _IsLeader,
+                                    TodayDate: _TomorrowDate,
+                                    YesterID: _DayID,
+                                    YesterDate: _TodayDate,
+                                    OrganizeID: _OrganizeID,
+                                    ShopCode: _ShopCode
+                                }
+                            });
+                        });
+                    }
+                    else {
+                        if (_IsLeader == "True") {
+                            _options = {
+                                PostData: {
+                                    Params: {
+                                        Result: "CreateInfo",
+                                        OrganizeID: _OrganizeID,
+                                        ShopCode: _ShopCode,
+                                        TodayDate: _TomorrowDate,
+                                        ZYear: (new Date(_BeginDate1).getFullYear()),
+                                        ZMonth: (new Date(_BeginDate1).getMonth()) + 1,
+                                        WeekNum: _WeekNum1,
+                                        BeginDate: _BeginDate1,
+                                        EndDate: _EndDate1,
+                                        CreateUserID: GetSession("UserID"),
+                                        CreateName: GetSession("UserName")
+                                    },
+                                    ProcName: "proc_SOM_ISR_DS_Title",
+                                    DataType: "Text",
+                                    ExecType: "PROC",
+                                    Mode: "MSSQL"
+                                }
+                            };
+                            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                                if (_result.Code == "1") {
+                                    _TomorrowID = _result.Data
+                                    $honesty.OpenWin({
+                                        name: name,
+                                        url: url,
+                                        title: "日计划",
+                                        LevelNum: 2,
+                                        pageParam: {
+                                            DayID: _TomorrowID,
+                                            IsLeader: _IsLeader,
+                                            TodayDate: _TomorrowDate,
+                                            YesterID: _DayID,
+                                            YesterDate: _TodayDate,
+                                            OrganizeID: _OrganizeID,
+                                            ShopCode: _ShopCode
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                        else {
+                            $honesty.ShowToast({ msg: "明日计划未创建！", location: "bottom" });
+                        }
+
+                    }
+                }
+            });
+        }
+        else {
+            $honesty.OpenWin({
+                name: name,
+                url: url,
+                title: "日计划",
+                LevelNum: 2,
+                pageParam: {
+                    DayID: _TomorrowID,
+                    IsLeader: _IsLeader,
+                    TodayDate: _TomorrowDate,
+                    YesterID: _DayID,
+                    YesterDate: _TodayDate,
+                    OrganizeID: _OrganizeID,
+                    ShopCode: _ShopCode
+                }
+            });
+        }
+    }
+
+    function CreateSale() {
+        $honesty.ConfirmWin({
+            msg: "是否生成实际销售数据？",
+            buttons: ["生成", "取消"],
+            callback: function (ret, err) {
+                if (ret.buttonIndex == "1") {
+                    var saleAnalyse = "<?xml version=\"1.0\" encoding=\"gb2312\"?><root>";
+                    var promotionData = "<?xml version=\"1.0\" encoding=\"gb2312\"?><root>";
+                    var empSaleData = "<?xml version=\"1.0\" encoding=\"gb2312\"?><root>";
+                    var _options = {
+                        PostData: {
+                            Params: {
+                                shopCode: _ShopCode,
+                                todayDate: _TodayDate,
+                                beginDate: _BeginDate,
+                                endDate: _EndDate,
+                                weekNum: _WeekNum
+                            },
+                            URL: "posSale/getSaleDaliy",
+                            Mode: "ESB",
+                            Handle: "GET"
+                        },
+                        Loading: {
+                            Title: "正在获取销售数据...",
+                            Show: true
+                        }
+                    };
+                    $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                        var daySale;
+                        if (_result.Code == "1") {
+                            if (_result.Data.DaySaleData != undefined) {
+                                daySale = (_result.Data.DaySaleData.daySale == undefined ? "0" : _result.Data.DaySaleData.daySale);
+                                var lastYearDaySale = (_result.Data.DaySaleData.lastYearDaySale == undefined ? "0" : _result.Data.DaySaleData.lastYearDaySale);
+                                var lastDaySale = (_result.Data.DaySaleData.lastDaySale == undefined ? "0" : _result.Data.DaySaleData.lastDaySale);
+                                var orderNum = (_result.Data.DaySaleData.orderNum == undefined ? "0" : _result.Data.DaySaleData.orderNum);
+                                var clothesNum = (_result.Data.DaySaleData.clothesNum == undefined ? "0" : _result.Data.DaySaleData.clothesNum);
+                                var newCardNum = (_result.Data.DaySaleData.newCardNum == undefined ? "0" : _result.Data.DaySaleData.newCardNum);
+                                var vipSale = (_result.Data.DaySaleData.vipSale == undefined ? "0" : _result.Data.DaySaleData.vipSale);
+                                var vipOrderNum = (_result.Data.DaySaleData.vipOrderNum == undefined ? "0" : _result.Data.DaySaleData.vipOrderNum);
+                                var vipclothesNum = (_result.Data.DaySaleData.vipclothesNum == undefined ? "0" : _result.Data.DaySaleData.vipclothesNum);
+                                saleAnalyse += "<Item ID=\"3\" ActualSale=\"" + daySale + "\" LastYearSale=\"" + lastYearDaySale + "\" " +
+                                               "LastMonthSale=\"" + lastDaySale + "\" OrderNum=\"" + orderNum + "\" " +
+                                               "ClothesNum=\"" + clothesNum + "\" CardNum=\"" + newCardNum + "\" " +
+                                               "VIPSale=\"" + vipSale + "\" VIPOrderNum=\"" + vipOrderNum + "\" " +
+                                               "VIPClothesNum=\"" + vipclothesNum + "\" />";
+                            }
+                            if (_result.Data.WeekSaleData != undefined) {
+                                var weekSale = (_result.Data.WeekSaleData.weekSale == undefined ? "0" : _result.Data.WeekSaleData.weekSale);
+                                var lastYearWeekSale = (_result.Data.WeekSaleData.lastYearWeekSale == undefined ? "0" : _result.Data.WeekSaleData.lastYearWeekSale);
+                                var lastWeekSale = (_result.Data.WeekSaleData.lastWeekSale == undefined ? "0" : _result.Data.WeekSaleData.lastWeekSale);
+                                var orderNum = (_result.Data.WeekSaleData.orderNum == undefined ? "0" : _result.Data.WeekSaleData.orderNum);
+                                var clothesNum = (_result.Data.WeekSaleData.clothesNum == undefined ? "0" : _result.Data.WeekSaleData.clothesNum);
+                                var newCardNum = (_result.Data.WeekSaleData.newCardNum == undefined ? "0" : _result.Data.WeekSaleData.newCardNum);
+                                var vipSale = (_result.Data.WeekSaleData.vipSale == undefined ? "0" : _result.Data.WeekSaleData.vipSale);
+                                var vipOrderNum = (_result.Data.WeekSaleData.vipOrderNum == undefined ? "0" : _result.Data.WeekSaleData.vipOrderNum);
+                                var vipclothesNum = (_result.Data.WeekSaleData.vipclothesNum == undefined ? "0" : _result.Data.WeekSaleData.vipclothesNum);
+                                saleAnalyse += "<Item ID=\"2\" ActualSale=\"" + weekSale + "\" LastYearSale=\"" + lastYearWeekSale + "\" " +
+                                                "LastMonthSale=\"" + lastWeekSale + "\" OrderNum=\"" + orderNum + "\" " +
+                                                "ClothesNum=\"" + clothesNum + "\" CardNum=\"" + newCardNum + "\" " +
+                                                "VIPSale=\"" + vipSale + "\" VIPOrderNum=\"" + vipOrderNum + "\" " +
+                                                "VIPClothesNum=\"" + vipclothesNum + "\" />";
+                            }
+                            if (_result.Data.MonthSaleData != undefined) {
+                                var monthSale = (_result.Data.MonthSaleData.monthSale == undefined ? "0" : _result.Data.MonthSaleData.monthSale);
+                                var lastYearMonthSale = (_result.Data.MonthSaleData.lastYearMonthSale == undefined ? "0" : _result.Data.MonthSaleData.lastYearMonthSale);
+                                var lastMonthSale = (_result.Data.MonthSaleData.lastMonthSale == undefined ? "0" : _result.Data.MonthSaleData.lastMonthSale);
+                                var orderNum = (_result.Data.MonthSaleData.orderNum == undefined ? "0" : _result.Data.MonthSaleData.orderNum);
+                                var clothesNum = (_result.Data.MonthSaleData.clothesNum == undefined ? "0" : _result.Data.MonthSaleData.clothesNum);
+                                var newCardNum = (_result.Data.MonthSaleData.newCardNum == undefined ? "0" : _result.Data.MonthSaleData.newCardNum);
+                                var vipSale = (_result.Data.MonthSaleData.vipSale == undefined ? "0" : _result.Data.MonthSaleData.vipSale);
+                                var vipOrderNum = (_result.Data.MonthSaleData.vipOrderNum == undefined ? "0" : _result.Data.MonthSaleData.vipOrderNum);
+                                var vipclothesNum = (_result.Data.MonthSaleData.vipclothesNum == undefined ? "0" : _result.Data.MonthSaleData.vipclothesNum);
+                                saleAnalyse += "<Item ID=\"1\" ActualSale=\"" + monthSale + "\" LastYearSale=\"" + lastYearMonthSale + "\" " +
+                                                "LastMonthSale=\"" + lastMonthSale + "\" OrderNum=\"" + orderNum + "\" " +
+                                                "ClothesNum=\"" + clothesNum + "\" CardNum=\"" + newCardNum + "\" " +
+                                                "VIPSale=\"" + vipSale + "\" VIPOrderNum=\"" + vipOrderNum + "\" " +
+                                                "VIPClothesNum=\"" + vipclothesNum + "\" />";
+                            }
+                            saleAnalyse += "</root>";
+                            if (_result.Data.PromotionData != undefined) {
+                                $.each(_result.Data.PromotionData, function (i, item) {
+                                    var promotionName = (item.promotionName == undefined ? "" : item.promotionName);
+                                    var beginDate = (item.beginDate == undefined ? "" : item.beginDate);
+                                    var endDate = (item.endDate == undefined ? "" : item.endDate);
+                                    var promotionDate = beginDate + "至" + endDate;
+                                    var orderNum = (item.orderNum == undefined ? "" : item.orderNum);
+                                    var clothesNum = (item.clothesNum == undefined ? "" : item.clothesNum);
+                                    var promotionSale = (item.promotionSale == undefined ? "" : item.promotionSale);
+                                    promotionData += "<Item ActivityName=\"" + promotionName + "\" ActivityDate=\"" + promotionDate + "\" " +
+                                                     "OrderNum=\"" + orderNum + "\" ClothesNum=\"" + clothesNum + "\" " +
+                                                     "ActualSale=\"" + promotionSale + "\" />";
+                                });
+                            }
+                            promotionData += "</root>";
+                            if (_result.Data.EmpSaleData != undefined) {
+                                $.each(_result.Data.EmpSaleData, function (i, item) {
+                                    var empCode = (item.empCode == undefined ? "" : item.empCode);
+                                    var actualCard = (item.actualCard == undefined ? "0" : item.actualCard);
+                                    var actualDaySale = (item.actualDaySale == undefined ? "0" : item.actualDaySale);
+                                    var actualMonthSale = (item.actualMonthSale == undefined ? "0" : item.actualMonthSale);
+                                    var clothesNum = (item.clothesNum == undefined ? "0" : item.clothesNum);
+                                    var orderNum = (item.orderNum == undefined ? "0" : item.orderNum);
+                                    empSaleData += "<Item EmpCode=\"" + empCode + "\" CardNum=\"" + actualCard + "\" " +
+                                                    "MonthTotalSale=\"" + actualMonthSale + "\" ActualSale=\"" + actualDaySale + "\" VipSale=\"" + vipSale + "\" " +
+                                                    "OrderNum=\"" + orderNum + "\" ClothesNum=\"" + clothesNum + "\" />";
+                                });
+                            }
+                            empSaleData += "</root>";
+                            _options = {
+                                PostData: {
+                                    Params: {
+                                        Result: "BatchInsert",
+                                        DayID: _DayID,
+                                        OrganizeID: _OrganizeID,
+                                        ShopCode: _ShopCode,
+                                        TodayDate: _TodayDate,
+                                        ZYear: (new Date(_BeginDate).getFullYear()),
+                                        ZMonth: (new Date(_BeginDate).getMonth()) + 1,
+                                        WeekNum: _WeekNum,
+                                        BeginDate: _BeginDate,
+                                        EndDate: _EndDate,
+                                        CreateUserID: GetSession("UserID"),
+                                        CreateName: GetSession("UserName"),
+                                        SaleAnalyse: saleAnalyse,
+                                        PromotionData: promotionData,
+                                        EmpSaleData: empSaleData,
+                                    },
+                                    ProcName: "proc_Thread_SOM_ISR_DaySale",
+                                    DataType: "Bool",
+                                    ExecType: "PROC",
+                                    Mode: "MSSQL"
+                                },
+                                Loading: {
+                                    Title: "正在生成数据...",
+                                    Show: true
+                                },
+                                async: false
+                            };
+                            _result = $honesty.AjaxChannel(_options);
+                            if (_result.Code == "1") {
+                                if (_result.Data == "True") {
+                                    $honesty.ShowMsg({ title: "提示", msg: "保存成功" });
+                                    $("#spIsCreate").removeClass("aui-superscript-danger");
+                                    $("#spIsCreate").addClass("aui-superscript-success");
+                                    $("#pActualSale").html(daySale);
+                                    $("#pRate").html(($("#pTargetSale").html() == "0" ? "0" : (Number(daySale) / Number($("#pTargetSale").html()) * 100).toFixed(0)) + "%");
+                                }
+                                else {
+                                    $honesty.ShowMsg({ title: "错误", msg: "保存失败" });
+                                }
+                            }
+                        }
+                    });
+                    var _result = $honesty.AjaxChannel(_options);
+
+                }
+            }
+        });
+    }
+</script>

@@ -1,0 +1,300 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>区经报数</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div style="height: 10px;"></div>
+    <div class="aui-content aui-card">
+        <div class="aui-form">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">日期</span>
+                <div class="aui-counter aui-warning aui-info aui-pull-left " style="margin-left: 10px;">
+                    <div id="btnDateMinus" class="aui-counter-minus"></div>
+                    <input id="txtDate" class="aui-counter-input" type="text" value="" style="width: 100px; text-align: center" readonly="true">
+                    <div id="btnDatePlus" class="aui-counter-plus"></div>
+                </div>
+            </div>
+            <div class="aui-btn-row">
+                <div id="btnSearch" class="aui-btn aui-btn-block aui-btn-info">
+                    查询
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _Date, _OrganizeID, _OrganizeName;
+    var _ShopList;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _Date = $honesty.NowDate();
+            _OrganizeID = api.pageParam.OrganizeID;
+            _OrganizeName = api.pageParam.Name;
+            LoadData();
+            //初始化日期
+            $("#txtDate").val(_Date.Format("yyyy-MM-dd"));
+
+            //日期减少按钮点击
+            $("#btnDateMinus").tap(function () {
+                _Date.addDays(-1);
+                $("#txtDate").val(_Date.Format("yyyy-MM-dd"));
+            });
+            //日期增加按钮点击
+            $("#btnDatePlus").tap(function () {
+                _Date.addDays(1);
+                $("#txtDate").val(_Date.Format("yyyy-MM-dd"));
+            });
+            //日期点击
+            $("#txtDate").tap(function () {
+                $honesty.DateTimeSelect({
+                    LevelNum: 2,
+                    Type: "Date",
+                    ControlID: "txtDate",
+                    ControlValue: $("#txtDate").val()
+                });
+            });
+
+
+            //查询按钮点击
+            $("#btnSearch").tap(function () {
+                var _options = {
+                    PostData: {
+                        Params: {
+                            Result: "SelectID",
+                            ReportDate: $("#txtDate").val(),
+                            OrganizeId: _OrganizeID
+                        },
+                        ProcName: "proc_SOM_ISR_RegionalSaleTitle",
+                        DataType: "Text",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    }
+                };
+                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                    if (_result.Code == "1") {
+                        if (_result.Data != "") {
+                            $honesty.OpenWin({
+                                name: "Sale_RegionalSale_Index",
+                                url: "Sale/RegionalSale/Index.html",
+                                title: "区经报数",
+                                LevelNum: 2,
+                                pageParam: {
+                                    RegionalId: _result.Data,
+                                    ShopList: _ShopList,
+                                    OrganizeID: _OrganizeID,
+                                    OrganizeName: _OrganizeName,
+                                    TodayDate: $("#txtDate").val()
+                                }
+                            });
+                        }
+                        else {
+                            if ($("#txtDate").val() <= $honesty.NowDate().Format("yyyy-MM-dd")) {
+                                $honesty.ConfirmWin({
+                                    msg: "是否生成" + $("#txtDate").val() + "区经报数？",
+                                    callback: function (ret, err) {
+                                        if (ret.buttonIndex == "1") {
+                                            var arrShop = new Array();
+                                            if (_ShopList.length > 0) {
+                                                $.each(_ShopList, function (i, item) {
+                                                    arrShop.push({
+                                                        shopCode: item.ShopCode,
+                                                        todayDate: $("#txtDate").val()
+                                                    })
+                                                });
+                                            }
+                                            var _options = {
+                                                PostData: {
+                                                    Params: {
+                                                        shops: arrShop
+                                                    },
+                                                    URL: "posSale/getRegionReport",
+                                                    Mode: "ESB",
+                                                    Handle: "POST"
+                                                },
+                                                Loading: {
+                                                    Title: "正在获取销售数据...",
+                                                    Show: true
+                                                }
+                                            };
+                                            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                                                if (_result.Code == "1" && _result.Data != undefined) {
+                                                    var _RegionalId = new $honesty.GUID().NewGUID();
+                                                    var xmlShopInfo = "<?xml version=\"1.0\" encoding=\"gb2312\"?><root>";
+                                                    if (_result.Data.DaySaleData != undefined) {
+                                                        $.each(_result.Data.DaySaleData, function (i, item) {
+                                                            var shopCode = (item.shopCode == undefined ? "" : item.shopCode);
+                                                            var actualSale = (item.daySale == undefined ? "0" : Number(item.daySale).toFixed(0));
+                                                            var orderNum = (item.orderNum == undefined ? "0" : Number(item.orderNum).toFixed(0));
+                                                            var clothesNum = (item.clothesNum == undefined ? "0" : Number(item.clothesNum).toFixed(0));
+                                                            var vipSale = (item.vipSale == undefined ? "0" : Number(item.vipSale).toFixed(0));
+                                                            var tagsale = (item.tagsale == undefined ? "0" : Number(item.tagsale).toFixed(0));
+                                                            var lastYear = (item.lastYearDaySale == undefined ? "0" : Number(item.lastYearDaySale).toFixed(0));
+                                                            var lastMonth = (item.lastDaySale == undefined ? "0" : Number(item.lastDaySale).toFixed(0));
+
+                                                            xmlShopInfo += "<Item Id=\"1\" RegionalId=\"" + _RegionalId + "\" " +
+                                                                             "ShopCode=\"" + shopCode + "\" ActualSale=\"" + actualSale + "\" " +
+                                                                             "OrderNum=\"" + orderNum + "\" ClothesNum=\"" + clothesNum + "\" " +
+                                                                             "VipSale=\"" + vipSale + "\" Tagsale=\"" + tagsale + "\" " +
+                                                                             "LastYear=\"" + lastYear + "\" LastMonth=\"" + lastMonth + "\" />";
+                                                        });
+                                                    }
+
+                                                    if (_result.Data.WeekSaleData != undefined) {
+                                                        $.each(_result.Data.WeekSaleData, function (i, item) {
+                                                            var shopCode = (item.shopCode == undefined ? "" : item.shopCode);
+                                                            var actualSale = (item.weekSale == undefined ? "0" : Number(item.weekSale).toFixed(0));
+                                                            var orderNum = (item.orderNum == undefined ? "0" : Number(item.orderNum).toFixed(0));
+                                                            var clothesNum = (item.clothesNum == undefined ? "0" : Number(item.clothesNum).toFixed(0));
+                                                            var vipSale = (item.vipSale == undefined ? "0" : Number(item.vipSale).toFixed(0));
+                                                            var tagsale = (item.tagsale == undefined ? "0" : Number(item.tagsale).toFixed(0));
+                                                            var lastYear = (item.lastYearWeekSale == undefined ? "0" : Number(item.lastYearWeekSale).toFixed(0));
+                                                            var lastMonth = (item.lastWeekSale == undefined ? "0" : Number(item.lastWeekSale).toFixed(0));
+
+                                                            xmlShopInfo += "<Item Id=\"2\" RegionalId=\"" + _RegionalId + "\" " +
+                                                                             "ShopCode=\"" + shopCode + "\" ActualSale=\"" + actualSale + "\" " +
+                                                                             "OrderNum=\"" + orderNum + "\" ClothesNum=\"" + clothesNum + "\" " +
+                                                                             "VipSale=\"" + vipSale + "\" Tagsale=\"" + tagsale + "\" " +
+                                                                             "LastYear=\"" + lastYear + "\" LastMonth=\"" + lastMonth + "\" />";
+                                                        });
+                                                    }
+
+
+                                                    if (_result.Data.MonthSaleData != undefined) {
+                                                        $.each(_result.Data.MonthSaleData, function (i, item) {
+                                                            var shopCode = (item.shopCode == undefined ? "" : item.shopCode);
+                                                            var actualSale = (item.monthSale == undefined ? "0" : Number(item.monthSale).toFixed(0));
+                                                            var orderNum = (item.orderNum == undefined ? "0" : Number(item.orderNum).toFixed(0));
+                                                            var clothesNum = (item.clothesNum == undefined ? "0" : Number(item.clothesNum).toFixed(0));
+                                                            var vipSale = (item.vipSale == undefined ? "0" : Number(item.vipSale).toFixed(0));
+                                                            var tagsale = (item.tagsale == undefined ? "0" : Number(item.tagsale).toFixed(0));
+                                                            var lastYear = (item.lastYearMonthSale == undefined ? "0" : Number(item.lastYearMonthSale).toFixed(0));
+                                                            var lastMonth = (item.lastMonthSale == undefined ? "0" : Number(item.lastMonthSale).toFixed(0));
+
+                                                            xmlShopInfo += "<Item Id=\"3\" RegionalId=\"" + _RegionalId + "\" " +
+                                                                             "ShopCode=\"" + shopCode + "\" ActualSale=\"" + actualSale + "\" " +
+                                                                             "OrderNum=\"" + orderNum + "\" ClothesNum=\"" + clothesNum + "\" " +
+                                                                             "VipSale=\"" + vipSale + "\" Tagsale=\"" + tagsale + "\" " +
+                                                                             "LastYear=\"" + lastYear + "\" LastMonth=\"" + lastMonth + "\" />";
+                                                        });
+                                                    }
+                                                    xmlShopInfo += "</root>";
+                                                    _options = {
+                                                        PostData: {
+                                                            Params: {
+                                                                Result: "CreateSale",
+                                                                RegionalId: _RegionalId,
+                                                                OrganizeId: _OrganizeID,
+                                                                OrganizeName: _OrganizeName,
+                                                                ReportDate: $("#txtDate").val(),
+                                                                CreateName: GetSession("UserName"),
+                                                                CreateID: GetSession("UseID"),
+                                                                xmlShopInfo: xmlShopInfo
+                                                            },
+                                                            ProcName: "proc_SOM_ISR_RegionalSaleTitle",
+                                                            DataType: "Bool",
+                                                            ExecType: "PROC",
+                                                            Mode: "MSSQL"
+                                                        },
+                                                        Loading: {
+                                                            Title: "正在生成数据...",
+                                                            Show: true
+                                                        },
+                                                        async: false
+                                                    };
+                                                    _result = $honesty.AjaxChannel(_options);
+                                                    if (_result.Code == "1") {
+                                                        if (_result.Data == "True") {
+                                                            $honesty.OpenWin({
+                                                                name: "Sale_RegionalSale_Index",
+                                                                url: "Sale/RegionalSale/Index.html",
+                                                                title: "区经报数",
+                                                                LevelNum: 2,
+                                                                pageParam: {
+                                                                    RegionalId: _RegionalId,
+                                                                    ShopList: _ShopList,
+                                                                    OrganizeID: _OrganizeID,
+                                                                    OrganizeName: _OrganizeName,
+                                                                    TodayDate: $("#txtDate").val()
+                                                                }
+                                                            });
+                                                        }
+                                                        else {
+                                                            $honesty.ShowMsg({ title: "错误", msg: "保存失败" });
+                                                        }
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+                            else {
+                                $honesty.ShowToast({ msg: "不存在对应日期的区经报数" });
+                            }
+                        }
+                    }
+                });
+
+            });
+
+
+        });
+
+    }
+
+    function LoadData() {
+        if (_OrganizeID == undefined) {
+            var _options = {
+                PostData: {
+                    Params: {
+                        Result: "SelectLeaderList",
+                        UserID: GetSession("UserID"),
+                    },
+                    ProcName: "proc_SOM_ISR_RegionalSaleTitle",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                async: false
+            };
+        }
+        var _result = $honesty.AjaxChannel(_options)
+        if (_result.Code == "1") {
+            if (_result.Data.length > 0) {
+                $.each(_result.Data, function (i, item) {
+                    _OrganizeID = item.ID;
+                    _OrganizeName = item.Name;
+                });
+            }
+        }
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "SelectShopList",
+                    OrganizeId: _OrganizeID,
+                },
+                ProcName: "proc_SOM_ISR_RegionalSaleTitle",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    _ShopList = _result.Data;
+                }
+            }
+        });
+    }
+</script>
+</html>

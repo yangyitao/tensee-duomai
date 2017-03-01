@@ -1,0 +1,110 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>其他应用模块</title>
+    <link href="../../css/aui.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <div class="aui-content">
+        <ul class="aui-grid-nine" id="ulMenu">
+        </ul>
+    </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script type="text/javascript">
+
+    apiready = function () {
+        $(function () {
+            LoadData();
+
+            //下拉刷新
+            api.setRefreshHeaderInfo({
+                visible: true,
+                loadingImg: 'widget://image/refresh.png',
+                bgColor: '#fff',
+                textColor: '#000',
+                textDown: '下拉刷新...',
+                textUp: '松开刷新...',
+                showTime: true
+            }, function (ret, err) {
+                LoadData();
+                api.refreshHeaderLoadDone();
+            });
+        });
+
+    };
+    //数据加载函数
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: { "Result": "GetAppMenu", "UserID": GetSession("UserID") },
+                ProcName: "proc_SOM_Others_APPMenu",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    var _Content = "";
+                    $.each(_result.Data, function (i, item) {
+                        _Content += "<li tapmode class='aui-col-xs-6 aui-text-center' data-id='" + item.ID + "' data-title='" + item.Title + "' data-appfunction='" + item.AppFunction + "' onclick='ClickMenu(this)'>" +
+                               "<span class='aui-iconfont " + item.AppIcoClass + "'></span><p>" + item.Title + "</p></li>";
+                    });
+                    if (_result.Data.length % 2 != 0) {
+                        _Content += "<li class='aui-col-xs-6 aui-text-center'><span class='aui-iconfont'>&nbsp;</span><p>&nbsp;</p></li>";
+                    }
+                    $("#ulMenu").html(_Content);
+                    api.parseTapmode();
+                }
+            }
+
+        });
+    }
+    function ClickMenu(_Menu) {
+        var Menu = $(_Menu);
+        try {
+            var _options = {
+                PostData: {
+                    Params: {
+                        result: "ModifyVisitLog",
+                        EmpID: GetSession("UserID"),
+                        ModuleID: Menu.attr("data-id"),
+                        ModuleName: Menu.attr("data-title"),
+                        AppVersion: api.appVersion,
+                        SystemType: api.systemType,
+                        SystemVersion: api.systemVersion,
+                        DeviceID: api.deviceId,
+                        DeviceModel: api.deviceModel,
+                        DeviceName: api.deviceName,
+                        Operator: api.operator,
+                        ConnectionType: api.connectionType,
+                        ScreenWidth: api.screenWidth,
+                        ScreenHeight: api.screenHeight
+                    },
+                    ProcName: "proc_SOM_Sys_ModuleVisitLog",
+                    DataType: "Bool",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                Loading: {
+                    Show: false
+                },
+                ShowError: false
+            };
+            $honesty.AjaxChannel(_options);
+        }
+        catch (e) {
+
+        }
+        eval(Menu.attr("data-appfunction"));
+    }
+</script>
+</html>

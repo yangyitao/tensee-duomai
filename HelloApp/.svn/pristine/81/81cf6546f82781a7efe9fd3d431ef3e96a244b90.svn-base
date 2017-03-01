@@ -1,0 +1,327 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>组织架构选择</title>
+    <link rel="stylesheet" type="text/css" href="../../css/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui-indexed-list.css" />
+</head>
+<body>
+    <div class="aui-searchbar-wrap fixed" id="group-search">
+        <div class="aui-searchbar aui-border-radius">
+            <i class="aui-iconfont aui-icon-search"></i>
+            <div class="aui-searchbar-text">输入关键字查询</div>
+            <div class="aui-searchbar-input">
+                <form action="javascript:search();">
+                    <input type="text" placeholder="输入关键字查询" id="aui-searchbar-input">
+                </form>
+            </div>
+            <i class="aui-iconfont aui-icon-roundclosefill" id="aui-searchbar-clear"></i>
+        </div>
+        <div class="aui-searchbar-cancel aui-text-info" id="aui-searchbar-cancel">取消</div>
+    </div>
+    <div class="aui-indexed-list">
+        <ul class="aui-list-view aui-indexed-list-view aui-in" id="group-*" data-group="*">
+            <group id="OrganizeList">
+            </group>
+            <group id="EmpList">
+            </group>
+        </ul>
+    </div>
+    <div class="aui-indexed-list-toast"></div>
+    <div class="aui-indexed-list-bar">
+        <a>
+            <i class="aui-iconfont aui-icon-search" data-value="search"></i>
+        </a>
+        <a>
+            <i class="aui-iconfont aui-icon-favorfill" data-value="*"></i>
+        </a>
+        <group id="IndexList">
+        </group>
+    </div>
+    <script type="text/javascript" src="../../script/api.js"></script>
+    <script type="text/javascript" src="../../script/zepto.js"></script>
+    <script type="text/javascript" src="../../script/aui-indexed-list.js"></script>
+    <script type="text/javascript" src="../../script/honesty.base.js"></script>
+    <script type="text/javascript">
+        var parentid = "04F12BEB-D99D-43DF-AC9A-3042957D6BDA";
+        var deptname = "卡宾集团";
+        var rootid = "04F12BEB-D99D-43DF-AC9A-3042957D6BDA";
+        var typemode = "A";
+        var ismore = "true";
+        var parentwin = "Null";
+        var count = 0;
+        var listid = [];
+        var ControlType = "checkbox";
+        var checked = "";
+        apiready = function () {
+            $(function () {
+                parentid = api.pageParam.parentid || parentid;
+                deptname = api.pageParam.deptname || deptname;
+                rootid = api.pageParam.rootid || rootid;
+                typemode = api.pageParam.typemode || typemode;
+                ismore = api.pageParam.ismore || ismore;
+                parentwin = api.pageParam.parentwin || parentwin;
+                count = api.pageParam.count || count;
+                listid = api.pageParam.listid || listid;
+                ControlType = (ismore == "true" ? "checkbox" : "radio");
+                $("#aui-searchbar-input").data("pageinfo", {
+                    parentid: parentid,
+                    deptname: deptname,
+                    rootid: rootid,
+                    typemode: typemode,
+                    ismore: ismore,
+                    parentwin: parentwin,
+                    count: count,
+                    listid: listid
+                });
+                InitData();
+                api.setRefreshHeaderInfo({
+                    visible: true,
+                    loadingImg: 'widget://image/refresh.png',
+                    bgColor: '#fff',
+                    textColor: '#000',
+                    textDown: '下拉刷新...',
+                    textUp: '松开刷新...',
+                    showTime: true
+                }, function (ret, err) {
+                    InitData();
+                    api.refreshHeaderLoadDone();
+                });
+                api.addEventListener({
+                    name: parentwin + "|ItemCount"
+                }, function (ret, err) {
+                    if (ret) {
+                        count = ret.value.Count;
+                        listid = ret.value.NListID;
+                    } else {
+                        count = ret.value.Count;
+                    }
+                });
+                if (ismore == "false") {
+                    api.addEventListener({
+                        name: parentwin + "|SingleSelect",
+                    }, function (ret, err) {
+                        if (ret) {
+                            if (parentid != ret.value.Item.Page) {
+                                $.each($("#OrganizeList input,#EmpList input"), function (i, item) {
+                                    $(item).prop("checked", false);
+                                });
+                            }
+                        }
+                    });
+                }
+            });
+        };
+        function InitData() {
+            var _options = {
+                PostData: {
+                    Params: {
+                        ParentID: parentid,
+                        TypeMode: typemode,
+                        RootID: rootid
+                    },
+                    ProcName: "proc_SOM_Other_Organize",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $("#OrganizeList,#EmpList,#IndexList").html("");
+            $.when($honesty.AjaxChannel(_options).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        LoadData(_result.Data);
+                    }
+                    else {
+                        $("#OrganizeList").html('<li class="aui-list-view-cell aui-indexed-list-view-group" style="text-align:center;font-size:15px"><span class="aui-iconfont aui-icon-favorfill aui-text-danger" data-value="*"></span>无数据，请尝试下拉刷新组织架构!</li>');
+                    }
+                }
+            }));
+        }
+        function LoadData(OrganizeData) {
+            var _OrganizeHtml = "";
+            var _EmpHtml = {};
+            var _width = (api.winWidth || $(window).width()) - 90;
+            $.each(OrganizeData, function (i, item) {
+                if (item.TypeCode == "Root" || item.TypeCode == "Dept") {
+                    if (_OrganizeHtml == "") {
+                        _OrganizeHtml = '<li class="aui-list-view-cell aui-indexed-list-view-group"><span class="aui-iconfont aui-icon-favorfill" data-value="*"></span>部门列表</li>';
+                    }
+                    var _icon = "aui-iconfont aui-icon-homefill aui-text-info";
+                    var _ChildCount = "";
+                    if (item.TypeCode == "Dept" && item.ChildCount > 0) {
+                        _icon = "aui-iconfont aui-icon-shopfill aui-text-warning";
+                        _ChildCount = "(" + item.ChildCount + ")";
+                    }
+                    else if (item.TypeCode == "Dept" && item.ChildCount == 0) {
+                        _icon = "aui-iconfont aui-icon-shopfill aui-text-success";
+                        _ChildCount = "(" + item.ChildCount + ")";
+                    }
+                    if ($.inArray(item.ID, listid) != -1) {
+                        checked = "checked";
+                    }
+                    else {
+                        checked = "";
+                    }
+                    _OrganizeHtml += '<li class="aui-list-view-cell">' +
+                        (typemode == "O" || (typemode == "S" && item.IsShop == "True") ? (
+                        '<input class="aui-pull-right aui-' + ControlType + ' aui-' + ControlType + '-warning" name="Dept" data-name="' + item.Name +
+                        '" data-id="' + item.ID + '" type="' + ControlType + '" tapmode ' + checked + '>') : "") +
+                        '<div style="width:' + _width + 'px;display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" tapmode data-role="ExpandDept" data-id="' + item.ID + '" data-child="' + item.ChildCount + '" data-name="' + item.Name +
+                        '" data-isshop="' + item.IsShop + '"><i class="' + _icon + '" style="zoom:1.44;margin-right:2px"></i>' + item.Name + _ChildCount + '</div></li>';
+                }
+                else if (item.TypeCode == "M" || item.TypeCode == "F") {
+                    if (_EmpHtml[item.SpellCode.substring(0, 1)] == "" || _EmpHtml[item.SpellCode.substring(0, 1)] == undefined) {
+                        _EmpHtml[item.SpellCode.substring(0, 1)] = '<li class="aui-list-view-cell aui-indexed-list-view-group" id="group-' + item.SpellCode.substring(0, 1) + '" data-group="' + item.SpellCode.substring(0, 1) + '" data-role="group">' + item.SpellCode.substring(0, 1) + '</li>';
+                    }
+                    if ($.inArray(item.ID, listid) != -1) {
+                        checked = "checked";
+                    }
+                    else {
+                        checked = "";
+                    }
+                    switch (item.TypeCode) {
+                        case "M":
+                            _EmpHtml[item.SpellCode.substring(0, 1)] += '<li class="aui-list-view-cell">' +
+                                (typemode == "A" || typemode == "C" ? (
+                                '<input class="aui-pull-right aui-' + ControlType + ' aui-' + ControlType + '-warning" name="User" data-name="' + item.Name +
+                                '" data-id="' + item.ID + '" type="' + ControlType + '" tapmode ' + checked + '>') : "") +
+                                '<div style="width:' + _width + 'px;display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" tapmode data-role="Expand" data-id="' + item.ID + '" data-child="0" data-name="' + item.Name + '"><i class="aui-iconfont aui-icon-my aui-bg-info" style="zoom:1.3;margin-right:3px"></i>' + item.Name + '</div></li>';
+                            break;
+                        case "F":
+                            _EmpHtml[item.SpellCode.substring(0, 1)] += '<li class="aui-list-view-cell">' +
+                                (typemode == "A" || typemode == "C" ? (
+                                '<input class="aui-pull-right aui-' + ControlType + ' aui-' + ControlType + '-warning" name="User" data-name="' + item.Name +
+                                '" data-id="' + item.ID + '" type="' + ControlType + '" tapmode ' + checked + '>') : "") +
+                                '<div style="width:' + _width + 'px;display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" tapmode data-role="Expand" data-id="' + item.ID + '" data-child="0" data-name="' + item.Name + '"><i class="aui-iconfont aui-icon-service aui-bg-danger" style="zoom:1.3;margin-right:3px"></i>' + item.Name + '</div></li>';
+                            break;
+                    }
+                    if (_EmpHtml["@"] == "" || _EmpHtml["@"] == undefined) {
+                        _EmpHtml["@"] = '<li class="aui-list-view-cell aui-indexed-list-view-group"><span class="aui-iconfont aui-icon-group" data-value="*"></span>人员列表(点击首字母全选)</li>';
+                    }
+                }
+            });
+            $("#OrganizeList").append(_OrganizeHtml);
+            for (var i = 64; i < 91; i++) {
+                $("#EmpList").append(_EmpHtml[String.fromCharCode(i)]);
+                if (i > 64 && _EmpHtml[String.fromCharCode(i)] != "" && _EmpHtml[String.fromCharCode(i)] != undefined) {
+                    $("#IndexList").append('<a data-value="' + String.fromCharCode(i) + '">' + String.fromCharCode(i) + '</a>');
+                }
+            }
+            api.parseTapmode();
+            $("#OrganizeList div[data-role='ExpandDept'],#EmpList div[data-role='Expand']").tap(function () {
+                var _ParentID = $(this).attr("data-id");
+                var _ChildCount = $(this).attr("data-child");
+                var _ParentName = $(this).attr("data-name");
+                var _DataRole = $(this).attr("data-role");
+                var _IsShop = $(this).attr("data-isshop");
+                if (_ChildCount == 0) {
+                    if (typemode == "O" || (typemode == "S" && _IsShop == "True")) {
+                        $("#OrganizeList input[data-id='" + _ParentID + "']").prop("checked", true);
+                        ItemSelect(_ParentID, _ParentName, true);
+                        if (ismore == "true") {
+                            if ($.inArray(_ParentID, listid) == -1) {
+                                listid.push(_ParentID);
+                            }
+                        }
+                        else {
+                            listid = [_ParentID];
+                        }
+                        return;
+                    }
+                    else if (typemode == "A" || typemode == "C") {
+                        if (_DataRole == "ExpandDept") {
+                            $honesty.ShowToast({ msg: "当前部门已不能展开!" });
+                        }
+                        else if (ControlType == "checkbox" && $("#EmpList input[data-id='" + _ParentID + "']").is(":checked")) {
+                            $("#EmpList input[data-id='" + _ParentID + "']").prop("checked", false);
+                            ItemSelect(_ParentID, _ParentName, false);
+                            listid.splice($.inArray(_ParentID, listid), 1);
+                        }
+                        else {
+                            $("#EmpList input[data-id='" + _ParentID + "']").prop("checked", true);
+                            ItemSelect(_ParentID, _ParentName, true);
+                            if (ismore == "true") {
+                                if ($.inArray(_ParentID, listid) == -1) {
+                                    listid.push(_ParentID);
+                                }
+                            }
+                            else {
+                                listid = [_ParentID];
+                            }
+                        }
+                        return;
+                    }
+                    else if ((typemode == "S" && _IsShop != "True")) {
+                        $honesty.ShowToast({ msg: "当前部门已不能展开!" });
+                        return;
+                    }
+                }
+                $honesty.Organize({
+                    deptname: _ParentName,
+                    rootid: rootid,
+                    parentid: _ParentID,
+                    typemode: typemode,
+                    ismore: ismore,
+                    parentwin: parentwin,
+                    IsFirst: false,
+                    count: count,
+                    listid: listid
+                });
+            });
+            $("#OrganizeList input,#EmpList input").change(function () {
+                var _ParentID = $(this).attr("data-id");
+                var _ParentName = $(this).attr("data-name");
+                ItemSelect($(this).attr("data-id"), $(this).attr("data-name"), $(this).is(":checked"));
+                if (ismore == "true") {
+                    if ($(this).is(":checked")) {
+                        var isSave = $.inArray(_ParentID, listid);
+                        if (isSave == -1) {
+                            listid.push(_ParentID);
+                        }
+                    }
+                    else {
+                        listid.splice($.inArray(_ParentID, listid), 1);
+                    }
+                }
+                else {
+                    listid = [_ParentID];
+                }
+            });
+            $("#EmpList li[data-role='group']").tap(function () {
+                var _Group = $(this).attr("data-group");
+
+            });
+        }
+        function ItemSelect(_ParentID, _ParentName, IsCheck) {
+            api.sendEvent({
+                name: parentwin + "|ItemSelect",
+                extra: {
+                    Item:
+                       {
+                           Page: parentid,
+                           ID: _ParentID,
+                           Name: _ParentName,
+                           IsCheck: IsCheck
+                       }
+                }
+            });
+            api.sendEvent({
+                name: parentwin + "|SingleSelect",
+                extra: {
+                    Item:
+                       {
+                           Page: parentid,
+                           ID: _ParentID,
+                           Name: _ParentName,
+                           IsCheck: IsCheck
+                       }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,389 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>竞品品牌明细</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-input-row .aui-input-addon {
+            width: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div class="aui-content">
+        <p class="aui-padded-5 aui-text-center" id="pTitle">品牌明细</p>
+        <div class="aui-form aui-input-form" id="divBrand">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">品牌</span>
+                <select id="BrandCode" class="aui-input" disabled="disabled">
+                </select>
+            </div>
+            <div id="divType" class="aui-input-row" style="display: none">
+                <span class="aui-input-addon">竞争类型</span>
+                <select id="CompetitionType" class="aui-input">
+                    <option value=''>请选择</option>
+                    <option value="feaa3976-ec4e-4421-bf03-9dafce7d5ee8">拉近距离型</option>
+                    <option value="685c4773-e09d-4246-8f12-e772faffab34">拉开距离型</option>
+                    <option value="c1f2d9af-cf1e-4fec-9626-f6e7b16c5e39">提升排名型</option>
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">当日销售</span>
+                <input id="DaySale" type="text" class="aui-input" placeholder="只能填写整数/单位为（元）" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">当日活动</span>
+                <input id="DayActivity" type="text" class="aui-input" placeholder="请填写当日活动" />
+            </div>
+        </div>
+    </div>
+    <div id="divFooter" style="height: 40px; display: none"></div>
+    <footer class="aui-nav" id="footer" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7; display: none">
+        <table style="width: 100%; border-collapse: collapse">
+            <tr>
+                <td>
+                    <div id="btnSave" class="aui-btn aui-btn-block aui-btn-info" style="height: 45px; width: 100%; line-height: 0.9;">
+                        保存
+                    </div>
+                </td>
+                <td id="tbDelete">
+                    <div id="btnDelete" class="aui-btn aui-btn-block aui-btn-danger" style="height: 45px; width: 100%; line-height: 0.9;">
+                        删除
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+    </footer>
+</body>
+</html>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script src="../../../script/honesty.valid.js"></script>
+<script type="text/javascript">
+    var _BrandCode, _IsLeader, _OrganizeID,
+        _State, _IsSelfShop, _Today;
+
+    var _SumSale, _IsExist, _MonthTarget = 0;
+    apiready = function () {
+        api.parseTapmode();
+
+        $(function () {
+            _BrandCode = api.pageParam.BrandCode;
+            _IsLeader = api.pageParam.IsLeader;
+            _OrganizeID = api.pageParam.OrganizeID;
+            _State = api.pageParam.State;
+            _IsSelfShop = api.pageParam.IsSelfShop;
+            _Today = api.pageParam.Today;
+
+            $("#pTitle").html(_Today + $("#pTitle").html());
+            if (_IsSelfShop == "1") {
+                $("#divType").show();
+                if (_IsLeader) {
+                    $("#DaySale").attr("disabled", "disabled");
+                }
+                else {
+                    $("#DaySale").attr("readonly", "readonly");
+                }
+            }
+            if (!_IsLeader) {
+                $("select.aui-input").attr("disabled", "disabled");
+                $("input.aui-input").attr("readonly", "readonly");
+                $("#divBrand").addClass("aui-input-disabled")
+            }
+
+
+            LoadData();
+
+            $("#btnDelete").tap(function () {
+                $honesty.ConfirmWin({
+                    msg: "是否删除？",
+                    callback: function (ret, err) {
+                        if (ret.buttonIndex == "1") {
+                            var _options = {
+                                PostData: {
+                                    Params: {
+                                        Result: "DeleteCountOff",
+                                        OrganizeID: _OrganizeID,
+                                        BrandCode: _BrandCode,
+                                        CountOffDate: _Today
+                                    },
+                                    ProcName: "proc_SOM_ISR_Brand",
+                                    DataType: "Bool",
+                                    ExecType: "PROC",
+                                    Mode: "MSSQL"
+                                }
+                            };
+                        }
+                        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                            if (_result.Code == "1") {
+                                if (_result.Data == "True") {
+                                    $honesty.ShowMsg({
+                                        title: "提示", msg: "删除成功", callback: function () {
+                                            api.sendEvent({
+                                                name: 'Brand_BrandCountOff_BrandCountOffInfo',
+                                                extra: {
+                                                    IsTrue: true
+                                                }
+                                            });
+                                            $honesty.CloseWin();
+                                        }
+                                    })
+                                }
+                                else {
+                                    $honesty.AjaxChannel({ title: "错误", msg: "删除失败" });
+                                }
+                            }
+                        });
+                    }
+                })
+            });
+        });
+
+
+        //保存函数点击
+        $("#btnSave").tap(function () {
+            if (CheckInfo()) {
+                var _BrandName = $("#BrandCode").find("option:selected").text();
+                var _CompetitionType = $("#CompetitionType").val();
+                if (_CompetitionType == "") {
+                    _CompetitionType = "00000000-0000-0000-0000-000000000000";
+                }
+                var _DaySale = $("#DaySale").val();
+                var _DayActivity = $("#DayActivity").val().trim();
+                var _MonthSale = Number(_SumSale) + Number(_DaySale);
+                var _ActualCompletion = "0";
+                if (_MonthTarget != "0") {
+                    _ActualCompletion = (Number(_MonthSale) / Number(_MonthTarget) * 100).toFixed(0);
+                }
+                var _options = {};
+                if (_State == "") {
+                    _options = {
+                        PostData: {
+                            Params: {
+                                Result: "InsertCountOff",
+                                OrganizeID: _OrganizeID,
+                                BrandCode: _BrandCode,
+                                CountOffDate: _Today,
+                                IsSelfShop: _IsSelfShop,
+                                BrandName: _BrandName,
+                                CompetitionType: _CompetitionType,
+                                MonthTarget: _MonthTarget,
+                                ActualCompletion: _ActualCompletion,
+                                MonthSale: _MonthSale,
+                                DaySale: _DaySale,
+                                DayActivity: _DayActivity,
+                                CreateUserID: GetSession("UserID"),
+                                CreateName: GetSession("UserName")
+                            },
+                            ProcName: "proc_SOM_ISR_Brand",
+                            DataType: "Bool",
+                            ExecType: "PROC",
+                            Mode: "MSSQL"
+                        }
+                    };
+                }
+                else {
+                    _options = {
+                        PostData: {
+                            Params: {
+                                Result: "UpdateCountOff",
+                                OrganizeID: _OrganizeID,
+                                BrandCode: _BrandCode,
+                                OrganizeID: _OrganizeID,
+                                BrandCode: _BrandCode,
+                                CountOffDate: _Today,
+                                IsSelfShop: _IsSelfShop,
+                                BrandName: _BrandName,
+                                CompetitionType: _CompetitionType,
+                                MonthTarget: _MonthTarget,
+                                ActualCompletion: _ActualCompletion,
+                                MonthSale: _MonthSale,
+                                DaySale: _DaySale,
+                                DayActivity: _DayActivity
+                            },
+                            ProcName: "proc_SOM_ISR_Brand",
+                            DataType: "Bool",
+                            ExecType: "PROC",
+                            Mode: "MSSQL"
+                        }
+                    };
+                }
+
+                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                    if (_result.Code == "1") {
+                        if (_result.Data == "True") {
+                            $honesty.ShowMsg({
+                                title: "提示", msg: "保存成功", callback: function () {
+                                    api.sendEvent({
+                                        name: 'Brand_BrandCountOff_BrandCountOffInfo',
+                                        extra: {
+                                            IsTrue: true
+                                        }
+                                    });
+                                    $honesty.CloseWin();
+                                }
+                            });
+                        }
+                        else {
+                            $honesty.ShowMsg({ title: "错误", msg: "保存失败" });
+                        }
+                    }
+                });
+
+            }
+        });
+
+    }
+
+    //验证函数
+    function CheckInfo() {
+        if ($("#CompetitionType").val() == "" && _IsSelfShop == "1") {
+            $honesty.ShowMsg({ title: "警告", msg: "请选择竞争类型！" });
+            return false;
+        }
+        else if ($("#DaySale").val().trim() == "") {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "请填写当日销售！",
+                callback: function () {
+                    $("#DaySale").focus();
+                }
+            });
+            return false;
+        }
+        else if (valid_int($("#DaySale").val().trim())) {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "当日销售不为整数，请重新填写",
+                callback: function () {
+                    $("#DaySale").focus();
+                }
+            });
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
+
+    //数据加载函数
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "SelectBrand",
+                    OrganizeID: _OrganizeID,
+                    IsSelfShop: _IsSelfShop
+                },
+                ProcName: "proc_SOM_ISR_Brand",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    var _Content = "<option value=''>请选择</option>"
+                    $.each(_result.Data, function (i, item) {
+                        _Content += "<option value='" + item.ID + "'>" + item.Title + "</option>";
+                    });
+                    $("#BrandCode").html(_Content);
+                    _options = {
+                        PostData: {
+                            Params: {
+                                Result: "CountOffSingle",
+                                OrganizeID: _OrganizeID,
+                                BrandCode: _BrandCode,
+                                CountOffDate: _Today,
+                                IsSelfShop: _IsSelfShop
+                            },
+                            ProcName: "proc_SOM_ISR_Brand",
+                            DataType: "DataTable",
+                            ExecType: "PROC",
+                            Mode: "MSSQL"
+                        },
+                        async: false
+                    };
+                    $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                        if (_result.Code == "1") {
+                            if (_result.Data.length > 0) {
+                                $.each(_result.Data, function (i, item) {
+                                    $("#BrandCode").val(item.BrandCode);
+                                    $("#CompetitionType").val(item.CompetitionType);
+                                    $("#DaySale").val(item.DaySale);
+                                    $("#DayActivity").val(item.DayActivity);
+                                    _SumSale = item.SumSale;
+                                    _IsExist = item.IsExist;
+                                    _MonthTarget = item.MonthTarget;
+                                });
+                            }
+                            if (_IsExist != "0") {
+                                if (_IsLeader) {
+                                    $(".aui-input").attr("disabled", "disabled");
+                                }
+                            }
+                            else {
+                                if (_IsLeader) {
+                                    $("#footer").show();
+                                    $("#divFooter").show();
+                                }
+                                if (_State == "") {
+                                    $("#tbDelete").hide();
+                                }
+                            }
+
+                            if (_IsSelfShop == "1" && _IsLeader && _IsExist == "0") {
+                                var _options = {
+                                    PostData: {
+                                        Params: {
+                                            shopCode: _BrandCode,
+                                            zDate: _Today
+                                        },
+                                        URL: "posSale/getGoodsSale",
+                                        Mode: "ESB",
+                                        Handle: "GET"
+                                    },
+                                    Loading: {
+                                        Title: "正在获取销售数据...",
+                                        Show: true
+                                    },
+                                    async: false
+                                };
+                                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                                    if (_result.Code == "1") {
+                                        if (_result.Data != undefined) {
+                                            $("#DaySale").val(_result.Data.daySale.toFixed(0));
+                                        }
+                                    }
+                                    else {
+                                        $honesty.ShowMsg({ title: "错误", msg: "获取销售数据失败" });
+                                        $("#footer").hide();
+                                        $("#divFooter").hide();
+                                    }
+                                });
+                            }
+                        }
+                        else {
+                            $("#footer").hide();
+                            $("#divFooter").hide();
+                        }
+                    })
+
+                }
+            }
+            else {
+                $("#footer").hide();
+                $("#divFooter").hide();
+            }
+        });
+
+    }
+
+</script>

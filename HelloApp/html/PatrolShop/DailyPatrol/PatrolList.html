@@ -1,0 +1,211 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>日常巡店模块列表</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-text-disabled {
+            color: #999999 !important;
+            font-size: 12px;
+        }
+
+        .aui-list-view-cell {
+            padding: 5px 10px;
+        }
+
+        .aui-counter-box {
+            padding: 0;
+        }
+
+        .aui-pull-right table {
+            color: #999999 !important;
+            font-size: 12px;
+            border-collapse: collapse;
+        }
+    </style>
+</head>
+<body>
+    <div class="aui-content">
+        <ul class="aui-list-view" id="ulList">
+        </ul>
+    </div>
+    <div id="divFooter" style="height: 40px; display: none"></div>
+    <footer class="aui-nav" id="footer" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7; display: none">
+        <div id="btnSave" class="aui-btn aui-btn-block aui-btn-info" style="height: 45px; width: 100%; line-height: 0.9;">
+            保存
+        </div>
+    </footer>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _PatrolID, _ProjectID, _ImageScore;
+    var _IsChange = false;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _PatrolID = api.pageParam.PatrolID;
+            _ProjectID = api.pageParam.ProjectID;
+            _ImageScore = api.pageParam.ImageScore;
+
+            if (_ImageScore == -1) {
+                $("#divFooter").show();
+                $("#footer").show();
+            }
+
+
+            LoadData();
+
+            $(document).on("change", "[data-role='IsCheck']", function () {
+                if (_ImageScore == -1) {
+                    if (!$(this).is(":checked")) {
+                        var id = $(this).data("checkid");
+                        $("[data-scoreid='" + id + "']").prop("checked", false);
+                    }
+                    _IsChange = true;
+                }
+            });
+
+            $(document).on("change", "[data-role='IsScore']", function () {
+                if (_ImageScore == -1) {
+                    if ($(this).is(":checked")) {
+                        var id = $(this).data("scoreid");
+                        $("[data-checkid='" + id + "']").prop("checked", true);
+                    }
+                    _IsChange = true;
+                }
+            });
+
+            $("#btnSave").tap(function () {
+                SaveInfo(true);
+            });
+        });
+    };
+
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "GetItemList",
+                    PatrolID: _PatrolID,
+                    ProjectID: _ProjectID
+                },
+                ProcName: "proc_SOM_ISR_PS_ImageManage",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        var _Content = "";
+                        $.each(_result.Data, function (i, item) {
+                            _Content += '<li class="aui-list-view-cell aui-img aui-counter-list">' +
+                                        '<div class="aui-img-body"><label tapmode onclick=\"SaveInfo(false,\'' + item.ID + '\')\">' + item.ItemName + '</label>' +
+                                        '<div class="aui-counter-box"><div class="aui-pull-left aui-text-disabled" tapmode onclick=\"SaveInfo(false,\'' + item.ID + '\')\">标准分:' +
+                                        item.StandardScore + '</div><div class="aui-counter aui-pull-right"><table><tr><td>是否检查</td> <td>' +
+                                        '<input data-checkid="' + item.ID + '" data-role="IsCheck" type="checkbox" class="aui-switch aui-switch-warning aui-pull-right" ' + (item.IsCheck == "True" ? 'checked ' : ' ') +
+                                        (_ImageScore == -1 ? '' : 'disabled') + '></td><td>是否得分</td><td>' +
+                                        '<input data-scoreid="' + item.ID + '" data-role="IsScore" data-score="' + item.StandardScore + '" type="checkbox" class="aui-switch aui-switch-success aui-pull-right" ' + (item.IsScore == "True" ? 'checked ' : ' ') +
+                                        (_ImageScore == -1 ? '' : 'disabled') + '></td></tr></table></div></div></div></li>';
+                        });
+                        $("#ulList").html(_Content);
+                        api.parseTapmode();
+                    }
+                }
+                else {
+                    $honesty.CloseWin();
+                }
+            }
+        });
+    }
+
+    function SaveInfo(isSave, id) {
+        if (_IsChange) {
+            var isCheck = $("[data-role='IsCheck']");
+            var isScore = $("[data-role='IsScore']");
+            var imageManage = "<?xml version=\"1.0\" encoding=\"gb2312\"?><root>";
+            var score = 0;
+            for (var i = 0; i < isCheck.length; i++) {
+                imageManage += "<Item ID=\"" + $(isCheck[i]).data("checkid") + "\" " +
+                               "IsScore=\"" + ($(isScore[i]).is(':checked') == true ? "1" : "0") + "\" " +
+                               "IsCheck=\"" + ($(isCheck[i]).is(':checked') == true ? "1" : "0") + "\" />";
+                if ($(isScore[i]).is(':checked')) {
+                    score += Number($(isScore[i]).data("score"));
+                }
+            }
+            imageManage += "</root>";
+            var _options = {
+                PostData: {
+                    Params: {
+                        Result: "SaveBatchInfo",
+                        ImageManage: imageManage
+                    },
+                    ProcName: "proc_SOM_ISR_PS_ImageManage",
+                    DataType: "Bool",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data == "True") {
+                        if (isSave) {
+                            $honesty.ShowMsg({ title: "提示", msg: "保存成功" });
+                        }
+                        else {
+                            $honesty.OpenWin({
+                                title: "日常巡店",
+                                name: "PatrolShop_DailyPatrol_PatrolInfo",
+                                url: "PatrolShop/DailyPatrol/PatrolInfo.html",
+                                LevelNum: 2,
+                                pageParam: {
+                                    ID: id,
+                                    ImageScore: _ImageScore
+                                }
+                            });
+                        }
+                        api.sendEvent({
+                            name: 'PatrolShop_DailyPatrol_PatrolList',
+                            extra: {
+                                ProjectID: _ProjectID,
+                                Score: score
+                            }
+                        });
+                    }
+                    else {
+                        if (isSave) {
+                            $honesty.ShowMsg({ title: "错误", msg: "保存失败" });
+                        }
+                        else {
+                            $honesty.ShowMsg({ title: "错误", msg: "获取数据失败，请重新点击" });
+                        }
+                    }
+                }
+            });
+
+        }
+        else if (isSave) {
+            $honesty.ShowToast({ msg: "值未发生改变，无需保存" });
+        }
+        else if (id != undefined) {
+            $honesty.OpenWin({
+                title: "日常巡店",
+                name: "PatrolShop_DailyPatrol_PatrolInfo",
+                url: "PatrolShop/DailyPatrol/PatrolInfo.html",
+                LevelNum: 2,
+                pageParam: {
+                    ID: id,
+                    ImageScore: _ImageScore
+                }
+            });
+        }
+    }
+</script>
+</html>

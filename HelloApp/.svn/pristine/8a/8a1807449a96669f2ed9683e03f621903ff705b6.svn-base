@@ -1,0 +1,638 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>降职申请</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-input-row .aui-input-addon {
+            width: 120px;
+            color: #8f8f94;
+            text-align: left;
+        }
+
+        .aui-input-form .aui-input-row .aui-input-addon {
+            padding-left: 8px;
+            font-weight: 300;
+            font-size: 13px;
+        }
+
+        .aui-list-view-cell {
+            padding: 5px 15px;
+        }
+
+        .aui-label-title {
+            text-align: right;
+            width: 90px;
+        }
+    </style>
+</head>
+<body>
+    <div id="main">
+        <p class="aui-padded-5 aui-text-center" style="color: #3175af; font-size: 16px;">降职申请流程</p>
+        <div class="aui-card" style="margin-bottom: 0px;">
+            <ul class="aui-list-view" style="margin-bottom: 0px;">
+                <li class="aui-list-view-cell">
+                    <label id="InfoSN"></label>
+                    <p>单号</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="InfoEmpName"></label>
+                    <p>姓名</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="InfoWriteDate"></label>
+                    <p>日期</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="InfoEmpCode"></label>
+                    <p>工号</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoAreaName"></label>
+                    <p>大区</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoProvince"></label>
+                    <p>区域</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoEmpPosition"></label>
+                    <p>岗位</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoSapCode"></label>
+                    <p>店铺代码</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoShopName"></label>
+                    <p>店铺名称</p>
+                </li>
+                <li data-role="colspan" data-show="hide" class="aui-list-view-cell" id="liBaseMore">
+                    <p style="text-align: center">点击显示详情</p>
+                </li>
+            </ul>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; margin: 0 10px; font-size: 15px;">基本信息</p>
+        <div class="aui-card aui-input-form" style="margin-bottom: 0px;">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">降职员工工号</span>
+                <input id="DemCode" type="text" class="aui-input aui-important" onchange="UserInfo()" placeholder="请填写员工工号" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">降职员工姓名</span>
+                <input id="DemName" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">所在店铺</span>
+                <input id="DemShopName" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">现任岗位</span>
+                <input id="DemPosition" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">入职时间</span>
+                <input id="InDate" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; margin: 0 10px; font-size: 15px;">降职信息</p>
+        <div class="aui-card aui-input-form" style="margin-bottom: 0px;">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">降职类型</span>
+                <select class="aui-input aui-important" id="DemType">
+                    <option value="">请选择...</option>
+                    <option value="业绩不达标">业绩不达标</option>
+                    <option value="其它">其它</option>
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">降职原因</span>
+                <input id="DemoteReason" type="text" class="aui-input aui-important" placeholder="请填写降职原因" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">降职岗位</span>
+                <select class="aui-input aui-important" id="NewPosition">
+                    <option value="">请选择...</option>
+                    <option value="E1">店经理</option>
+                    <option value="F1">高级店长</option>
+                    <option value="F2">中级店长</option>
+                    <option value="F3">初级店长</option>
+                    <option value="H1">高级导购</option>
+                    <option value="H4">导购</option>
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">申请降职时间</span>
+                <input id="DemDate" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">现任职位岗龄(月)</span>
+                <input id="PositionAge" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; margin: 0 10px; font-size: 15px;">业绩信息</p>
+        <div class="aui-card aui-input-form" style="margin-bottom: 0px;">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">业绩达成率</span>
+                <input id="KPI" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon" style="vertical-align: top">排名</span>
+                <textarea id="Rank" class="aui-input" style="height: 70px; overflow-y: auto" readonly="readonly"></textarea>
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; margin: 0 10px; font-size: 15px;">考核信息</p>
+        <div class="aui-card aui-input-form" style="margin-bottom: 0px;">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">180度评估结果</span>
+                <input id="JudgeResult" type="text" class="aui-input aui-important" placeholder="请填写评估结果" />
+            </div>
+        </div>
+        <div style="height: 100px"></div>
+    </div>
+    <input id="EmpID" type="hidden" />
+    <input id="RankInfo" type="hidden" />
+    <input id="DemID" type="hidden" />
+    <input id="DemLevelDesc" type="hidden" />
+    <input id="DemSapCode" type="hidden" />
+    <input id="NewLevelDesc" type="hidden" />
+    <input id="NewEmpLevel" type="hidden" />
+</body>
+<script src="../../script/api.js"></script>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script src="../../script/honesty.flow.js"></script>
+<script type="text/javascript">
+    var arry = ["E1", "F1", "F2", "F3", "H1", "H4"];
+    var DemID = "";
+    var _ContentList = "";
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            if (GetSession("IsLeader") >= 1) {
+
+                $honestyFlow.InitFlow({ Async: false, wapflowpage: "HRFlow/EmpDemote" });
+                var InstanceID = $honestyFlow.GetFlowInfo("instanceid");
+                if (api.pageParam.instanceid != undefined) {
+                    DemID = InstanceID;
+                }
+                if ($honestyFlow.GetFlowInfo("stepname") != "提出降职申请") {
+                    $("#DemoteReason,#JudgeResult,#NewPosition,#DemType,#DemCode").attr("disabled", "disabled");
+                }
+                //点击展示隐藏
+                $("#liBaseMore").tap(function () {
+                    $("[data-role='baseMore']").fadeToggle(200);
+                    if ($("#liBaseMore").attr("data-show") == "hide") {
+                        $("#liBaseMore").children("p").html("点击收起");
+                        $("#liBaseMore").attr("data-show", "show");
+                    }
+                    else {
+                        $("#liBaseMore").children("p").html("点击显示详情");
+                        $("#liBaseMore").attr("data-show", "hide");
+                    }
+                });
+                if ($("#SOM_HR_EmpDemote.DemLevelDesc").val() >= $("#SOM_HR_EmpDemote.NewLevelDesc").val()) {
+                    alert("降职后岗位不能低于降职前岗位！", "E");
+                    $("#SOM_HR_EmpDemote.NewPosition").val("");
+                    return false
+                }
+
+                InitBase();
+                $("#btnSend").unbind("tap").tap(function () {
+                    if (SaveData()) {
+                        $honestyFlow.SendFlow();
+                    }
+                });
+                $("#btnPause").unbind("tap").tap(function () {
+                    if (SaveData()) {
+                        $honestyFlow.PauseFlow();
+                    }
+                });
+                $("#btnBack").unbind("tap").tap(function () {
+                    if (SaveData()) {
+                        $honestyFlow.BackFlow();
+                    }
+                });
+                //完成
+                $("#btnComplete").unbind("tap").tap(function () {
+                    var NowDate = $honesty.NowDate();
+                    var EmpDemote = {
+                        PostData: {
+                            ITable: {
+                                "PTI_JZBD": [{
+                                    ZEMID: $("#EmpID").val(),
+                                    ZLSDH: $honestyFlow.GetFlowInfo("sn"),
+                                    ZJZID: $("#DemID").val(),
+                                    ZJZGW: $("#NewPosition").val(),
+                                    ZSPRQ: NowDate,
+                                    ZSPSJ: NowDate,
+                                    ZPGJG: $("#JudgeResult").val(),
+                                    ZJZYY: $("#DemoteReason").val(),
+                                    ZJZRQ: $("#DemDate").val(),
+                                    Z_SAPCODE: $("#DemSapCode").val(),
+                                    ZXQGW: $("#DemLevelDesc").val(),
+                                }]
+                            },
+                            Export: [
+                                "POC_RETURN_ID",
+                                "POC_RETURN_DESC"
+                            ],
+                            FunctionName: "ZHR_FM_JZ_INPUT",
+                            Mode: "RFC"
+                        },
+                        async: false
+                    };
+                    var _result = $honesty.AjaxChannel(EmpDemote);
+                    if (_result.Code == "1") {
+                        if (_result.Data.Export.POC_RETURN_ID == "000") {
+                            $honestyFlow.CompleteFlow();
+                        }
+                        else {
+                            $honesty.ShowMsg({ msg: _result.Data.Export.POC_RETURN_DESC, title: "警告" });
+                        }
+                    }
+                });
+            }
+            else {
+                $honesty.ShowMsg({
+                    title: "警告",
+                    msg: "您暂无权限操作！",
+                    callback: function () {
+                        api.closeWin();
+                    }
+                });
+            }
+
+        });
+        //打开二级菜单
+        $("#Rank").tap(function () {
+            if ($("#DemDate").val() != "") {
+                api.openFrame({
+                    name: 'Ranking',
+                    url: 'Ranking.html',
+                    bounces: false,
+                    pageParam: {
+                        ContentList: _ContentList,
+                    },
+                    rect: {
+                        x: 0,
+                        y: 0,
+                        w: 'auto',
+                        h: 'auto'
+                    }
+                });
+                api.bringFrameToFront({
+                    from: 'Ranking'
+                });
+            }
+        })
+        $("#DemDate").tap(function () {
+            if (($honestyFlow.GetFlowInfo("stepname") == "提出降职申请") && ($("#DemCode").val() != "")) {
+                $honesty.DateTimeSelect({
+                    LevelNum: 1,
+                    Type: "Date",
+                    ControlID: "DemDate",
+                    ControlValue: $("#DemDate").val(),
+                    onchange: function (ret) {
+                        if (ret) {
+                            Time();
+                        }
+                    }
+                });
+            }
+        });
+        $("#NewPosition").change(function () {
+            $("#NewLevelDesc").val($("#NewPosition").val());
+            $("#NewEmpLevel").val($("#NewPosition").val().substring(0, 1));
+            //if ($("#DemLevelDesc").val() >= $("#NewPosition").val()) {
+            //    $honesty.ShowMsg({
+            //        title: "警告", msg: "降职后岗位不能高于降职前岗位！", callback: function () {
+            //            $("#NewPosition").val("");
+            //        }
+            //    });
+            //    return false
+            //}
+        })
+    }
+    function InitBase() {
+        $honestyFlow.InitFlow({ Async: false, wapflowpage: "HRFlow/EmpDemote" });
+        var InstanceID = $honestyFlow.GetFlowInfo("instanceid");
+        _Date = $honesty.NowDate();
+        if (DemID != "") {
+            var _options = {
+                PostData: {
+                    Params: {
+                        Result: "InitEmpDemote",
+                        ID: DemID
+                    },
+                    ProcName: "proc_SOM_HR_EmpDemote",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        $.each(_result.Data, function (i, item) {
+                            $("#InfoSN").html(item.SN);
+                            $("#InfoWriteDate").html(item.WriteDate);
+                            $("#InfoEmpCode").html(item.EmpCode);
+                            $("#InfoEmpName").html(item.EmpName);
+                            $("#InfoSapCode").html(item.SapCode);
+                            $("#InfoShopName").html(item.ShopName);
+                            $("#InfoProvince").html(item.Province);
+                            $("#InfoAreaName").html(item.AreaName);
+                            $("#InfoEmpPosition").html(item.EmpPosition);
+                            $("#DemCode").val(item.DemCode);
+                            $("#DemName").val(item.DemName);
+                            $("#DemShopName").val(item.DemShopName);
+                            $("#InDate").val(item.InDate);
+                            $("#PositionAge").val(item.PositionAge);
+                            $("#DemPosition").val(item.DemPosition);
+                            $("#DemLevelDesc").val(item.DemLevelDesc);
+                            $("#DemSapCode").val(item.DemSapCode);
+                            $("#DemDate").val(item.DemDate);
+                            $("#KPI").val(item.KPI);
+                            $("#DemID").val(item.DemID);
+                            $("#RankInfo").val(item.RankInfo);
+                            $("#Rank").val(item.Rank);
+                            $("#JudgeResult").val(item.JudgeResult);
+                            $("#EmpID").val(item.EmpID);
+                            $("#DemoteReason").val(item.DemoteReason);
+                            $("#DemType").val(item.DemType);
+                            $("#NewPosition").val(item.NewLevelDesc);
+                            $("#NewLevelDesc").val(item.NewLevelDesc);
+                        });
+                        _ContentList = "";
+                        var trList = $("#RankInfo").val().split("|");
+                        for (var i = 0 ; i < trList.length; i++) {
+                            var tdList = trList[i].split(",");
+                            _ContentList += "<tr><td>" + tdList[0] + "</td><td>" + tdList[1] + "</td><td>" + tdList[2] + "</td><td>" + tdList[3] + "</td><tr>";
+                        }
+                    }
+                }
+            });
+        }
+        else {
+            DemID = $honestyFlow.GetFlowInfo("instanceid");
+            $("#InfoSN").html($honestyFlow.GetFlowInfo("SN"));
+            $("#InfoWriteDate").html(_Date.Format("yyyy-MM-dd"));
+            $("#InfoEmpCode").html(GetSession("UserCode"));
+            $("#InfoEmpName").html(GetSession("UserName"));
+            $("#InfoSapCode").html(GetSession("SapCode"));
+            $("#InfoShopName").html(GetSession("ShopName"));
+            $("#InfoEmpPosition").html(GetSession("Position"));
+            $("#InfoAreaName").html(GetSession("AreaName"));
+            $("#InfoProvince").html(GetSession("Province"));
+            $("#DemID").html(GetSession("UserID"));
+        }
+    }
+    function UserInfo() {
+        if ($("#DemCode").val() == GetSession("UserCode")) {
+            $honesty.ShowMsg({ title: "警告", msg: "不可发起本人的降职流程！" });
+            $("#DemCode").val("");
+            return false;
+        }
+        if ($("#DemCode").val() != "") {
+            $honesty.GetUserInfo({
+                account: $("#DemCode").val(), callback: function (ret) {
+                    if (ret.Code == 1) {
+                        $("#DemName").val(ret.Data.UserName);
+                        $("#DemShopName").val(ret.Data.ShopName);
+                        $("#DemPosition").val(ret.Data.Position);
+                        $("#InDate").val(ret.Data.CreateDate);
+                        $("#DemLevelDesc").val(ret.Data.LevelDesc);
+                        $("#DemSapCode").val(ret.Data.SapCode);
+                        $("#DemID").val(ret.Data.UserID);
+
+                        $("#NewPosition option").removeAttr("disabled", "");
+                        $("#NewPosition").css("display", "");
+                        $("#NewPosition").val("");
+                        var TranLv = $.inArray($("#DemLevelDesc").val(), arry);
+                        for (var i = 1 ; i <= TranLv + 1; i++) {
+                            $("#NewPosition option:eq(" + i + ")").attr("disabled", "disabled");
+
+                        }
+                    }
+                    else {
+                        $honesty.ShowMsg({
+                            title: "警告", msg: "该工号不存在！", callback: function () {
+                                $("#DemCode").val("");
+                            }
+                        });
+                        return false;
+                    }
+                }
+            });
+        }
+        else $("#DemName,#DemShopName,#DemPosition,#InDate,#DemDate,#PositionAge,#KPI,#Rank").val("");
+    }
+    function Time() {
+        var _Date = new Date($("#DemDate").val());
+        var _DemDate = _Date.getFullYear() + "/" + (_Date.getMonth() + 1) + "/" + "01";
+        $("#DemDate").val(new Date(_DemDate).Format("yyyy/MM/dd"));
+        if ($("#DemID").val() != "") {
+            var _options = {
+                PostData: {
+                    Params: {
+                        empId: $("#DemID").val(),
+                        date: new Date($("#DemDate").val()).Format("yyyyMMdd")
+                    },
+                    URL: "employeeInfo/getEmpServiceAge",
+                    Mode: "ESB",
+                    Handle: "GET"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.returnCode == "000") {
+                        $("#PositionAge").val(_result.Data.positionAge);
+
+                        //获取业绩达成率
+                        var _optionsKip = {
+                            PostData: {
+                                Params: {
+                                    result: "GetSaleKip",
+                                    EmpID: $("#DemID").val(),
+                                    ApplyDate: $("#DemDate").val()
+                                },
+                                ProcName: "proc_SOM_HR_EmpTransfer",
+                                DataType: "DataTable",
+                                ExecType: "PROC",
+                                Mode: "MSSQL"
+                            },
+                            async: false
+                        };
+                        var _resultKip = $honesty.AjaxChannel(_optionsKip);
+                        if (_result.Code == "1") {
+                            if (_result.Data.returnCode == "000") {
+                                var Sumrate = 0;
+                                var Counts = 0;
+                                var Content = "";
+                                _ContentList = "";
+                                var _RankInfo = "";
+                                if (_resultKip.Data.length > 0) {
+                                    $.each(_resultKip.Data, function (i, item) {
+                                        if (i != _resultKip.Data.length - 1) {
+                                            _RankInfo += item.ZYear + "," + item.ZMonth + "," + item.OrgRank + "," + item.AreaRank + "," + item.WageLevel + "|";
+                                        }
+                                        else {
+                                            _RankInfo += item.ZYear + "," + item.ZMonth + "," + item.OrgRank + "," + item.AreaRank + "," + item.WageLevel;
+                                        }
+                                        _ContentList += "<tr style=' font-size: 13px'><td>" + item.ZYear + "</td><td>" + item.ZMonth + "</td><td>" + item.OrgRank + "</td><td>" + item.AreaRank + "</td><tr>"
+                                        Sumrate += Number(item.rate);
+                                        Content += item.ZYear + "年" + item.ZMonth + "月该员工在当前店铺排名为" + item.OrgRank + ",大区同级别员工中排名为" + item.AreaRank + "\n";
+                                        Counts++;
+                                    });
+                                    $("#Rank").val(Content);
+                                    $("#KPI").val((Sumrate / Counts).toFixed(2) + "%");
+                                    $("#RankList").html(_ContentList);
+                                    $("#RankInfo").val(_RankInfo);
+                                }
+                                else {
+                                    $("#Rank").val("");
+                                    $("#KPI").val("0" + "%");
+                                    $("#RankList").html("");
+                                    $("#RankInfo").val("");
+                                    $honesty.ShowMsg({ title: "警告", msg: "该员工在SAP无销售数据！" });
+                                }
+                            }
+                        }
+                    }
+                }
+
+            });
+
+        }
+        else {
+            $honesty.ShowMsg({
+                title: "警告", msg: "请选择降职员工工号！", callback: function () {
+                    $("#DemCode").val("");
+                }
+            });
+
+        }
+    };
+    //保存基本信息
+    function SaveData() {
+        if ($honestyFlow.GetFlowInfo("stepname") == "提出降职申请") {
+            var _options = {
+                PostData: {
+                    Params: {
+                        Result: "IsDemoteStatus",
+                        EmpID: GetSession("UserID"),
+                        DemID: $("#DemID").val(),
+                        SN: $("#InfoSN").html()
+                    },
+                    ProcName: "proc_SOM_HR_EmpDemote",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                async: false
+            };
+            var _result = $honesty.AjaxChannel(_options);
+            var _Erre = true;
+            if (_result.Data.length > 0) {
+                $.each(_result.Data, function (i, item) {
+                    $honesty.ShowMsg({ title: "警告", msg: "相同的降职申请流程已存在，请先完成！流程信息:" + item.SN });
+                    _Erre = false;
+                });
+            }
+            else {
+                if (_Erre == false) {
+                    return false;
+                }
+                if ($.trim($("#DemCode").val()) == "") {
+                    $honesty.ShowMsg({ title: "警告", msg: "请填写降职员工工号！" });
+                    return false;
+                }
+                if ($("#DemType").val() == "") {
+                    $honesty.ShowMsg({ title: "警告", msg: "请选降职类型！" });
+                    return false;
+                }
+                if ($.trim($("#DemoteReason").val()) == "") {
+                    $honesty.ShowMsg({ title: "警告", msg: "请填写降职原因！" });
+                    return false;
+                }
+                if ($("#NewPosition").val() == "") {
+                    $honesty.ShowMsg({ title: "警告", msg: "请选择降职岗位！" });
+                    return false;
+                }
+                if ($("#DemDate").val() == undefined || $("#DemDate").val() == "") {
+                    $honesty.ShowMsg({ title: "警告", msg: "请选择申请降职时间！" });
+                    return false;
+                }
+                if ($.trim($("#JudgeResult").val()) == "") {
+                    $honesty.ShowMsg({ title: "警告", msg: "请填写180度评估结果！" });
+                    return false;
+                }
+                var _options = {
+                    PostData: {
+                        Params: {
+                            Result: "ModifyEmpDemote",
+                            ID: DemID,
+                            SN: $honestyFlow.GetFlowInfo("SN"),
+                            EmpID: (GetSession("UserID")),
+                            EmpCode: (GetSession("UserCode")),
+                            EmpName: (GetSession("UserName")),
+                            OrganizeID: (GetSession("OrganizeID")),
+                            AreaName: (GetSession("AreaName")),
+                            Province: (GetSession("Province")),
+                            CompanyName: (GetSession("CompanyName")),
+                            SapCode: (GetSession("SapCode")),
+                            ShopName: (GetSession("ShopName")),
+                            EmpPosition: (GetSession("Position")),
+                            EmpLevel: (GetSession("EmpLevel")),
+                            LevelDesc: (GetSession("LevelDesc")),
+                            DemID: $("#DemID").val(),
+                            DemCode: $("#DemCode").val(),
+                            DemName: $("#DemName").val(),
+                            DemShopName: $("#DemShopName").val(),
+                            InDate: $("#InDate").val(),
+                            PositionAge: $("#PositionAge").val(),
+                            DemLevelDesc: $("#DemLevelDesc").val(),
+                            DemSapCode: $("#DemSapCode").val(),
+                            DemType: $("#DemType").val(),
+                            DemPosition: $("#DemPosition").val(),
+                            DemDate: $("#DemDate").val(),
+                            NewPosition: $("#NewPosition").find("option:selected").text(),
+                            NewLevelDesc: $("#NewLevelDesc").val(),
+                            NewEmpLevel: $("#NewEmpLevel").val(),
+                            KPI: $("#KPI").val(),
+                            Rank: $("#Rank").val(),
+                            RankInfo: $("#RankInfo").val(),
+                            JudgeResult: $("#JudgeResult").val(),
+                            DemoteReason: $("#DemoteReason").val(),
+                            Title: $honestyFlow.GetFlowInfo("title"),
+                        },
+                        ProcName: "proc_SOM_HR_EmpDemote",
+                        DataType: "Bool",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    },
+                    async: false
+                };
+                var _result = $honesty.AjaxChannel(_options);
+                if (_result.Code == "1") {
+                    if (_result.Data == "True") {
+                        return true;
+                    }
+                }
+                else {
+                    $honesty.ShowMsg({ title: "警告", msg: "业务数据保存失败！" });
+                    return false;
+                }
+            }
+        }
+        else {
+            return true;
+        }
+    }
+
+</script>
+</html>

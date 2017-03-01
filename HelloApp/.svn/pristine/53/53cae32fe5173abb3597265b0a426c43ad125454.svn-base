@@ -1,0 +1,215 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>月销售计划</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div style="height: 10px;"></div>
+    <div class="aui-content aui-card">
+        <div class="aui-form">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">年份</span>
+                <div class="aui-counter aui-warning aui-info aui-pull-left " style="margin-left: 10px;">
+                    <div id="btnYearMinus" class="aui-counter-minus"></div>
+                    <input id="txtYear" class="aui-counter-input" type="text" value="" style="width: 60px; text-align: center" readonly="true">
+                    <div id="btnYearPlus" class="aui-counter-plus"></div>
+                </div>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">月份</span>
+
+                <div class="aui-counter aui-warning aui-info aui-pull-left " style="margin-left: 10px;">
+                    <div id="btnMonthMinus" class="aui-counter-minus"></div>
+                    <select id="ddlMonth" class="aui-input" style="width: 60px; text-align: center; border: 1px solid #e6e4e3; border-style: solid none;">
+                        <option value="1">1月</option>
+                        <option value="2">2月</option>
+                        <option value="3">3月</option>
+                        <option value="4">4月</option>
+                        <option value="5">5月</option>
+                        <option value="6">6月</option>
+                        <option value="7">7月</option>
+                        <option value="8">8月</option>
+                        <option value="9">9月</option>
+                        <option value="10">10月</option>
+                        <option value="11">11月</option>
+                        <option value="12">12月</option>
+                    </select>
+                    <div id="btnMonthPlus" class="aui-counter-plus"></div>
+                </div>
+
+            </div>
+            <div class="aui-btn-row">
+                <div id="btnSearch" class="aui-btn aui-btn-block aui-btn-warning">
+                    查询
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _Date, _OrganizeID, _ShopCode;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _Date = $honesty.NowDate();
+            _OrganizeID = api.pageParam.OrganizeID;
+            _ShopCode = api.pageParam.ShopCode;
+
+            //初始化年份
+            $("#txtYear").val(_Date.getFullYear());
+
+            //初始化月份
+            $("#ddlMonth").val(_Date.getMonth() + 1);
+
+
+            //年份减少按钮点击
+            $("#btnYearMinus").tap(function () {
+                $("#txtYear").val(Number($("#txtYear").val()) - 1);
+            });
+            //年份增加按钮点击
+            $("#btnYearPlus").tap(function () {
+                $("#txtYear").val(Number($("#txtYear").val()) + 1);
+            });
+
+
+            //月份减少按钮点击
+            $("#btnMonthMinus").tap(function () {
+                if ($("#ddlMonth").val() == "1") {
+                    $("#txtYear").val(Number($("#txtYear").val()) - 1);
+                    $("#ddlMonth").val("12");
+                }
+                else {
+                    $("#ddlMonth").val(Number($("#ddlMonth").val()) - 1);
+                }
+            });
+            //月份增加按钮点击
+            $("#btnMonthPlus").tap(function () {
+                if ($("#ddlMonth").val() == "12") {
+                    $("#txtYear").val(Number($("#txtYear").val()) + 1);
+                    $("#ddlMonth").val("1");
+                }
+                else {
+                    $("#ddlMonth").val(Number($("#ddlMonth").val()) + 1);
+                }
+            });
+
+            //查询按钮点击
+            $("#btnSearch").tap(function () {
+                var _options = {
+                    PostData: {
+                        Params: {
+                            Result: "SelectID",
+                            OrganizeID: _OrganizeID,
+                            ShopCode: _ShopCode,
+                            ZYear: $("#txtYear").val(),
+                            ZMonth: $("#ddlMonth").val()
+                        },
+                        ProcName: "proc_SOM_ISR_MonthSale",
+                        DataType: "DataTable",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    }
+                };
+                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                    if (_result.Code == "1") {
+                        if (_result.Data.length > 0) {
+                            $.each(_result.Data, function (i, item) {
+                                //if (_OrganizeID.toUpperCase() == GetSession("OrganizeID").toUpperCase() && GetSession("IsLeader") == "0" && (GetSession("EmpLevel").toUpperCase() == "H" || GetSession("EmpLevel").toUpperCase() == "I")) {
+                                //    $honesty.OpenWin({
+                                //        name: "Sale_MonthSale_EmpSelfInfo",
+                                //        url: "Sale/MonthSale/EmpSelfInfo.html",
+                                //        title: "月销售计划",
+                                //        LevelNum: 2,
+                                //        pageParam: {
+                                //            MonthID: item.MonthID
+                                //        }
+                                //    });
+                                //}
+                                //else {
+                                $honesty.OpenWin({
+                                    name: "Sale_MonthSale_Index",
+                                    url: "Sale/MonthSale/Index.html",
+                                    title: "月销售计划",
+                                    LevelNum: 2,
+                                    pageParam: {
+                                        MonthID: item.MonthID
+                                    }
+                                });
+                                //}
+
+                            });
+                        }
+                        else {
+                            var selectDate = new Date($("#txtYear").val() + "/" + ($("#ddlMonth").val().toString().length == 1 ? "0" + $("#ddlMonth").val() : $("#ddlMonth").val()) + "/01");
+                            var selectNextDate = new Date($("#txtYear").val() + "/" + ($("#ddlMonth").val().toString().length == 1 ? "0" + $("#ddlMonth").val() : $("#ddlMonth").val()) + "/01");
+                            selectNextDate.addMonths(-1);
+                            if (_OrganizeID.toUpperCase() == GetSession("OrganizeID").toUpperCase() && GetSession("IsLeader") != "0" &&
+                               ((_Date.getFullYear() == selectNextDate.getFullYear() && _Date.getMonth() == selectNextDate.getMonth()) ||
+                                (_Date.getFullYear() == selectDate.getFullYear() && _Date.getMonth() == selectDate.getMonth()))
+                                ) {
+                                $honesty.ConfirmWin({
+                                    msg: "对应销售计划不存在，是否创建？",
+                                    buttons: ["创建", "取消"],
+                                    callback: function (ret, err) {
+                                        if (ret.buttonIndex == "1") {
+                                            _options = {
+                                                PostData: {
+                                                    Params: {
+                                                        Result: "CreateInfo",
+                                                        OrganizeID: _OrganizeID,
+                                                        ShopCode: _ShopCode,
+                                                        ZYear: $("#txtYear").val(),
+                                                        ZMonth: $("#ddlMonth").val(),
+                                                        CreateUserID: GetSession("UserID"),
+                                                        CreateName: GetSession("UserName")
+                                                    },
+                                                    ProcName: "proc_SOM_ISR_MonthSale",
+                                                    DataType: "Text",
+                                                    ExecType: "PROC",
+                                                    Mode: "MSSQL"
+                                                },
+                                                Loading: {
+                                                    Show: true,
+                                                    Title: "创建中..."
+                                                }
+                                            };
+                                            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                                                if (_result.Code == "1") {
+                                                    $honesty.OpenWin({
+                                                        name: "Sale_MonthSale_Index",
+                                                        url: "Sale/MonthSale/Index.html",
+                                                        title: "月销售计划",
+                                                        LevelNum: 2,
+                                                        pageParam: {
+                                                            MonthID: _result.Data
+                                                        }
+                                                    });
+                                                }
+                                            });
+
+                                        }
+                                    }
+                                });
+                            }
+                            else {
+                                $honesty.ShowToast({ msg: "对应月销售计划不存在！", location: "bottom" });
+                            }
+                        }
+                    }
+
+                });
+            });
+
+
+        });
+
+    }
+</script>
+</html>

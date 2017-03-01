@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>全部</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-list-view-cell {
+            padding: 5px 12px;
+        }
+
+        .aui-img-body {
+            font-size: 12px;
+        }
+
+            .aui-img-body p {
+                font-size: 10px;
+            }
+
+        .aui-checkbox {
+            margin: 13px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="aui-content" style="overflow: auto;">
+        <ul class="aui-list-view" id="content">
+        </ul>
+    </div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var Leader;
+    var _ShopCode;
+    var _UserID;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            Leader = api.pageParam.Leader;
+            _ShopCode = api.pageParam.ShopCode;
+            _UserID = GetSession("UserID");
+            LoadData();
+            //下拉刷新
+            api.setRefreshHeaderInfo({
+                visible: true,
+                loadingImg: 'widget://image/refresh.png',
+                bgColor: '#fff',
+                textColor: '#000',
+                textDown: '下拉刷新...',
+                textUp: '松开刷新...',
+                showTime: true
+            }, function (ret, err) {
+                LoadData();
+                api.refreshHeaderLoadDone();
+            });
+
+        });
+    };
+
+    function LoadData() {
+        if (Leader != "0") {
+            var _options = {
+                PostData: {
+                    Params: {
+                        Result: "SelectList",
+                        ShopCode: _ShopCode,
+                        State: ""
+                    },
+                    ProcName: "proc_SOM_ISR_VIPBirthday",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+        }
+        else {
+            var _options = {
+                PostData: {
+                    Params: {
+                        Result: "SelectList1",
+                        ShopCode: _ShopCode,
+                        EmpID: _UserID,
+                        State: ""
+                    },
+                    ProcName: "proc_SOM_ISR_VIPBirthday",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+        }
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    var _Content = "";
+                    $.each(_result.Data, function (i, item) {
+                        _Content += "<li class='aui-list-view-cell'data-VipID='" + item.ID + "' data-EmpID='" + item.EmpID + "'><div class='aui-img-body aui-pull-left'><div>" + (i + 1) + "." + item.VIPName + "&nbsp;" + item.CardType + "</div><div>生日:" + item.Birthday + "</div>" +
+                                  "<p>负责人:" + item.EmpName + "</p></div></li>"
+                    })
+                    $("#content").html(_Content);
+                    $("li").tap(function () {
+                        $honesty.OpenWin({
+                            name: "Customer_Birthday_VipBirthdayMag",
+                            url: "Customer/Birthday/VipBirthdayMag.html",
+                            title: "VIP生日管理",
+                            LevelNum: 2,
+                            pageParam: {
+                                VipID: $(this).attr("data-VipID"),
+                                EmpID: $(this).attr("data-EmpID")
+                            }
+                        });
+                    });
+                }
+            }
+        });
+    }
+</script>
+</html>

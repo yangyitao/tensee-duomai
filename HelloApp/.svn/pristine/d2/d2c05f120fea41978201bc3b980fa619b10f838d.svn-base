@@ -1,0 +1,155 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>商品分析报表选择</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-input-row .aui-input-addon {
+            width: 80px;
+        }
+    </style>
+</head>
+<body>
+    <div style="height: 10px;"></div>
+    <div class="aui-content aui-card">
+        <div class="aui-form aui-input-form">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">开始时间</span>
+                <input id="StartDate" type="text" class="aui-input aui-important" readonly="readonly" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">结束时间</span>
+                <input id="EndDate" type="text" class="aui-input" readonly="readonly" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">年份</span>
+                <div class="aui-counter aui-warning aui-info aui-pull-left " style="margin-left: 10px;">
+                    <div id="btnYearMinus" class="aui-counter-minus"></div>
+                    <input id="txtYear" class="aui-counter-input" type="text" value="" style="width: 60px; text-align: center" readonly="true">
+                    <div id="btnYearPlus" class="aui-counter-plus"></div>
+                </div>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">季节</span>
+                <div class="aui-counter aui-warning aui-info aui-pull-left">
+                    <div class="aui-pull-left">
+                        <div style="float: left">
+                            <input data-group="season" value="1" class="aui-checkbox aui-checkbox-warning" type="checkbox">
+                            <div class="aui-checkbox-name">春</div>
+                        </div>
+                        <div style="float: left">
+                            <input data-group="season" value="2" class="aui-checkbox aui-checkbox-warning" type="checkbox">
+                            <div class="aui-checkbox-name">夏</div>
+                        </div>
+                        <div style="float: left">
+                            <input data-group="season" value="3" class="aui-checkbox aui-checkbox-warning" type="checkbox">
+                            <div class="aui-checkbox-name">秋</div>
+                        </div>
+                        <div style="float: left">
+                            <input data-group="season" value="4" class="aui-checkbox aui-checkbox-warning" type="checkbox">
+                            <div class="aui-checkbox-name">冬</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="aui-btn-row">
+                <div id="btnSearch" class="aui-btn aui-btn-block aui-btn-warning">
+                    查询
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _Date, _OrganizeID, _ShopCode;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _Date = $honesty.NowDate();
+            _OrganizeID = api.pageParam.OrganizeID;
+            _ShopCode = api.pageParam.ShopCode;
+
+            //初始化年份
+            $("#txtYear").val(_Date.getFullYear());
+            _Date = _Date.Format("yyyy-MM-dd");
+            var arrDate = _Date.split("-")
+            $("#StartDate").val(arrDate[0] + "-" + arrDate[1] + "-01");
+            $("#EndDate").val(_Date);
+
+            //年份减少按钮点击
+            $("#btnYearMinus").tap(function () {
+                $("#txtYear").val(Number($("#txtYear").val()) - 1);
+            });
+            //年份增加按钮点击
+            $("#btnYearPlus").tap(function () {
+                $("#txtYear").val(Number($("#txtYear").val()) + 1);
+            });
+
+            //开始时间点击
+            $("#StartDate").tap(function () {
+                $honesty.DateTimeSelect({
+                    LevelNum: 2,
+                    Type: "Date",
+                    ControlID: "StartDate",
+                    ControlValue: $("#StartDate").val()
+                });
+            });
+            //结束时间点击
+            $("#EndDate").tap(function () {
+                $honesty.DateTimeSelect({
+                    LevelNum: 2,
+                    Type: "Date",
+                    ControlID: "EndDate",
+                    ControlValue: $("#EndDate").val()
+                });
+            });
+
+
+            //查询按钮点击
+            $("#btnSearch").tap(function () {
+                var season = "";
+                $("[data-group='season']").each(function () {
+                    if ($(this).is(':checked')) {
+                        season += "," + $(this).val();
+                    }
+                });
+                season = season.replace(",", "");
+
+                if ($("#StartDate").val() == "") {
+                    $honesty.ShowMsg({ title: "警告", msg: "请选择起始日期" });
+                }
+                else if ($("#EndDate").val() == "") {
+                    $honesty.ShowMsg({ title: "警告", msg: "请选择截止日期" });
+                }
+                else if ($("#StartDate").val() > $("#EndDate").val()) {
+                    $honesty.ShowMsg({ title: "警告", msg: "起始日期不能大于截止日期" });
+                }
+                else if (season == "") {
+                    $honesty.ShowMsg({ title: "警告", msg: "请选择季节" });
+                }
+                else {
+                    $honesty.OpenWin({
+                        name: "PatrolShop_GoodsAnalysis_Index",
+                        url: "PatrolShop/GoodsAnalysis/Index.html",
+                        title: "商品分析报表",
+                        LevelNum: 2,
+                        pageParam: {
+                            Year: $("#txtYear").val(),
+                            ShopCode: _ShopCode,
+                            BeginDate: $("#StartDate").val(),
+                            EndDate: $("#EndDate").val(),
+                            Season: season
+                        }
+                    });
+                }
+            });
+        });
+    }
+</script>
+</html>

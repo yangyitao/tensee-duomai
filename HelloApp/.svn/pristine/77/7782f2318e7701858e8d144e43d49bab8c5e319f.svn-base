@@ -1,0 +1,226 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>目标总结（月计划报表）</title>
+    <link href="../../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .form {
+            width: 100%;
+            text-align: center;
+            font-size: 14px;
+            border-collapse: collapse;
+        }
+
+            .form td, .form th{
+                border-bottom: 1px solid rgba(216, 216, 216, 0.1);
+                height:35px;
+                letter-spacing: 0.4px;
+            }
+            .form th {
+                font-weight:400;
+            }
+            .form td {
+                color:#8f8f94
+            }
+                .form td:first-child  {
+                    color:#000;
+                }
+    </style>
+</head>
+<body>
+    <div class="aui-content">
+        <ul class="aui-list-view" style="margin-bottom: 0">
+            <li class="aui-list-view-cell" style="padding: 3px;">
+                <table class="form">
+                    <tr>
+                        <th style="width:80px;"></th>
+                        <th>去年同期</th>
+                        <th>本月目标</th>
+                        <th>本月完成</th>
+                        <th>本月达成</th>
+                    </tr>
+                    <tr>
+                        <td>目标</td>
+                        <td id="TargetSale1"></td>
+                        <td id="TargetSale2"></td>
+                        <td id="TargetSale3">0</td>
+                        <td id="TargetSale4"></td>
+                    </tr>
+                    <tr>
+                        <td>客单价</td>
+                        <td id="CustomerUnitPrice1"></td>
+                        <td id="CustomerUnitPrice2"></td>
+                        <td id="CustomerUnitPrice3">0</td>
+                        <td id="CustomerUnitPrice4"></td>
+                    </tr>
+                    <tr>
+                        <td>客单件</td>
+                        <td id="CustomerSingle1"></td>
+                        <td id="CustomerSingle2"></td>
+                        <td id="CustomerSingle3">0</td>
+                        <td id="CustomerSingle4"></td>
+                    </tr>
+
+                    <tr>
+                        <td>件数</td>
+                        <td id="ClothesNum1"></td>
+                        <td id="ClothesNum2"></td>
+                        <td id="ClothesNum3">0</td>
+                        <td id="ClothesNum4"></td>
+                    </tr>
+                    <tr>
+                        <td>单数</td>
+                        <td id="OrderNum1"></td>
+                        <td id="OrderNum2"></td>
+                        <td id="OrderNum3">0</td>
+                        <td id="OrderNum4"></td>
+                    </tr>
+                    <tr>
+                        <td>VIP占比</td>
+                        <td id="VIPProportion1"></td>
+                        <td id="VIPProportion2"></td>
+                        <td id="VIPProportion3">0%</td>
+                        <td id="VIPProportion4"></td>
+                    </tr>
+                    <tr>
+                        <td>日均</td>
+                        <td id="Daily1"></td>
+                        <td id="Daily2"></td>
+                        <td id="Daily3">0</td>
+                        <td id="Daily4"></td>
+                    </tr>
+                    <tr>
+                        <td>人效</td>
+                        <td id="PerCapita1"></td>
+                        <td id="PerCapita2"></td>
+                        <td id="PerCapita3">0</td>
+                        <td id="PerCapita4"></td>
+                    </tr>
+                    <tr>
+                        <td>折扣</td>
+                        <td id="DiscountPercent1"></td>
+                        <td id="DiscountPercent2"></td>
+                        <td id="DiscountPercent3">0%</td>
+                        <td id="DiscountPercent4"></td>
+                    </tr>
+                    <tr>
+                        <td>同比增长</td>
+                        <td id="YearOnYear1"></td>
+                        <td id="YearOnYear2"></td>
+                        <td id="YearOnYear3">0%</td>
+                        <td id="YearOnYear4"></td>
+                    </tr>
+                    <tr>
+                        <td>坪效</td>
+                        <td id="AreaSale1"></td>
+                        <td id="AreaSale2"></td>
+                        <td id="AreaSale3">0</td>
+                        <td id="AreaSale4"></td>
+                    </tr>
+                    <tr>
+                        <td>环比增长</td>
+                        <td id="QuarterOnQuarter1"></td>
+                        <td id="QuarterOnQuarter2"></td>
+                        <td id="QuarterOnQuarter3">0%</td>
+                        <td id="QuarterOnQuarter4"></td>
+                    </tr>
+                    <tr>
+                        <td>正价占比</td>
+                        <td id="PriceProportion1"></td>
+                        <td id="PriceProportion2"></td>
+                        <td id="PriceProportion3">0%</td>
+                        <td id="PriceProportion4"></td>
+                    </tr>
+                    <tr>
+                        <td>活动占比</td>
+                        <td id="ActivityProportion1"></td>
+                        <td id="ActivityProportion2"></td>
+                        <td id="ActivityProportion3">0%</td>
+                        <td id="ActivityProportion4"></td>
+                    </tr>
+                </table>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>
+<script src="../../../../script/zepto.js"></script>
+<script src="../../../../script/api.js"></script>
+<script src="../../../../script/honesty.base.js"></script>
+
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            LoadData();
+
+            //下拉刷新
+            api.setRefreshHeaderInfo({
+                visible: true,
+                loadingImg: 'widget://image/refresh.png',
+                bgColor: '#fff',
+                textColor: '#000',
+                textDown: '下拉刷新...',
+                textUp: '松开刷新...',
+                showTime: true
+            }, function (ret, err) {
+                LoadData();
+                api.refreshHeaderLoadDone();
+            });
+        });
+    }
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "FormMonthTarget",
+                    MonthID: api.pageParam.MonthID
+                },
+                ProcName: "proc_SOM_ISR_MonthSale",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        $("#TargetSale" + item.ID).html(item.TargetSale);
+                        $("#CustomerUnitPrice" + item.ID).html(item.CustomerUnitPrice);
+                        $("#CustomerSingle" + item.ID).html(item.CustomerSingle);
+                        $("#ClothesNum" + item.ID).html(item.ClothesNum);
+                        $("#OrderNum" + item.ID).html(item.OrderNum);
+                        $("#VIPProportion" + item.ID).html(item.VIPProportion + "%");
+                        $("#Daily" + item.ID).html(item.Daily);
+                        $("#PerCapita" + item.ID).html(item.PerCapita);
+                        $("#DiscountPercent" + item.ID).html(item.DiscountPercent + "%");
+                        $("#YearOnYear" + item.ID).html(item.YearOnYear + "%");
+                        $("#AreaSale" + item.ID).html(item.AreaSale);
+                        $("#QuarterOnQuarter" + item.ID).html(item.QuarterOnQuarter + "%");
+                        $("#PriceProportion" + item.ID).html(item.PriceProportion + "%");
+                        $("#ActivityProportion" + item.ID).html(item.ActivityProportion + "%");
+                    });
+                    $("#TargetSale4").html(($("#TargetSale2").html() == "0" ? "0" : (Number($("#TargetSale3").html()) / Number($("#TargetSale2").html()) * 100).toFixed(0)) + "%");
+                    $("#CustomerUnitPrice4").html(($("#CustomerUnitPrice2").html() == "0" ? "0" : (Number($("#CustomerUnitPrice3").html()) / Number($("#CustomerUnitPrice2").html()) * 100).toFixed(0)) + "%");
+                    $("#CustomerSingle4").html(($("#CustomerSingle2").html() == "0" ? "0" : (Number($("#CustomerSingle3").html()) / Number($("#CustomerSingle2").html()) * 100).toFixed(0)) + "%");
+                    $("#ClothesNum4").html(($("#ClothesNum2").html() == "0" ? "0" : (Number($("#ClothesNum3").html()) / Number($("#ClothesNum2").html()) * 100).toFixed(0)) + "%");
+                    $("#OrderNum4").html(($("#OrderNum2").html() == "0" ? "0" : (Number($("#OrderNum3").html()) / Number($("#OrderNum2").html()) * 100).toFixed(0)) + "%");
+                    $("#VIPProportion4").html(($("#VIPProportion2").html() == "0%" ? "0" : (Number($("#VIPProportion3").html().replace("%", "")) / Number($("#VIPProportion2").html().replace("%", "")) * 100).toFixed(0)) + "%");
+                    $("#Daily4").html(($("#Daily2").html() == "0" ? "0" : (Number($("#Daily3").html()) / Number($("#Daily2").html()) * 100).toFixed(0)) + "%");
+                    $("#PerCapita4").html(($("#PerCapita2").html() == "0" ? "0" : (Number($("#PerCapita3").html()) / Number($("#PerCapita2").html()) * 100).toFixed(0)) + "%");
+                    $("#DiscountPercent4").html(($("#DiscountPercent2").html() == "0%" ? "0" : (Number($("#DiscountPercent3").html().replace("%", "")) / Number($("#DiscountPercent2").html().replace("%", "")) * 100).toFixed(0)) + "%");
+                    $("#YearOnYear4").html(($("#YearOnYear2").html() == "0%" ? "0" : (Number($("#YearOnYear3").html().replace("%", "")) / Number($("#YearOnYear2").html().replace("%", "")) * 100).toFixed(0)) + "%");
+                    $("#AreaSale4").html(($("#AreaSale2").html() == "0" ? "0" : (Number($("#AreaSale3").html()) / Number($("#AreaSale2").html()) * 100).toFixed(0)) + "%");
+                    $("#QuarterOnQuarter4").html(($("#QuarterOnQuarter2").html() == "0%" ? "0" : (Number($("#QuarterOnQuarter3").html().replace("%", "")) / Number($("#QuarterOnQuarter2").html().replace("%", "")) * 100).toFixed(0)) + "%");
+                    $("#PriceProportion4").html(($("#PriceProportion2").html() == "0%" ? "0" : (Number($("#PriceProportion3").html().replace("%", "")) / Number($("#PriceProportion2").html().replace("%", "")) * 100).toFixed(0)) + "%");
+                    $("#ActivityProportion4").html(($("#ActivityProportion2").html() == "0%" ? "0" : (Number($("#ActivityProportion3").html().replace("%", "")) / Number($("#ActivityProportion2").html().replace("%", "")) * 100).toFixed(0)) + "%");
+                }
+
+            }
+        });
+    }
+</script>

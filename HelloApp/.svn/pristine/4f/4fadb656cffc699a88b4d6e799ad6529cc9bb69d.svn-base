@@ -1,0 +1,87 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>共享信息主页面</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div style="height: 10px;"></div>
+    <div class="aui-content-padded" id="divTab">
+        <div class="aui-tab">
+            <ul class="aui-tab-nav aui-tab-border" id="ulTab">
+                <li data-role="title" class="active" data-index="0">共享知识</li>
+                <li data-role="title" data-index="1">规则制度</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            var y = $honesty.RangeTop(110);
+            api.openFrameGroup({
+                name: 'Info_Datum_Tab',
+                scrollEnabled: true,
+                rect: { x: 0, y: y, w: 'auto', h: 'auto' },
+                index: 0,
+                preload: 0,
+                frames:
+                [{
+                    name: 'Info_Datum_Knowledge',
+                    url: 'Knowledge.html',
+                    bounces: false,
+                    pageParam: {
+                        StartDate: api.pageParam.StartDate,
+                        EndDate: api.pageParam.EndDate,
+                        DatumTitle: api.pageParam.Title,
+                        CreateName: api.pageParam.CreateName,
+                        DatumPType: "3763c781-ea78-4db7-8458-f51078445e72",
+                    }
+                }, {
+                    name: 'Info_Datum_Role',
+                    url: 'Role.html',
+                    bounces: false,
+                    pageParam: {
+                        StartDate: api.pageParam.StartDate,
+                        EndDate: api.pageParam.EndDate,
+                        DatumTitle: api.pageParam.Title,
+                        CreateName: api.pageParam.CreateName,
+                        DatumPType: "5173a5a6-c192-45de-aab6-a20803e9af9d",
+                    }
+                }]
+            },
+             function (ret, err) {
+                 var index = ret.index;
+                 $("#ulTab").find(".active").removeClass("active");
+                 $("[data-index='" + index + "']").addClass("active");
+
+             });
+
+        });
+
+    }
+
+    $("[data-role='title']").tap(function () {
+        if (!$(this).hasClass("active")) {
+            $("[data-role='title']").removeClass("active");
+            $(this).addClass("active");
+
+            api.setFrameGroupIndex({
+                name: 'Info_Datum_Tab',
+                index: $(this).attr("data-index"),
+                scroll: true
+            });
+        }
+    });
+
+
+</script>

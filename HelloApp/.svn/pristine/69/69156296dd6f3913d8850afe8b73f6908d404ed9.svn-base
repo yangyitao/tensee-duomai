@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>业绩排名情况</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+    <link href="../../css/api.css" rel="stylesheet" type="text/css" />
+    <link href="../../css/common.css" rel="stylesheet" type="text/css" />
+    <style>
+        body, html {
+            background: transparent;
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+
+        #main {
+            padding: 0;
+            padding-top: 1em;
+            position: relative;
+        }
+
+        .share-box {
+            position: absolute;
+            width: 85%;
+            background-color: rgba(0,0,0,0);
+            /*border-radius: 3px;*/
+            top: 40%;
+            left: 50%;
+            -webkit-transform: translate(-50%,-50%);
+            transform: translate(-50%,-50%);
+            /*padding: 3px;*/
+            z-index: 2;
+        }
+
+        table {
+            margin: 0 auto;
+            box-shadow: 0 0 10px #000;
+        }
+
+        .shadow {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        td {
+            border-bottom: 1px solid #808080;
+        }
+    </style>
+</head>
+<body>
+    <div id="wrap">
+        <div id="main">
+            <div class="shadow" tapmode onclick="api.closeFrame({name: 'Ranking'});"></div>
+            <div class="share-box">
+                <table class="" style="width: 95%;">
+                    <thead>
+                        <tr style="background-color: #fbc700; text-align: center; font-size: 13px">
+                            <td>年份</td>
+                            <td>月份</td>
+                            <td>店铺排名</td>
+                            <td>大区同级排名</td>
+                            <td data-id="xinzi">激励津贴档极</td>
+                        </tr>
+                    </thead>
+                    <tbody id="RankList" style="text-align: center; background-color: #FFF"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="../../script/api.js" type="text/javascript"></script>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            var _ContentList = api.pageParam.ContentList;
+            var _NewLevel = api.pageParam.NewLevelDesc;
+            if (_NewLevel == "H1") {
+                $("[data-id='xinzi']").css("display", "");
+            }
+            else {
+                $("[data-id='xinzi']").css("display", "none");
+            }
+            $("#RankList").html(_ContentList);
+        })
+    }
+</script>
+</html>

@@ -1,0 +1,79 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <title>可使用加班单</title>
+    <style>
+        .div-height {
+            height: 10px;
+        }
+
+        .aui-list-view-cell {
+            padding: 5px;
+        }
+
+            .aui-list-view-cell table {
+                width: 100%;
+                font-size: 13px;
+                color: gray;
+                table-layout: fixed;
+                border-collapse: collapse;
+            }
+
+                .aui-list-view-cell table .value {
+                    word-break: keep-all;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    text-align: right;
+                    padding-right: 5px;
+                    text-align: right;
+                }
+    </style>
+</head>
+<body>
+    <div class="aui-content" id="Content"></div>
+    <div class="div-height "></div>
+</body>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        var _Content = ""
+        api.parseTapmode();
+        $(function () {
+            var _options = {
+                PostData: {
+                    Params: {
+                        Result: "InitExtraPeriod",
+                        EmpID: GetSession("UserID"),
+                        Type: 1
+                    },
+                    ProcName: "proc_SOM_HR_EmpLeave",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        $.each(_result.Data, function (i, item) {
+                            _Content += "<div class='aui-content aui-card'><ul class='aui-list-view'><li class='aui-list-view-cell'><p style='color:#000'>" +
+                                      "单据编号：" + item.SN + "</p></li><li class='aui-list-view-cell'><table><tr><td style='width: 110px;'>加班时数:</td><td class='value'>" +
+                                      item.OverTime + "</td></tr><tr><td>剩余可调休时数:</td><td class='value'>" +
+                                      item.LastTime + "</td></tr><tr><td>有效期截止日:</td><td class='value'>" +
+                                      item.ExtraLast + "</td></tr></table></li></ul></div>"
+                        });
+                        $("#Content").html(_Content);
+                    }
+                }
+            });
+        });
+    };
+</script>
+</html>

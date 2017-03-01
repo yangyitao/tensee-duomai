@@ -1,0 +1,379 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>个人考勤</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <link href="../../../css/aui-calendar.css" rel="stylesheet" />
+</head>
+<body>
+    <div id="calendar" class="aui-calendar" style="padding-top: 10px;">
+        <table>
+            <thead class="aui-calendar-header">
+                <tr>
+
+                    <td colspan="7">
+                        <table class="aui-calendar-title aui-text-primary">
+                            <tr>
+                                <th class="aui-iconfont aui-icon-left" style="width: 40px;" id="tdPrev"></th>
+                                <th id="thTitle">2016年2月</th>
+                                <th class="aui-iconfont aui-icon-right" style="width: 40px;" id="tdNext"></th>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr class="aui-text-primary">
+                    <th class="aui-text-danger">日</th>
+                    <th class="aui-text-primary">一</th>
+                    <th class="aui-text-primary">二</th>
+                    <th class="aui-text-primary">三</th>
+                    <th class="aui-text-primary">四</th>
+                    <th class="aui-text-primary">五</th>
+                    <th class="aui-text-danger">六</th>
+                </tr>
+            </thead>
+            <tbody class="aui-calendar-body" id="CalendarList">
+            </tbody>
+        </table>
+    </div>
+    <div id="divFooter" style="height: 40px; display: none"></div>
+    <footer class="aui-nav" id="footer" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7; display: none">
+        <div id="btnConfirm" class="aui-btn aui-btn-block aui-btn-warning" style="height: 45px; width: 100%; line-height: 0.9;">
+            考勤确认
+        </div>
+    </footer>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _AttendList = new Array(), _Date, _SelectDate;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _Date = $honesty.NowDate();
+            _SelectDate = $honesty.NowDate();
+            InitCalendar(_SelectDate.getFullYear(), _SelectDate.getMonth() + 1);
+
+            //下拉刷新
+            api.setRefreshHeaderInfo({
+                visible: true,
+                loadingImg: 'widget://image/refresh.png',
+                bgColor: '#fff',
+                textColor: '#000',
+                textDown: '下拉刷新...',
+                textUp: '松开刷新...',
+                showTime: true
+            }, function (ret, err) {
+                InitCalendar(_SelectDate.getFullYear(), _SelectDate.getMonth() + 1);
+                api.refreshHeaderLoadDone();
+            });
+
+            $("#tdPrev").tap(function () {
+                _SelectDate.addMonths(-1);
+                InitCalendar(_SelectDate.getFullYear(), _SelectDate.getMonth() + 1);
+            });
+
+            $("#tdNext").tap(function () {
+                _SelectDate.addMonths(1);
+                InitCalendar(_SelectDate.getFullYear(), _SelectDate.getMonth() + 1);
+            });
+
+            $(document).on("tap", "#CalendarList td", function () {
+                $("[data-role='Calendar']").children("div").removeClass("click");
+                $(this).children("div").addClass("click");
+                var _Day = $(this).attr("data-day");
+                var _AttendJSON = {
+                    ZDay: 0,
+                    TodayTime: "",
+                    SignTime: "",
+                    EffectSignTime: "",
+                    TodayName: "",
+                    NormTime: 0,
+                    FactDay: 0,
+                    TardyDay: 0,
+                    LegalDay: 0,
+                    LegalName: 0,
+                    LegalFactDay: 0,
+                    TardyTime: 0,
+                    TardyCount: 0,
+                    AbsentDay: 0,
+                    BTripDay: 0,
+                    OutDay: 0,
+                    RestOver: 0,
+                    ExtendOver: 0,
+                    LegalRestOver: 0,
+                    LegalExtendOver: 0,
+                    AnnualDay: 0,
+                    MarryDay: 0,
+                    DeliveryDay: 0,
+                    CompassionDay: 0,
+                    AntenatalDay: 0,
+                    MaternityDay: 0,
+                    SuspensionDay: 0,
+                    CasualDay: 0,
+                    SickDay: 0,
+                    TakeRestDay: 0,
+                    FaultInfo: "",
+                    FlowProgress: "",
+                };
+                $.each(_AttendList, function (i, item) {
+                    if (item.ZDay == _Day) {
+                        _AttendJSON = item;
+                        return false;
+                    }
+                });
+
+                $honesty.OpenWin({
+                    title: "个人考勤",
+                    name: "Attend_EmpAttend_EmpAttendInfo",
+                    url: "Attend/EmpAttend/EmpAttendInfo.html",
+                    LevelNum: 2,
+                    pageParam: {
+                        Year: _SelectDate.getFullYear(),
+                        Month: _SelectDate.getMonth() + 1,
+                        Day: _Day,
+                        AttendJSON: _AttendJSON
+                    }
+                })
+            });
+
+            $("#btnConfirm").tap(function () {
+                $honesty.OpenWin({
+                    title: "个人考勤",
+                    name: "Attend_EmpAttend_EmpAttendSure",
+                    url: "Attend/EmpAttend/EmpAttendSure.html",
+                    LevelNum: 2,
+                    pageParam: {
+                        Year: _SelectDate.getFullYear(),
+                        Month: _SelectDate.getMonth() + 1
+                    }
+                })
+            });
+
+            //业绩提交监听事件
+            api.addEventListener({
+                name: 'Attend_EmpAttend_EmpAttendSure'
+            }, function (ret) {
+                if (ret && ret.value) {
+                    if (ret.value.IsTrue) {
+                        $("#footer").hide();
+                        $("#divFooter").hide();
+                    }
+                }
+            });
+        });
+    };
+
+    //初始化日历考勤数据
+    function InitCalendar(year, month) {
+        $("#thTitle").html(year + "年" + month + "月");
+        $("#CalendarList").html("");
+        EmpConfirmStatus = FlowCount = 0;
+        _AttendList.length = 0;
+        var _FirstDay = new Date(year, month - 1, 1);
+        var _LastDay = new Date(year, month, 0);
+        var _FirstWeek = _FirstDay.getDay();
+        var _Day = 1;
+        var _options = {
+            PostData: {
+                Params: {
+                    result: "LoadUserAttend",
+                    ZYear: year,
+                    ZMonth: month,
+                    UserCode: GetSession("UserID")
+                },
+                ProcName: "proc_SOM_HR_EmpDayAttend_F",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        FlowCount = item.FlowCount;
+                        EmpConfirmStatus = item.EmpConfirmState;
+                        _AttendList.push({
+                            ZDay: item.ZDay,
+                            TodayTime: item.TodayTime,
+                            SignTime: item.SignTime,
+                            EffectSignTime: item.EffectSignTime,
+                            TodayName: item.TodayName,
+                            TardyDay: item.TardyDay,
+                            NormTime: item.NormTime,
+                            FactDay: item.FactDay,
+                            LegalDay: item.LegalDay,
+                            LegalName: item.LegalName,
+                            LegalFactDay: item.LegalFactDay,
+                            TardyTime: item.TardyTime,
+                            TardyCount: item.TardyCount,
+                            AbsentDay: item.AbsentDay,
+                            BTripDay: item.BTripDay,
+                            OutDay: item.OutDay,
+                            RestOver: item.RestOver,
+                            ExtendOver: item.ExtendOver,
+                            LegalRestOver: item.LegalRestOver,
+                            LegalExtendOver: item.LegalExtendOver,
+                            AnnualDay: item.AnnualDay,
+                            MarryDay: item.MarryDay,
+                            DeliveryDay: item.DeliveryDay,
+                            CompassionDay: item.CompassionDay,
+                            AntenatalDay: item.AntenatalDay,
+                            MaternityDay: item.MaternityDay,
+                            SuspensionDay: item.SuspensionDay,
+                            CasualDay: item.CasualDay,
+                            SickDay: item.SickDay,
+                            TakeRestDay: item.TakeRestDay,
+                            FaultInfo: item.FaultMsg,
+                            FlowProgress: item.FlowProgress,
+                        });
+                    });
+                }
+                var _Content = "<tr>";
+                for (var i = 0; i < 7; i++) {
+                    if (i < _FirstWeek) {
+                        _Content += '<td></td>';
+                    }
+                    else {
+                        var _AttendJSON = {
+                            ZDay: 0,
+                            TodayName: "",
+                            NormTime: 0,
+                            FactDay: 0,
+                            LegalDay: 0,
+                            LegalName: 0,
+                            LegalFactDay: 0,
+                            TardyTime: 0,
+                            TardyCount: 0,
+                            AbsentDay: 0,
+                            BTripDay: 0,
+                            OutDay: 0,
+                            RestOver: 0,
+                            ExtendOver: 0,
+                            LegalRestOver: 0,
+                            LegalExtendOver: 0,
+                            AnnualDay: 0,
+                            MarryDay: 0,
+                            DeliveryDay: 0,
+                            CompassionDay: 0,
+                            AntenatalDay: 0,
+                            MaternityDay: 0,
+                            SuspensionDay: 0,
+                            CasualDay: 0,
+                            SickDay: 0,
+                            TakeRestDay: 0,
+                            FaultInfo: "",
+                            FlowProgress: "",
+                        };
+                        $.each(_AttendList, function (j, item) {
+                            if (item.ZDay == _Day) {
+                                _AttendJSON = item;
+                                return false;
+                            }
+                        });
+                        var _TextColor = 'aclass="aui-text-primary"';
+                        if (_Day == 6) {
+                            _TextColor = 'class="aui-text-danger"'
+                        }
+                        var _BorderColor = '<div></div>';
+                        if (_AttendJSON.TardyTime > 0 || _AttendJSON.TardyCount > 0 || _AttendJSON.AbsentDay > 0 || _AttendJSON.TodayName == "") {
+                            if (Date.parse(new Date(year, month - 1, i)) > Date.parse(new Date(_Date)) || Date.parse(new Date(year, month - 1, i)) < Date.parse(new Date(GetSession("CreateDate")))) {
+                                _BorderColor = '<div></div>';
+                            }
+                            else {
+                                _BorderColor = '<div class="danger"></div>';
+                            }
+                        }
+                        else if (_AttendJSON.BTripDay > 0 || _AttendJSON.OutDay > 0 || _AttendJSON.LegalRestOver > 0 || _AttendJSON.LegalExtendOver > 0 || _AttendJSON.RestOver > 0 ||
+                            _AttendJSON.ExtendOver > 0 || _AttendJSON.AnnualDay > 0 || _AttendJSON.MarryDay > 0 || _AttendJSON.DeliveryDay > 0 || _AttendJSON.CompassionDay > 0 ||
+                            _AttendJSON.AntenatalDay > 0 || _AttendJSON.MaternityDay > 0 || _AttendJSON.SuspensionDay > 0 || _AttendJSON.CasualDay > 0 || _AttendJSON.SickDay > 0 || _AttendJSON.TakeRestDay > 0) {
+                            _BorderColor = '<div class="waining"></div>';
+                        }
+                        _Content += '<td data-role="Calendar" ' + _TextColor + ' data-day="' + _Day + '" data-date="' + _FirstDay.Format("yyyy-MM-") + _Day + '">' + _BorderColor + _Day + '<p>' + (_AttendJSON.TodayName == "" ? "未排" : _AttendJSON.TodayName) + '</p></td>';
+                        _Day++;
+                    }
+                }
+                _Content += '</tr><tr>';
+                for (var i = _Day; i < _LastDay.getDate() + 1 ; i++) {
+                    var _AttendJSON = {
+                        ZDay: 0,
+                        TodayName: "",
+                        NormTime: 0,
+                        FactDay: 0,
+                        LegalDay: 0,
+                        LegalName: 0,
+                        LegalFactDay: 0,
+                        TardyTime: 0,
+                        TardyCount: 0,
+                        AbsentDay: 0,
+                        BTripDay: 0,
+                        OutDay: 0,
+                        RestOver: 0,
+                        ExtendOver: 0,
+                        LegalRestOver: 0,
+                        LegalExtendOver: 0,
+                        AnnualDay: 0,
+                        MarryDay: 0,
+                        DeliveryDay: 0,
+                        CompassionDay: 0,
+                        AntenatalDay: 0,
+                        MaternityDay: 0,
+                        SuspensionDay: 0,
+                        CasualDay: 0,
+                        SickDay: 0,
+                        TakeRestDay: 0,
+                        FaultInfo: "",
+                        FlowProgress: "",
+                    };
+                    $.each(_AttendList, function (j, item) {
+                        if (item.ZDay == i) {
+                            _AttendJSON = item;
+                            return false;
+                        }
+                    });
+                    var _TextColor = 'aclass="aui-text-primary"';
+                    if (new Date(year, month - 1, i).getDay() == "6" || new Date(year, month - 1, i).getDay() == "0") {
+                        _TextColor = 'class="aui-text-danger"'
+                    }
+                    var _BorderColor = '<div></div>';
+                    if (_AttendJSON.TardyTime > 0 || _AttendJSON.TardyCount > 0 || _AttendJSON.AbsentDay > 0 || _AttendJSON.TodayName == "") {
+                        if (Date.parse(new Date(year, month - 1, i)) > Date.parse(new Date(_Date)) || Date.parse(new Date(year, month - 1, i)) < Date.parse(new Date(GetSession("CreateDate")))) {
+                            _BorderColor = '<div></div>';
+                        }
+                        else {
+                            _BorderColor = '<div class="danger"></div>';
+                        }
+                    }
+                    else if (_AttendJSON.BTripDay > 0 || _AttendJSON.OutDay > 0 || _AttendJSON.LegalRestOver > 0 || _AttendJSON.LegalExtendOver > 0 || _AttendJSON.RestOver > 0 ||
+                        _AttendJSON.ExtendOver > 0 || _AttendJSON.AnnualDay > 0 || _AttendJSON.MarryDay > 0 || _AttendJSON.DeliveryDay > 0 || _AttendJSON.CompassionDay > 0 ||
+                        _AttendJSON.AntenatalDay > 0 || _AttendJSON.MaternityDay > 0 || _AttendJSON.SuspensionDay > 0 || _AttendJSON.CasualDay > 0 || _AttendJSON.SickDay > 0 || _AttendJSON.TakeRestDay > 0) {
+                        _BorderColor = '<div class="waining"></div>';
+                    }
+                    _Content += (((i - _Day) % 7 != 0 || (i - _Day) == 0) ? '' : '</tr><tr>');
+                    _Content += '<td data-role="Calendar" ' + _TextColor + ' data-day="' + i + '" data-date="' + _FirstDay.Format("yyyy-MM-") + i + '">' + _BorderColor + i + '<p>' + (_AttendJSON.TodayName == "" ? "未排" : _AttendJSON.TodayName) + '</p></td>';
+                }
+                $("#CalendarList").append(_Content);
+                if (_SelectDate.getFullYear() < _Date.getFullYear() || (_SelectDate.getFullYear() == _Date.getFullYear() && _SelectDate.getMonth() < _Date.getMonth())) {
+                    $("#footer").show();
+                    $("#divFooter").show();
+                }
+                else {
+                    $("#footer").hide();
+                }
+                if (EmpConfirmStatus == "是") {
+                    $("#footer").hide();
+                    $("#divFooter").hide();
+                }
+            }
+            else {
+                $("#footer").hide();
+                $("#divFooter").hide();
+            }
+        });
+    }
+</script>
+</html>

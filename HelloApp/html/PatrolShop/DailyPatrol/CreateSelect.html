@@ -1,0 +1,76 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>日常巡店创建查询</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="aui-tab" id="divTab" style="display: none">
+        <ul id="TopBar" class="aui-tab-nav">
+            <li data-index="0" class="active">查询</li>
+            <li data-index="1">新建</li>
+            <li data-index="2" style="display: none">授权</li>
+        </ul>
+    </div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _OrganizeID, _IsEdit;
+    var _PatrolType = "8ACAE113-0B14-4C0B-B794-9C579D59BFDB";
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _OrganizeID = api.pageParam.OrganizeID;
+
+
+            LoadData();
+
+            //Tab点击
+            $("#TopBar").children("li").tap(function () {
+                $("#TopBar").find(".active").removeClass("active");
+                $(this).addClass("active");
+
+                api.setFrameGroupIndex({
+                    name: 'DailyPatrol_Tab',
+                    index: $(this).data("index"),
+                    scroll: true
+                });
+            });
+        });
+    };
+
+    function LoadData() {
+
+
+        var h = $honesty.RangeTop(45);
+        var arrFrame = new Array();
+        arrFrame.push({ name: 'PatrolShop_DailyPatrol_Select', url: 'Select.html', bounces: false, pageParam: { OrganizeID: _OrganizeID, PatrolType: _PatrolType } });
+
+        if (_OrganizeID != GetSession("OrganizeID")) {
+            arrFrame.push({ name: 'PatrolShop_DailyPatrol_Create', url: 'Create.html', bounces: false, pageParam: { OrganizeID: _OrganizeID, PatrolType: _PatrolType } });
+            $("#divTab").show();
+            h += 45;
+        }
+        api.openFrameGroup({
+            name: 'DailyPatrol_Tab',
+            scrollEnabled: true,
+            rect: { x: 0, y: h, w: 'auto', h: 'auto' },
+            index: 0,
+            preload: 0,
+            frames: arrFrame
+        },
+         function (ret, err) {
+             var index = ret.index;
+             $("#TopBar").find(".active").removeClass("active");
+             $("[data-index='" + index + "']").addClass("active");
+         });
+
+
+    }
+</script>
+</html>

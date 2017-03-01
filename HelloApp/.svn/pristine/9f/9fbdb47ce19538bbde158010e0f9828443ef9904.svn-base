@@ -1,0 +1,165 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>店仓号选择</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="aui-searchbar-wrap" id="divSearchBlock">
+        <div id="divSearch" class="aui-searchbar aui-border-radius">
+            <i class="aui-iconfont aui-icon-search"></i>
+            <div class="aui-searchbar-text">请输入搜索内容</div>
+        </div>
+    </div>
+    <div class="aui-content">
+        <ul class="aui-list-view" id="ulList">
+        </ul>
+    </div>
+</body>
+<script src="../../script/api.js"></script>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _PageNum = 1;
+    var _Condition = "";
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            LoadData("");
+
+            //下拉刷新
+            api.setRefreshHeaderInfo({
+                visible: true,
+                loadingImg: 'widget://image/refresh.png',
+                bgColor: '#fff',
+                textColor: '#000',
+                textDown: '下拉刷新...',
+                textUp: '松开刷新...',
+                showTime: true
+            }, function (ret, err) {
+                $("#ulList").html("");
+                _PageNum = 1;
+                LoadData("");
+                api.refreshHeaderLoadDone();
+            });
+
+            api.addEventListener({
+                name: 'scrolltobottom',
+                extra: {
+                    threshold: 60
+                }
+            }, function (ret, err) {
+                LoadData(_Condition);
+            });
+
+            $("#divSearch").tap(function () {
+                var UISearchBar = api.require('UISearchBar');
+                UISearchBar.open({
+                    placeholder: '请输入搜索内容',
+                    historyCount: 10,
+                    showRecordBtn: false,
+                    texts: {
+                        cancelText: '取消',
+                        clearText: '清除搜索记录'
+                    },
+                    styles: {
+                        navBar: {
+                            bgColor: '#FFFFFF',
+                            borderColor: '#ccc'
+                        },
+                        searchBox: {
+                            bgImg: '',
+                            color: '#000',
+                            height: 35
+                        },
+                        cancel: {
+                            bg: 'rgba(0,0,0,0)',
+                            color: '#696969',
+                            size: 14
+                        },
+                        list: {
+                            color: '#696969',
+                            bgColor: '#FFFFFF',
+                            borderColor: '#eee',
+                            size: 14
+                        },
+                        clear: {
+                            color: '#000000',
+                            borderColor: '#ccc',
+                            size: 14
+                        }
+                    }
+                }, function (ret, err) {
+                    if (ret) {
+                        if (ret.eventType == "search" || ret.eventType == "history") {
+                            $("#ulList").html("");
+                            _PageNum = 1;
+                            _Condition = ret.text;
+                            LoadData(ret.text);
+                        }
+                    }
+                    else {
+                        $honesty.ShowToast({ msg: "搜索错误，请重新进行搜索" });
+                    }
+                });
+            });
+        });
+
+    }
+
+    //加载数据函数
+    function LoadData(condition) {
+        if (_PageNum != 0) {
+            var _options = {
+                PostData: {
+                    Params: { "result": "GetShopCodeList", "PageNum": _PageNum, "PageSize": 15, "Condition": condition, "UserID": GetSession("UserID") },
+                    ProcName: "proc_Authortity",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        var _Content = "";
+                        $.each(_result.Data, function (i, item) {
+                            _Content += "<li class='aui-list-view-cell' tapmode onclick=\"SelectItem(\'" + item.ShopCode + "\',\'" + item.OrganizeID + "\')\">" +
+                                        "<label class='aui-arrow-right'>" + item.ShopCode + "&nbsp;" + item.Brands + "<p>" + item.ShopName + "</p></label></li>";
+                        });
+                        $("#ulList").append(_Content);
+                        _PageNum++;
+                    }
+                    else {
+                        if (_PageNum == 1) {
+                            $("#ulList").html("<li style='text-align:center'>尊敬的用户，您好，无店仓数据</li>")
+                        }
+                        else {
+                            $honesty.ShowToast({ msg: "没有更多的数据", location: "bottom" });
+                        }
+                        _PageNum = 0;
+                    }
+                }
+                api.parseTapmode();
+            });
+        }
+    }
+
+    //行项目点击函数
+    function SelectItem(shopCode, organizeID) {
+        $honesty.OpenWin({
+            title: api.pageParam.JumpTitle,
+            name: api.pageParam.JumpName,
+            url: api.pageParam.JumpUrl,
+            pageParam: {
+                OrganizeID: organizeID,
+                ShopCode: shopCode
+            }
+        });
+    }
+</script>
+</html>

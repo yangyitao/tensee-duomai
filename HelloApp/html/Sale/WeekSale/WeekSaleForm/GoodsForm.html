@@ -1,0 +1,107 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>货品目标（周计划报表）</title>
+    <link href="../../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-list-view-cell {
+            padding: 3px 10px;
+        }
+
+            .aui-list-view-cell table {
+                width: 100%;
+                text-align: center;
+                border-collapse: collapse;
+                font-size: 14px;
+            }
+
+                .aui-list-view-cell table td {
+                    width: 33.3333%;
+                }
+
+                .aui-list-view-cell table .success {
+                    background-color: #4ec71e;
+                    color: #fff;
+                    border-radius: 15px;
+                }
+
+                .aui-list-view-cell table .warning {
+                    background-color: #f1c40f;
+                    color: #fff;
+                    border-radius: 15px;
+                }
+
+                .aui-list-view-cell table .danger {
+                    background-color: #e74c3c;
+                    color: #fff;
+                    border-radius: 15px;
+                }
+    </style>
+</head>
+<body>
+    <div style="height: 5px;"></div>
+    <div id="divList"></div>
+    <div style="height: 10px;"></div>
+</body>
+</html>
+<script src="../../../../script/zepto.js"></script>
+<script src="../../../../script/api.js"></script>
+<script src="../../../../script/honesty.base.js"></script>
+
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            LoadData();
+
+            //下拉刷新
+            api.setRefreshHeaderInfo({
+                visible: true,
+                loadingImg: 'widget://image/refresh.png',
+                bgColor: '#fff',
+                textColor: '#000',
+                textDown: '下拉刷新...',
+                textUp: '松开刷新...',
+                showTime: true
+            }, function (ret, err) {
+                LoadData();
+                api.refreshHeaderLoadDone();
+            });
+        });
+    }
+
+    //数据加载函数
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "FormGoodsTarget",
+                    WeekID: api.pageParam.WeekID
+                },
+                ProcName: "proc_SOM_ISR_WeekSale",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    var _Content = "";
+                    $.each(_result.Data, function (i, item) {
+                        _Content += "<div class='aui-content aui-card'><ul class='aui-list-view'><li class='aui-list-view-cell'>" +
+                                    "<p style='color:#000'>" + item.Title + "</p></li><li class='aui-list-view-cell'><table><tr><td style='font-size: 18px;'>" +
+                                    item.TargetSale + "</td><td><div class='" + (Number(item.Rate) < 80 ? "danger" : (Number(item.Rate) < 100 ? "warning" : "success")) +
+                                    "'>比例</div></td><td style='font-size: 18px;'>" + item.ActualSale + "</td>" +
+                                    "</tr><tr><td>计划</td><td>" + item.Rate + "%</td><td>实际</td></tr></table></li></ul></div>";
+                    });
+                    $("#divList").html(_Content);
+                }
+            }
+        });
+    }
+</script>

@@ -1,0 +1,247 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>工作计划详细信息（月计划）</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-input-row .aui-input-addon {
+            width: 90px;
+        }
+    </style>
+</head>
+<body>
+    <div class="aui-content">
+        <p class="aui-padded-5 aui-text-center" id="pTitle">工作计划</p>
+        <div class="aui-form aui-input-form" id="divGoodsTarget">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">工作类型</span>
+                <input id="WorkType" type="text" class="aui-input" placeholder="必填" />
+            </div>
+            <div class="aui-input-row" style="padding-right: 3px;">
+                <span class="aui-input-addon">具体执行<br />
+                    与效果</span>
+                <input id="SpecificPerform" type="text" class="aui-input" placeholder="必填" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">执行人</span>
+                <input id="PerformName" type="text" class="aui-input" placeholder="必填" readonly="readonly" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">跟进人</span>
+                <input id="FollowUpName" type="text" class="aui-input" placeholder="必填" readonly="readonly" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">完成时间</span>
+                <input id="CompleteDate" type="text" class="aui-input aui-important" placeholder="请选择完成时间" readonly="readonly" />
+            </div>
+            <div class="aui-input-row" style="padding-right: 3px;">
+                <span class="aui-input-addon" style="vertical-align: top;">完成情况</span>
+                <textarea id="CompleteSituation" class="aui-input" style="height: 100px; border: 1px solid #c8c7cc; overflow-y: auto"></textarea>
+            </div>
+        </div>
+    </div>
+    <div id="divFooter" style="height: 40px; display: none"></div>
+    <footer class="aui-nav" id="footer" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7; display: none">
+        <div id="btnSave" class="aui-btn aui-btn-block aui-btn-info" style="height: 45px; width: 100%; line-height: 0.9;">
+            保存
+        </div>
+    </footer>
+</body>
+</html>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script src="../../../script/honesty.valid.js"></script>
+<script type="text/javascript">
+    var _MonthID, _IsSend, _ID, _Index, _IsLeader;
+    apiready = function () {
+        api.parseTapmode();
+
+        $(function () {
+            _MonthID = api.pageParam.MonthID;
+            _IsSend = api.pageParam.IsSend;
+            _IsLeader = api.pageParam.IsLeader;
+            _Index = api.pageParam.Index == undefined ? "-1" : api.pageParam.Index;
+            _ID = api.pageParam.ID || new $honesty.GUID().NewGUID();
+
+            if (_IsSend == "True") {
+                $(".aui-input").attr("readonly", "readonly");
+                $("#divGoodsTarget").addClass("aui-input-disabled");
+            }
+            else {
+                $("#footer").css("display", "");
+                $("#divFooter").css("display", "");
+            }
+
+            if (_IsLeader == "True") {
+                $("#CompleteSituation").removeAttr("readonly");
+                $("#footer").css("display", "");
+                $("#divFooter").css("display", "");
+            }
+
+            LoadData()
+
+            //保存函数点击
+            $("#btnSave").tap(function () {
+                if (CheckInfo()) {
+                    var _options = {
+                        PostData: {
+                            Params: {
+                                Result: "MaintainInfo",
+                                MonthID: _MonthID,
+                                ID: _ID,
+                                WorkType: $("#WorkType").val().trim(),
+                                SpecificPerform: $("#SpecificPerform").val().trim(),
+                                PerformName: $("#PerformName").val().trim(),
+                                FollowUpName: $("#FollowUpName").val().trim(),
+                                CompleteDate: $("#CompleteDate").val().trim(),
+                                CompleteSituation: $("#CompleteSituation").val().trim(),
+                                CreateUserID: GetSession("UserID"),
+                                CreateName: GetSession("UserName")
+                            },
+                            ProcName: "proc_SOM_ISR_MS_WorkPlan",
+                            DataType: "Bool",
+                            ExecType: "PROC",
+                            Mode: "MSSQL"
+                        }
+                    };
+
+                    $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                        if (_result.Code == "1") {
+                            if (_result.Data == "True") {
+                                $honesty.ShowMsg({
+                                    title: "提示",
+                                    msg: "保存成功",
+                                    callback: function () {
+                                        api.sendEvent({
+                                            name: 'Sale_MonthSale_WorkPlanInfo',
+                                            extra: {
+                                                ID: _ID,
+                                                PerformName: $("#SpecificPerform").val().trim(),
+                                                Index: _Index
+                                            }
+                                        });
+                                        $honesty.CloseWin();
+                                    }
+                                })
+                            }
+                            else {
+                                $honesty.ShowMsg({ title: "错误", msg: "系统错误" });
+                            }
+                        }
+
+                    });
+                }
+            });
+
+            //执行人点击
+            $("#PerformName").tap(function () {
+                if (_IsSend != "True") {
+                    $honesty.ShopEmpSelect({
+                        LevelNum: 2,
+                        ControlID: "PerformName"
+                    });
+                }
+            });
+
+            //跟进人点击
+            $("#FollowUpName").tap(function () {
+                if (_IsSend != "True") {
+                    $honesty.ShopEmpSelect({
+                        LevelNum: 2,
+                        ControlID: "FollowUpName"
+                    });
+                }
+            });
+
+            //完成时间点击
+            $("#CompleteDate").tap(function () {
+                $honesty.DateTimeSelect({
+                    LevelNum: 2,
+                    Type: "Date",
+                    ControlID: "CompleteDate",
+                    ControlValue: $("#CompleteDate").val()
+                });
+            })
+        });
+    }
+
+    //数据加载函数
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "SelectInfo",
+                    ID: _ID
+                },
+                ProcName: "proc_SOM_ISR_MS_WorkPlan",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        $("#WorkType").val(item.WorkType);
+                        $("#SpecificPerform").val(item.SpecificPerform);
+                        $("#PerformName").val(item.PerformName);
+                        $("#FollowUpName").val(item.FollowUpName);
+                        $("#CompleteDate").val(item.CompleteDate);
+                        $("#CompleteSituation").val(item.CompleteSituation);
+                    });
+                }
+            }
+            else {
+                $("#footer").css("display", "none");
+            }
+
+        });
+    }
+
+    //验证函数
+    function CheckInfo() {
+        if ($("#WorkType").val().trim() == "") {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "工作类型不能为空",
+                callback: $("#WorkType").focus()
+            })
+            return false;
+        }
+        else if ($("#SpecificPerform").val().trim() == "") {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "具体执行与效果不能为空",
+                callback: $("#SpecificPerform").focus()
+            })
+            return false;
+        }
+        else if ($("#PerformName").val().trim() == "") {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "请选择执行人",
+                callback: $("#PerformName").focus()
+            })
+            return false;
+        }
+        else if ($("#FollowUpName").val().trim() == "") {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "请选择跟进人",
+                callback: $("#FollowUpName").focus()
+            })
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
+
+</script>

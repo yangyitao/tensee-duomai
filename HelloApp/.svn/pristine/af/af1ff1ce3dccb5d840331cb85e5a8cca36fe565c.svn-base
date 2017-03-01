@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<widget id="A6939285314263" version="0.0.1"> 
+  <name>Tensee</name>  
+  <description/>  
+  <author email="516116853@qq.com" href="http://www.apicloud.com">yang</author>  
+  <content src="html/User/Login.html"/>  
+  <preference name="pageBounce" value="false"/>  
+  <preference name="appBackground" value="rgba(0,0,0,0.0)"/>  
+  <preference name="windowBackground" value="rgba(0,0,0,0.0)"/>  
+  <preference name="frameBackgroundColor" value="rgba(0,0,0,0.0)"/>  
+  <preference name="hScrollBarEnabled" value="true"/>  
+  <preference name="vScrollBarEnabled" value="true"/>  
+  <preference name="autoLaunch" value="true"/>  
+  <preference name="fullScreen" value="false"/>  
+  <preference name="autoUpdate" value="true"/>  
+  <preference name="smartUpdate" value="true"/>  
+  <preference name="debug" value="false"/>  
+  <preference name="statusBarAppearance" value="true"/>  
+  <preference name="iOS7StatusBarAppearance" value="true"/>  
+  <preference name="pageBounce" value="false"/>  
+  <preference name="appBackground" value="rgba(0,0,0,0.0)"/>  
+  <preference name="windowBackground" value="rgba(0,0,0,0.0)"/>  
+  <preference name="frameBackgroundColor" value="rgba(0,0,0,0.0)"/>  
+  <preference name="hScrollBarEnabled" value="true"/>  
+  <preference name="vScrollBarEnabled" value="true"/>  
+  <preference name="autoLaunch" value="true"/>  
+  <preference name="fullScreen" value="false"/>  
+  <preference name="autoUpdate" value="true"/>  
+  <preference name="smartUpdate" value="true"/>  
+  <preference name="debug" value="false"/>  
+  <preference name="statusBarAppearance" value="true"/>  
+  <preference name="iOS7StatusBarAppearance" value="true"/>  
+  <preference name="pageBounce" value="false"/>  
+  <preference name="appBackground" value="rgba(0,0,0,0.0)"/>  
+  <preference name="windowBackground" value="rgba(0,0,0,0.0)"/>  
+  <preference name="frameBackgroundColor" value="rgba(0,0,0,0.0)"/>  
+  <preference name="hScrollBarEnabled" value="true"/>  
+  <preference name="vScrollBarEnabled" value="true"/>  
+  <preference name="autoLaunch" value="true"/>  
+  <preference name="fullScreen" value="false"/>  
+  <preference name="autoUpdate" value="true"/>  
+  <preference name="smartUpdate" value="true"/>  
+  <preference name="debug" value="false"/>  
+  <preference name="statusBarAppearance" value="true"/>  
+  <preference name="iOS7StatusBarAppearance" value="true"/>  
+  <preference name="pageBounce" value="false"/>  
+  <preference name="appBackground" value="rgba(0,0,0,0.0)"/>  
+  <preference name="windowBackground" value="rgba(0,0,0,0.0)"/>  
+  <preference name="frameBackgroundColor" value="rgba(0,0,0,0.0)"/>  
+  <preference name="hScrollBarEnabled" value="true"/>  
+  <preference name="vScrollBarEnabled" value="true"/>  
+  <preference name="autoLaunch" value="true"/>  
+  <preference name="fullScreen" value="false"/>  
+  <preference name="autoUpdate" value="true"/>  
+  <preference name="smartUpdate" value="true"/>  
+  <preference name="debug" value="false"/>  
+  <preference name="statusBarAppearance" value="true"/>  
+  <preference name="iOS7StatusBarAppearance" value="true"/>  
+  <permission name="readPhoneState"/>  
+  <permission name="camera"/>  
+  <permission name="record"/>  
+  <permission name="location"/>  
+  <permission name="fileSystem"/>  
+  <permission name="internet"/>  
+  <permission name="bootCompleted"/>  
+  <permission name="hardware"/>  
+  <permission name="call"/>  
+  <permission name="contact"/>  
+  <permission name="sms"/>  
+  <permission name="readPhoneState"/>  
+  <permission name="camera"/>  
+  <permission name="record"/>  
+  <permission name="location"/>  
+  <permission name="fileSystem"/>  
+  <permission name="internet"/>  
+  <permission name="bootCompleted"/>  
+  <permission name="hardware"/>  
+  <permission name="call"/>  
+  <permission name="contact"/>  
+  <permission name="sms"/>  
+  <permission name="readPhoneState"/>  
+  <permission name="camera"/>  
+  <permission name="record"/>  
+  <permission name="location"/>  
+  <permission name="fileSystem"/>  
+  <permission name="internet"/>  
+  <permission name="bootCompleted"/>  
+  <permission name="hardware"/>  
+  <permission name="call"/>  
+  <permission name="contact"/>  
+  <permission name="sms"/>  
+  <permission name="readPhoneState"/>  
+  <permission name="camera"/>  
+  <permission name="record"/>  
+  <permission name="location"/>  
+  <permission name="fileSystem"/>  
+  <permission name="internet"/>  
+  <permission name="bootCompleted"/>  
+  <permission name="hardware"/>  
+  <permission name="call"/>  
+  <permission name="contact"/>  
+  <permission name="sms"/>  
+  <access origin="*"/>  
+  <access origin="*"/>  
+  <access origin="*"/>  
+  <access origin="*"/>  
+  <feature name="UIScrollPicture"/>  
+  <feature name="mam"/>  
+  <feature name="UISearchBar"/>  
+  <feature name="UICalendar"/>  
+  <feature name="UICustomPicker"/>  
+  <feature name="bubbleMenu"/>  
+  <feature name="wx"> 
+    <param name="urlScheme" value="wx4e236896383841fa"/>  
+    <param name="apiKey" value="wx4e236896383841fa"/>  
+    <param name="apiSecret" value="c73df39f4a752d348ed422b22a6ad1e0"/> 
+  </feature>  
+  <feature name="downloadManager"/>  
+  <feature name="photoBrowser"/>  
+  <feature name="UIMultiSelector"/>  
+  <feature name="photoBrowser"/>  
+  <feature name="navigationBar"/>  
+  <feature name="UIListView"/>  
+  <feature name="baiduLocation"> 
+    <param name="apiKey" value="UT2CfbSLR9RlptgIOVBqjH7WfA0rcta9"/> 
+  </feature>  
+  <feature name="UIChatBox"/>  
+  <feature name="ajpush"> 
+    <param name="app_key" value="b2190dd4d6c64f25efa97465"/>  
+    <param name="channel" value="0e38994a69b09778b0bc5317"/> 
+  </feature>  
+  <feature name="push"/>  
+  <feature name="fileBrowser"/>  
+  <feature name="FNScanner"/>  
+  <feature name="UIScrollPicture"/>  
+  <feature name="mam"/>  
+  <feature name="UISearchBar"/>  
+  <feature name="UICalendar"/>  
+  <feature name="UICustomPicker"/>  
+  <feature name="bubbleMenu"/>  
+  <feature name="wx"> 
+    <param name="urlScheme" value="wx4e236896383841fa"/>  
+    <param name="apiKey" value="wx4e236896383841fa"/>  
+    <param name="apiSecret" value="c73df39f4a752d348ed422b22a6ad1e0"/> 
+  </feature>  
+  <feature name="downloadManager"/>  
+  <feature name="photoBrowser"/>  
+  <feature name="UIMultiSelector"/>  
+  <feature name="photoBrowser"/>  
+  <feature name="navigationBar"/>  
+  <feature name="UIListView"/>  
+  <feature name="baiduLocation"> 
+    <param name="apiKey" value="UT2CfbSLR9RlptgIOVBqjH7WfA0rcta9"/> 
+  </feature>  
+  <feature name="UIChatBox"/>  
+  <feature name="ajpush"> 
+    <param name="app_key" value="b2190dd4d6c64f25efa97465"/>  
+    <param name="channel" value="0e38994a69b09778b0bc5317"/> 
+  </feature>  
+  <feature name="push"/>  
+  <feature name="fileBrowser"/>  
+  <feature name="FNScanner"/>  
+  <feature name="UIScrollPicture"/>  
+  <feature name="mam"/>  
+  <feature name="UISearchBar"/>  
+  <feature name="UICalendar"/>  
+  <feature name="UICustomPicker"/>  
+  <feature name="bubbleMenu"/>  
+  <feature name="wx"> 
+    <param name="urlScheme" value="wx4e236896383841fa"/>  
+    <param name="apiKey" value="wx4e236896383841fa"/>  
+    <param name="apiSecret" value="c73df39f4a752d348ed422b22a6ad1e0"/> 
+  </feature>  
+  <feature name="downloadManager"/>  
+  <feature name="photoBrowser"/>  
+  <feature name="UIMultiSelector"/>  
+  <feature name="photoBrowser"/>  
+  <feature name="navigationBar"/>  
+  <feature name="UIListView"/>  
+  <feature name="baiduLocation"> 
+    <param name="apiKey" value="UT2CfbSLR9RlptgIOVBqjH7WfA0rcta9"/> 
+  </feature>  
+  <feature name="UIChatBox"/>  
+  <feature name="ajpush"> 
+    <param name="app_key" value="b2190dd4d6c64f25efa97465"/>  
+    <param name="channel" value="0e38994a69b09778b0bc5317"/> 
+  </feature>  
+  <feature name="push"/>  
+  <feature name="fileBrowser"/>  
+  <feature name="FNScanner"/>  
+  <feature name="UIScrollPicture"/>  
+  <feature name="mam"/>  
+  <feature name="UISearchBar"/>  
+  <feature name="UICalendar"/>  
+  <feature name="UICustomPicker"/>  
+  <feature name="bubbleMenu"/>  
+  <feature name="wx"> 
+    <param name="urlScheme" value="wx4e236896383841fa"/>  
+    <param name="apiKey" value="wx4e236896383841fa"/>  
+    <param name="apiSecret" value="c73df39f4a752d348ed422b22a6ad1e0"/> 
+  </feature>  
+  <feature name="downloadManager"/>  
+  <feature name="photoBrowser"/>  
+  <feature name="UIMultiSelector"/>  
+  <feature name="photoBrowser"/>  
+  <feature name="navigationBar"/>  
+  <feature name="UIListView"/>  
+  <feature name="baiduLocation"> 
+    <param name="apiKey" value="UT2CfbSLR9RlptgIOVBqjH7WfA0rcta9"/> 
+  </feature>  
+  <feature name="UIChatBox"/>  
+  <feature name="ajpush"> 
+    <param name="app_key" value="b2190dd4d6c64f25efa97465"/>  
+    <param name="channel" value="0e38994a69b09778b0bc5317"/> 
+  </feature>  
+  <feature name="push"/>  
+  <feature name="fileBrowser"/>  
+  <feature name="FNScanner"/> 
+</widget>

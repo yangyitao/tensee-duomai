@@ -1,0 +1,346 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>考勤确认</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        table {
+            text-align: center;
+            border-collapse: collapse;
+            width: 100%;
+            background: #fff;
+            font-size: 13px;
+        }
+
+        td {
+            border: 1px solid rgba(216, 216, 216, 0.5);
+            height: 45px;
+        }
+    </style>
+</head>
+<body>
+    <div class="aui-content">
+        <table>
+            <tr>
+                <td id="TZYear" style="background-color: rgb(235,241,221); width: 80px">年份</td>
+                <td id="MZYear"></td>
+                <td id="TZMonth" style="background-color: rgb(235,241,221); width: 80px">月份</td>
+                <td id="MZMonth"></td>
+            </tr>
+            <tr>
+                <td style="background-color: rgb(235,241,221)">月天数</td>
+                <td id="MMonthDay"></td>
+                <td style="background-color: rgb(235,241,221)">最大<br />
+                    休息天数</td>
+                <td id="MShopRestDay"></td>
+            </tr>
+            <tr>
+                <td style="background-color: rgb(235,241,221)">排班天数</td>
+                <td id="MNormDay"></td>
+                <td style="background-color: rgb(235,241,221)">排班<br />
+                    休息天数</td>
+                <td id="MEmpRestDay"></td>
+            </tr>
+            <tr style="display: none">
+                <td style="background-color: rgb(235,241,221)">业绩1</td>
+                <td id="MActualSale"></td>
+                <td style="background-color: rgb(235,241,221)">业绩2</td>
+                <td id="MActualSale1"></td>
+            </tr>
+            <tr>
+                <td style="background-color: rgb(235,241,221)">异常数量</td>
+                <td id="MFaultCount" colspan="3"></td>
+            </tr>
+            <tr>
+                <td style="background-color: rgb(219,239,243)">出勤天数</td>
+                <td id="MFactDay"></td>
+                <td style="background-color: rgb(219,239,243)">旷工天数</td>
+                <td id="MAbsentDay"></td>
+                <td id="MTardyDay" style="display: none"></td>
+            </tr>
+            <tr>
+                <td style="background-color: rgb(219,239,243)">事假天数</td>
+                <td id="MCasualDay"></td>
+                <td style="background-color: rgb(219,239,243)">病假天数</td>
+                <td id="MSickDay"></td>
+            </tr>
+            <tr>
+                <td style="background-color: rgb(219,239,243)">停薪留职<br />
+                    天数</td>
+                <td id="MSuspensionDay"></td>
+                <td style="background-color: rgb(219,239,243)">产假天数</td>
+                <td id="MMaternityDay"></td>
+            </tr>
+            <tr>
+                <td style="background-color: rgb(235,241,221)">年假天数</td>
+                <td id="MAnnualDay"></td>
+                <td style="background-color: rgb(235,241,221)">婚假天数</td>
+                <td id="MMarryDay"></td>
+            </tr>
+            <tr>
+                <td style="background-color: rgb(235,241,221)">陪产假<br />
+                    天数</td>
+                <td id="MDeliveryDay"></td>
+                <td style="background-color: rgb(235,241,221)">恩恤假<br />
+                    天数</td>
+                <td id="MCompassionDay"></td>
+            </tr>
+            <tr>
+                <td style="background-color: rgb(235,241,221)">产检假<br />
+                    天数</td>
+                <td id="MAntenatalDay"></td>
+                <td style="background-color: rgb(235,241,221)">调休<br />
+                    天数</td>
+                <td id="MTakeRestDay"></td>
+            </tr>
+            <tr>
+                <td style="background-color: rgb(219,239,243)">延时加班<br />
+                    天数</td>
+                <td id="MExtendOver"></td>
+                <td style="background-color: rgb(219,239,243)">延时加班<br />
+                    时数</td>
+                <td id="MExtendOverTime"></td>
+            </tr>
+            <tr>
+                <td style="background-color: rgb(219,239,243)">休息加班<br />
+                    时数</td>
+                <td id="MRestOver" colspan="3"></td>
+            </tr>
+            <tr>
+                <td style="background-color: rgb(235,241,221)">法定假<br />
+                    天数</td>
+                <td id="MLegalDay"></td>
+                <td style="background-color: rgb(235,241,221)">法定假<br />
+                    排班天数</td>
+                <td id="MLegalNormDay"></td>
+            </tr>
+            <tr>
+                <td style="background-color: rgb(235,241,221)">法定假<br />
+                    出勤天数</td>
+                <td id="MLegalFactDay"></td>
+                <td style="background-color: rgb(235,241,221)">法定休息<br />
+                    加班时数</td>
+                <td id="MHRestOver"></td>
+            </tr>
+            <tr>
+                <td style="background-color: rgb(235,241,221)">法定延时<br />
+                    加班天数</td>
+                <td id="MHExtendOver" colspan="3"></td>
+            </tr>
+            <tr>
+                <td style="background-color: rgb(219,239,243)">迟到早退<br />
+                    次数</td>
+                <td id="MTardyCount"></td>
+                <td style="background-color: rgb(219,239,243)">外勤时数</td>
+                <td id="MOutDay"></td>
+            </tr>
+            <tr>
+                <td style="background-color: rgb(219,239,243)">出差天数</td>
+                <td id="MBTripDay" colspan="3"></td>
+            </tr>
+        </table>
+    </div>
+    <div id="divFooter" style="height: 40px;"></div>
+    <footer class="aui-nav" id="footer" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7;">
+        <div id="btnSure" class="aui-btn aui-btn-block aui-btn-warning" style="height: 45px; width: 100%; line-height: 0.9;">
+            确认
+        </div>
+    </footer>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _Year, _Month;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _Year = api.pageParam.Year;
+            _Month = api.pageParam.Month;
+            $("#MZYear,#MZMonth").width((api.winWidth - 90 * 2) / 2);
+            LoadData();
+
+            $("#btnSure").tap(function () {
+                $honesty.ConfirmWin({
+                    msg: "是否确认当月考勤？确认之后将无法调整!",
+                    callback: function (ret, err) {
+                        if (ret.buttonIndex == "1") {
+                            var monthXML = "<?xml version=\"1.0\" encoding=\"gb2312\"?><root>" +
+                           "<Item ZYear=\"" + $("#MZYear").attr("data-value") +
+                           "\" ZMonth=\"" + $("#MZMonth").attr("data-value") +
+                           "\" EmpID=\"" + GetSession("UserID") +
+                           "\" EmpCode=\"" + GetSession("UserCode") +
+                           "\" EmpName=\"" + GetSession("UserName") +
+                           "\" OrganizeID=\"" + GetSession("OrganizeID") +
+                           "\" EmpRestDay=\"" + $("#MEmpRestDay").attr("data-value") +
+                           "\" ShopRestDay=\"" + $("#MShopRestDay").attr("data-value") +
+                           "\" MonthDay=\"" + $("#MMonthDay").attr("data-value") +
+                           "\" NormDay=\"" + $("#MNormDay").attr("data-value") +
+                           "\" LegalDay=\"" + $("#MLegalDay").attr("data-value") +
+                           "\" LegalNormDay=\"" + $("#MLegalNormDay").attr("data-value") +
+                           "\" FactDay=\"" + $("#MFactDay").attr("data-value") +
+                           "\" LegalFactDay=\"" + $("#MLegalFactDay").attr("data-value") +
+                           "\" TardyDay=\"" + $("#MTardyDay").attr("data-value") +
+                           "\" TardyCount=\"" + $("#MTardyCount").attr("data-value") +
+                           "\" AbsentDay=\"" + $("#MAbsentDay").attr("data-value") +
+                           "\" BTripDay=\"" + $("#MBTripDay").attr("data-value") +
+                           "\" OutDay=\"" + $("#MOutDay").attr("data-value") +
+                           "\" OverDay=\"" + $("#MRestOver").attr("data-value") +
+                           "\" RestOver=\"" + $("#MRestOver").attr("data-value") +
+                           "\" ExtendOver=\"" + $("#MExtendOver").attr("data-value") +
+                           "\" AnnualDay=\"" + $("#MAnnualDay").attr("data-value") +
+                           "\" MarryDay=\"" + $("#MMarryDay").attr("data-value") +
+                           "\" DeliveryDay=\"" + $("#MDeliveryDay").attr("data-value") +
+                           "\" CompassionDay=\"" + $("#MCompassionDay").attr("data-value") +
+                           "\" AntenatalDay=\"" + $("#MAntenatalDay").attr("data-value") +
+                           "\" MaternityDay=\"" + $("#MMaternityDay").attr("data-value") +
+                           "\" SuspensionDay=\"" + $("#MSuspensionDay").attr("data-value") +
+                           "\" CasualDay=\"" + $("#MCasualDay").attr("data-value") +
+                           "\" SickDay=\"" + $("#MSickDay").attr("data-value") +
+                           "\" TakeRestDay=\"" + $("#MTakeRestDay").attr("data-value") +
+                           "\" LegalRestOver=\"" + $("#MHRestOver").attr("data-value") +
+                           "\" LegalExtendOver=\"" + $("#MHExtendOver").attr("data-value") +
+                           "\"/></root>";
+                            var _options = {
+                                PostData: {
+                                    Params: {
+                                        result: "EmpConfirmAttend",
+                                        monthXML: monthXML
+                                    },
+                                    ProcName: "proc_SOM_HR_EmpDayAttend_F",
+                                    DataType: "Bool",
+                                    ExecType: "PROC",
+                                    Mode: "MSSQL"
+                                }
+                            };
+                            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                                if (_result.Code == "1") {
+                                    if (_result.Data == "True") {
+                                        $honesty.ShowMsg({
+                                            title: "提示", msg: "确认成功", callback: function () {
+                                                api.sendEvent({
+                                                    name: 'Attend_EmpAttend_EmpAttendSure',
+                                                    extra: {
+                                                        IsTrue: true
+                                                    }
+                                                });
+                                                $honesty.CloseWin();
+                                            }
+                                        });
+                                    }
+                                    else {
+                                        $honesty.ShowMsg({
+                                            title: "错误", msg: "确认失败，请重试!"
+                                        });
+                                    }
+                                }
+                            });
+                        }
+                    }
+                })
+            });
+        });
+    };
+
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    result: "GetEmpMonthAttend",
+                    ZYear: _Year,
+                    ZMonth: _Month,
+                    UserCode: GetSession("UserID")
+                },
+                ProcName: "proc_SOM_HR_EmpDayAttend_F",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        $("#MZYear").html(_Year);
+                        $("#MZMonth").html(_Month);
+                        $("#MMonthDay").html(item.MonthDay);
+                        $("#MFaultCount").html(parseFloat(item.FaultCount) == 0 ? "" : item.FaultCount);
+                        $("#MActualSale").html(parseFloat(item.ActualSale) == 0 ? "" : item.ActualSale);
+                        $("#MShopRestDay").html(parseFloat(item.ShopRestDay) == 0 ? "" : item.ShopRestDay);
+                        $("#MNormDay").html(parseFloat(item.NormDay) == 0 ? "" : item.NormDay);
+                        $("#MEmpRestDay").html(parseFloat(item.EmpRestDay) == 0 ? "" : item.EmpRestDay);
+                        $("#MFactDay").html(parseFloat(item.FactDay) == 0 ? "" : item.FactDay);
+                        $("#MTardyDay").html(parseFloat(item.TardyDay) == 0 ? "" : item.TardyDay);
+                        $("#MLegalDay").html(parseFloat(item.LegalDay) == 0 ? "" : item.LegalDay);
+                        $("#MLegalNormDay").html(parseFloat(item.LegalNormDay) == 0 ? "" : item.LegalNormDay);
+                        $("#MLegalFactDay").html(parseFloat(item.LegalFactDay) == 0 ? "" : item.LegalFactDay);
+                        $("#MTardyCount").html(parseFloat(item.TardyCount) == 0 ? "" : item.TardyCount);
+                        $("#MAbsentDay").html(parseFloat(item.AbsentDay) == 0 ? "" : item.AbsentDay);
+                        $("#MBTripDay").html(parseFloat(item.BTripDay) == 0 ? "" : item.BTripDay);
+                        $("#MOutDay").html(parseFloat(item.OutDay) == 0 ? "" : item.OutDay);
+                        $("#MExtendOver").html(parseFloat(item.ExtendOver) == 0 ? "" : item.ExtendOver);
+                        $("#MExtendOverTime").html(parseFloat(item.ExtendOverTime) == 0 ? "" : item.ExtendOverTime);
+                        $("#MRestOver").html(parseFloat(item.RestOver) == 0 ? "" : item.RestOver);
+                        $("#MHExtendOver").html(parseFloat(item.LegalExtendOver) == 0 ? "" : item.LegalExtendOver);
+                        $("#MHRestOver").html(parseFloat(item.LegalRestOver) == 0 ? "" : item.LegalRestOver);
+                        $("#MAnnualDay").html(parseFloat(item.AnnualDay) == 0 ? "" : item.AnnualDay);
+                        $("#MMarryDay").html(parseFloat(item.MarryDay) == 0 ? "" : item.MarryDay);
+                        $("#MDeliveryDay").html(parseFloat(item.DeliveryDay) == 0 ? "" : item.DeliveryDay);
+                        $("#MCompassionDay").html(parseFloat(item.CompassionDay) == 0 ? "" : item.CompassionDay);
+                        $("#MAntenatalDay").html(parseFloat(item.AntenatalDay) == 0 ? "" : item.AntenatalDay);
+                        $("#MMaternityDay").html(parseFloat(item.MaternityDay) == 0 ? "" : item.MaternityDay);
+                        $("#MSuspensionDay").html(parseFloat(item.SuspensionDay) == 0 ? "" : item.SuspensionDay);
+                        $("#MCasualDay").html(parseFloat(item.CasualDay) == 0 ? "" : item.CasualDay);
+                        $("#MSickDay").html(parseFloat(item.SickDay) == 0 ? "" : item.SickDay);
+                        $("#MTakeRestDay").html(parseFloat(item.TakeRestDay) == 0 ? "" : item.TakeRestDay);
+                        $("#MZYear").attr("data-value", _Year);
+                        $("#MZMonth").attr("data-value", _Month);
+                        $("#MMonthDay").attr("data-value", item.MonthDay);
+                        $("#MFaultCount").attr("data-value", parseFloat(item.FaultCount));
+                        $("#MActualSale").attr("data-value", parseFloat(item.ActualSale));
+                        $("#MShopRestDay").attr("data-value", parseFloat(item.ShopRestDay));
+                        $("#MNormDay").attr("data-value", parseFloat(item.NormDay));
+                        $("#MEmpRestDay").attr("data-value", parseFloat(item.EmpRestDay));
+                        $("#MFactDay").attr("data-value", parseFloat(item.FactDay));
+                        $("#MTardyDay").attr("data-value", parseFloat(item.TardyDay));
+                        $("#MLegalDay").attr("data-value", parseFloat(item.LegalDay));
+                        $("#MLegalNormDay").attr("data-value", parseFloat(item.LegalNormDay));
+                        $("#MLegalFactDay").attr("data-value", parseFloat(item.LegalFactDay));
+                        $("#MTardyCount").attr("data-value", parseFloat(item.TardyCount));
+                        $("#MAbsentDay").attr("data-value", parseFloat(item.AbsentDay));
+                        $("#MBTripDay").attr("data-value", parseFloat(item.BTripDay));
+                        $("#MOutDay").attr("data-value", parseFloat(item.OutDay));
+                        $("#MExtendOver").attr("data-value", parseFloat(item.ExtendOver));
+                        $("#MRestOver").attr("data-value", parseFloat(item.RestOver));
+                        $("#MHExtendOver").attr("data-value", parseFloat(item.LegalExtendOver));
+                        $("#MHRestOver").attr("data-value", parseFloat(item.LegalRestOver));
+                        $("#MAnnualDay").attr("data-value", parseFloat(item.AnnualDay));
+                        $("#MMarryDay").attr("data-value", parseFloat(item.MarryDay));
+                        $("#MDeliveryDay").attr("data-value", parseFloat(item.DeliveryDay));
+                        $("#MCompassionDay").attr("data-value", parseFloat(item.CompassionDay));
+                        $("#MAntenatalDay").attr("data-value", parseFloat(item.AntenatalDay));
+                        $("#MMaternityDay").attr("data-value", parseFloat(item.MaternityDay));
+                        $("#MSuspensionDay").attr("data-value", parseFloat(item.SuspensionDay));
+                        $("#MCasualDay").attr("data-value", parseFloat(item.CasualDay));
+                        $("#MSickDay").attr("data-value", parseFloat(item.SickDay));
+                        $("#MTakeRestDay").attr("data-value", parseFloat(item.TakeRestDay));
+                    });
+                }
+                else {
+                    $honesty.ShowMsg({ title: "提示", msg: "当月无考勤数据" });
+                    $("#footer").hide();
+                    $("#divFooter").hide();
+                }
+            }
+            else {
+                $("#footer").hide();
+                $("#divFooter").hide();
+            }
+        });
+    }
+
+</script>
+</html>

@@ -1,0 +1,122 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>知识共享列表（共享资料）</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="aui-content">
+        <ul class="aui-list-view aui-in" id="ulList">
+        </ul>
+    </div>
+</body>
+</html>
+
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _PageNum = 1;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+
+            LoadData();
+            //下拉刷新
+            api.setRefreshHeaderInfo({
+                visible: true,
+                loadingImg: 'widget://image/refresh.png',
+                bgColor: '#fff',
+                textColor: '#000',
+                textDown: '下拉刷新...',
+                textUp: '松开刷新...',
+                showTime: true
+            }, function (ret, err) {
+                $("#ulList").html("");
+                _PageNum = 1;
+                LoadData();
+                api.refreshHeaderLoadDone();
+            });
+
+            api.addEventListener({
+                name: 'scrolltobottom',
+                extra: {
+                    threshold: 60
+                }
+            }, function (ret, err) {
+                LoadData();
+            });
+
+        });
+
+
+
+    }
+
+    //数据加载函数
+    function LoadData() {
+        if (_PageNum != 0) {
+            var _options = {
+                PostData: {
+                    Params: {
+                        result: "GetList",
+                        DeptID: GetSession("OrganizeID"),
+                        BeginDate: api.pageParam.StartDate,
+                        EndDate: api.pageParam.EndDate,
+                        DatumTitle: api.pageParam.Title || "",
+                        CreateName: api.pageParam.CreateName || "",
+                        DatumPType:api.pageParam.DatumPType,
+                        PageNum: _PageNum,
+                        PageSize: 15
+                    },
+                    ProcName: "proc_SOM_ISR_Datum",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+
+
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    var _Content = "";
+                    if (_result.Data.length > 0) {
+                        $.each(_result.Data, function (i, item) {
+                            _Content += "<li class='aui-list-view-cell' tapmode onclick=\'ShowInfo(\"" + item.DatumID + "\")\'>" +
+                                        "<a class='aui-arrow-right'><label>" + item.DatumTitle + "</label><p>" + item.CreateName +
+                                        "&nbsp;" + item.PublishedDate + "</p></a></li>";
+                        });
+                        _PageNum++;
+                        $("#ulList").append(_Content);
+                    }
+                    else {
+                        if (_PageNum == 1) {
+                            $("#ulList").html("<li style='text-align:center'>尊敬的用户，您好，无知识共享数据</li>")
+                        }
+                        else {
+                            $honesty.ShowToast({ msg: "没有更多的数据", location: "bottom" });
+                        }
+                        _PageNum = 0;
+                    }
+                    api.parseTapmode();
+                }
+            });
+        }
+    }
+
+    //共享资料列表点击
+    function ShowInfo(datumID) {
+        $honesty.OpenWin({
+            name: "Info_Datum_DatumInfo",
+            url: "Info/Datum/DatumInfo.html",
+            title: "知识共享",
+            LevelNum: 2,
+            pageParam: {
+                DatumID: datumID
+            }
+        });
+    }
+</script>

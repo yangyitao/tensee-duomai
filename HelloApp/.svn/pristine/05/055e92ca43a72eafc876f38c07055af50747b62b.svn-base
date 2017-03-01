@@ -1,0 +1,415 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>消息内容</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+    <style type="text/css">
+        #MsgList {
+            padding: 8px 0 15px 0;
+            min-height: 0;
+            height: auto;
+        }
+
+        .receiver, .sender {
+            padding: 10px;
+            clear: both;
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: flex;
+            -webkit-box-orient: horizontal;
+            -webkit-flex-flow: row;
+            flex-flow: row;
+            width: 100%;
+        }
+
+        .area {
+            margin: 0 10px;
+            position: relative;
+            padding-right: 42px;
+            -webkit-box-flex: 1;
+            -webkit-flex: 1;
+            flex: 1;
+        }
+
+        .sender .area {
+            padding-right: 0;
+            padding-left: 42px;
+        }
+
+        .content {
+            position: relative;
+            background: #4385f6;
+            color: #fff;
+            padding: 10px;
+            font-size: 14px;
+            line-height: 24px;
+            border-radius: 10px;
+            -webkit-border-radius: 10px;
+            margin-left: 6px;
+            min-height: 44px;
+            display: inline-block;
+        }
+
+        .receiver-arrow, .sender-arrow {
+            font-style: normal;
+            display: block;
+            height: 0px;
+            width: 0px;
+            border-width: 7px;
+            border-style: solid;
+            border-color: transparent #4385f6 transparent transparent;
+            position: absolute;
+            top: 10px;
+            left: -14px;
+            z-index: 12;
+        }
+
+        .sender .content {
+            background: #e3e7ec;
+            color: #556893;
+            margin-right: 6px;
+            margin-left: 0;
+            float: right;
+        }
+
+        .sender-arrow {
+            border-color: transparent transparent transparent #e3e7ec;
+            right: -14px;
+            left: auto;
+        }
+
+        .time {
+            font-size: 12px;
+            text-align: center;
+            height: 24px;
+            line-height: 24px;
+            color: #9daeca;
+        }
+
+        .userinfo {
+            padding: 0 0 7px 5px;
+            font-size: 12px;
+            color: #666;
+            text-align: left;
+        }
+
+        .sender .level {
+            margin-left: 0px;
+            margin-right: 10px;
+        }
+
+        .sender .userinfo {
+            padding: 0 5px 7px 0;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div id="MsgList" style="padding-bottom: 70px">
+    </div>
+</body>
+<script src="../../script/api.js"></script>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _PageNum = 1, UserID = "";
+    var UIChatBox;
+    var sourcePath = "widget://res/chatBox/emotion";
+    var emotionData;
+    apiready = function () {
+        UserID = api.pageParam.UserID || UserID;
+        api.parseTapmode();
+        $(function () {
+            getImgsPaths(sourcePath + "/emotion", function (emotion) {
+                emotionData = emotion;
+            });
+            LoadData();
+            //下拉刷新
+            api.setRefreshHeaderInfo({
+                visible: true,
+                loadingImg: "widget://image/refresh.png",
+                bgColor: "#fff",
+                textColor: "#000",
+                textDown: "下拉刷新...",
+                textUp: "松开刷新...",
+                showTime: true
+            }, function (ret, err) {
+                LoadData();
+                api.refreshHeaderLoadDone();
+            });
+            UIChatBox = api.require("UIChatBox")
+            UIChatBox.open({
+                placeholder: "输入发送内容",
+                autoFocus: true,
+                emotionPath: sourcePath,
+                styles: {
+                    extrasBtn: {
+                        normalImg: "widget://res/chatBox/add.png"
+                    },
+                    indicator: {
+                        target: "extrasPanel",
+                        color: "#c4c4c4",
+                        activeColor: "#9e9e9e"
+                    },
+                    sendBtn: {
+                        titleColor: "#FFFFFF",
+                        bg: "widget://res/img/button_1.png",
+                        activeBg: "widget://res/img/button_2.png",
+                        titleSize: 14
+                    }
+                },
+                extras: {
+                    titleSize: 10,
+                    titleColor: "#a3a3a3",
+                    btns: [{
+                        title: '图片',
+                        normalImg: "widget://res/chatBox/album.png"
+                    }, {
+                        title: '拍照',
+                        normalImg: "widget://res/chatBox/cam.png"
+                    },
+                    {
+                        title: "文件",
+                        normalImg: "widget://res/chatBox/loc.png"
+                    }]
+                }
+            }, function (ret, err) {
+                if (ret) {
+                    var msg = ret.msg;
+                    switch (ret.eventType) {
+                        case "send":
+                            if (msg == "") {
+                                $honesty.ShowMsg({ title: "警告", msg: "请输入要发送的内容" });
+                                return;
+                            }
+                            else {
+                                var strXML = "<root><UserInfo><ReceiveID>" + UserID + "</ReceiveID></UserInfo></root>";
+                                var _options = {
+                                    PostData: {
+                                        Params: {
+                                            result: "SendMessage",
+                                            UserID: GetSession("UserID"),
+                                            strXML: strXML,
+                                            MsgContent: msg,
+                                            MsgSlaves: "",
+                                            MsgType: "03"
+                                        },
+                                        ProcName: "proc_SOM_Other_Message",
+                                        DataType: "Bool",
+                                        ExecType: "PROC",
+                                        Mode: "MSSQL"
+                                    }
+                                };
+                                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                                    if (_result.Code == "1") {
+                                        if (_result.Data == "True") {
+                                            _Content = '<div class="time">' + $honesty.NowDate("yyyy-MM-dd hh:mm:ss") + '</div><div class="sender"><div class="area"><div class="userinfo"><font class="level">' + GetSession("Position") + '</font><span>' + GetSession("UserName") + '</span></div><div class="content"><big class="sender-arrow"></big>' + transText(msg) + '</div></div><i class="user-icon aui-img-object aui-pull-left aui-iconfont' + (GetSession("Sex") == "女" ? " aui-icon-service aui-bg-danger" : " aui-icon-my aui-bg-info") + '"></i></div>';
+                                            $("#MsgList").append(_Content);
+                                        }
+                                        else {
+                                            $honesty.ShowMsg({ title: "错误", msg: "消息发送失败!" });
+                                        }
+                                    }
+                                });
+                                UIChatBox.closeKeyboard();
+                                UIChatBox.closeBoard();
+                            }
+                            break;
+                        case "show":
+                            break;
+                        case "clickExtras":
+                            if (ret.index == "0") {
+                                $honesty.MessageFile({ uploadtype: "album", UserID: UserID });
+                            }
+                            else if (ret.index == "1") {
+                                $honesty.MessageFile({ uploadtype: "camera", UserID: UserID });
+                            }
+                            else if (ret.index == "2") {
+                                $honesty.MessageFile({ uploadtype: "file", UserID: UserID });
+                            }
+                            break;
+                    }
+                } else {
+                }
+            });
+        });
+    };
+    function LoadData() {
+        if (_PageNum != 0) {
+            var _options = {
+                PostData: {
+                    Params: {
+                        result: "LoadMessageDialog",
+                        UserID: UserID,
+                        ReceiveID: GetSession("UserID"),
+                        PageNum: _PageNum,
+                        PageSize: 15
+                    },
+                    ProcName: "proc_SOM_Other_Message",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    var UnReadCount = 0;
+                    var _Content = "";
+                    if (_result.Data.length > 0) {
+                        $.each(_result.Data, function (i, item) {
+                            UnReadCount = item.UnReadCount;
+                            var flow = {
+                                flowid: "",
+                                stepid: "",
+                                instanceid: "",
+                                taskid: "",
+                                groupid: "",
+                                sn: "",
+                                flowPage: "",
+                                name: "流程查看"
+                            };
+                            if (item.MsgType == "02") {
+                                var url = $(item.WAPContent).attr("href").replace("../", "");
+                                if (url.split("?")[0] != "" && url.split("?")[1] != "") {
+                                    flow.flowPage = url.split("?")[0];
+                                    var paramArr = url.split("?")[1].split("&");
+                                    $.each(paramArr, function (i, item) {
+                                        var flowArr = item.split("=");
+                                        if (flowArr.length > 0) {
+                                            flow[flowArr[0]] = flowArr[1];
+                                        }
+                                    });
+                                }
+                            }
+                            switch (item.UserType) {
+                                case "Sender":
+                                    if (item.MsgSlaves != "") {
+                                        var slaveArr = item.MsgSlaves.split("|");
+                                        for (var j = 0; j < slaveArr.length; j++) {
+                                            if (slaveArr[j] != "") {
+                                                var _FileName = GetFileName(slaveArr[j]);
+                                                var _FileFormat = _FileName.split(".")[1];
+                                                _Content = '<div class="time">' + item.SendTime + '</div><div class="sender"><div class="area"><div class="userinfo"><font class="level">' + item.LevelDesc + '</font><span>' + item.SenderName + '</span></div><div class="content" onclick=\"$honesty.ShowSlaves(\'' + slaveArr[j] + '\')\"><big class="sender-arrow"></big><img src="../../res/fileicon/icon_' + _FileFormat + '.png" style="float: left" /><div style="float: right; min-width: 100px; max-width: 150px; padding-left: 10px; margin-right: 10px;">' + _FileName + '</div></div></div><i class="user-icon aui-img-object aui-pull-left aui-iconfont' + (item.Sex == "女" ? " aui-icon-service aui-bg-danger" : " aui-icon-my aui-bg-info") + '"></i></div>';
+                                                $("#MsgList").prepend(_Content);
+                                            }
+                                        }
+                                    }
+                                    _Content = '<div class="time">' + item.SendTime + '</div><div class="sender"><div class="area"><div class="userinfo"><font class="level">' + item.LevelDesc + '</font><span>' + item.SenderName + '</span></div><div class="content" ' + (item.MsgType == "02" ? 'tapmode onclick=\"ShowFlowInfo(\'' +
+                                    flow.flowid + "\',\'" +
+                                    flow.stepid + "\',\'" +
+                                    flow.instanceid + "\',\'" +
+                                    flow.taskid + "\',\'" +
+                                    flow.groupid + "\',\'" +
+                                    flow.sn + "\',\'" +
+                                    flow.flowPage + "\',\'" +
+                                    flow.name + '\')\"' : "") + '><big class="sender-arrow"></big>' + transText($honesty.DelHtml(item.MsgContent)) + '</div></div><i class="user-icon aui-img-object aui-pull-left aui-iconfont' + (item.Sex == "女" ? " aui-icon-service aui-bg-danger" : " aui-icon-my aui-bg-info") + '"></i></div>';
+                                    break;
+                                case "Receive":
+                                    if (item.MsgSlaves != "") {
+                                        var slaveArr = item.MsgSlaves.split("|");
+                                        for (var j = 0; j < slaveArr.length; j++) {
+                                            if (slaveArr[j] != "") {
+                                                var _FileName = GetFileName(slaveArr[j]);
+                                                var _FileFormat = _FileName.split(".")[1];
+                                                _Content = '<div class="time">' + item.SendTime + '</div><div class="receiver"><i class="user-icon aui-img-object aui-pull-left aui-iconfont' + (item.Sex == "女" ? " aui-icon-service aui-bg-danger" : " aui-icon-my aui-bg-info") + '"></i><div class="area"><div class="userinfo"><span>' + item.SenderName + '</span><font class="level">' + item.LevelDesc + '</font></div><div class="content" onclick=\"$honesty.ShowSlaves(\'' + slaveArr[j] + '\')\"><big class="receiver-arrow"></big><img src="../../res/fileicon/icon_' + _FileFormat + '.png" style="float: left" /><div style="float: right; min-width: 100px; max-width: 150px; padding-left: 10px;margin-right: 10px;">' + _FileName + '</div></div></div></div>';
+                                                $("#MsgList").prepend(_Content);
+                                            }
+                                        }
+                                    }
+                                    _Content = '<div class="time">' + item.SendTime + '</div><div class="receiver"><i class="user-icon aui-img-object aui-pull-left aui-iconfont' + (item.Sex == "女" ? " aui-icon-service aui-bg-danger" : " aui-icon-my aui-bg-info") + '"></i><div class="area"><div class="userinfo"><span>' + item.SenderName + '</span><font class="level">' + item.LevelDesc + '</font></div><div class="content" ' + (item.MsgType == "02" ? 'tapmode onclick=\"ShowFlowInfo(\'' +
+                                    flow.flowid + "\',\'" +
+                                    flow.stepid + "\',\'" +
+                                    flow.instanceid + "\',\'" +
+                                    flow.taskid + "\',\'" +
+                                    flow.groupid + "\',\'" +
+                                    flow.sn + "\',\'" +
+                                    flow.flowPage + "\',\'" +
+                                    flow.name + '\')\"' : "") + '><big class="receiver-arrow"></big>' + transText($honesty.DelHtml(item.MsgContent)) + '</div></div></div>';
+                                    break;
+                            }
+                            if ($honesty.DelHtml(item.MsgContent) != "") {
+                                $("#MsgList").prepend(_Content);
+                            }
+                        });
+                        _PageNum++;
+                    }
+                    else {
+                        if (_PageNum != 1) {
+                            $honesty.ShowToast({ msg: "没有更多的数据", location: "bottom" });
+                        }
+                        _PageNum = 0;
+                    }
+                    api.sendEvent({
+                        name: "ReadMessage",
+                        extra: {
+                            UnReadCount: UnReadCount,
+                            UserID: UserID
+                        }
+                    });
+                    api.parseTapmode();
+                }
+            });
+        }
+    }
+    function ShowFlowInfo(flowid, stepid, instanceid, taskid, groupid, sn, flowPage, name) {
+        if (instanceid != "") {
+            $honesty.OpenWin({
+                name: flowPage.replace(/\//g, "_"),
+                url: flowPage + ".html",
+                title: name,
+                pageParam: {
+                    flowid: flowid,
+                    stepid: stepid,
+                    instanceid: instanceid,
+                    taskid: taskid,
+                    groupid: groupid,
+                    sn: sn,
+                    isread: "true"
+                }
+            });
+        }
+    }
+    function transText(text, imgWidth, imgHeight) {
+        var imgWidth = imgWidth || 30;
+        var imgHeight = imgHeight || 30;
+        var regx = /\[(.*?)\]/gm
+        var textTransed = text.replace(regx, function (match) {
+            var imgSrc = emotionData[match];
+            if (!imgSrc) { /* 说明不对应任何表情,直接返回即可.*/
+                return match;
+            }
+            var img = "<img src='" + imgSrc + "' width='" + imgWidth + "' height ='" + imgHeight + "' />";
+            return img;
+        });
+        return textTransed;
+    }
+    function getImgsPaths(sourcePathOfChatBox, callback) {
+        try {
+            var jsonPath = sourcePathOfChatBox + ".json";
+            api.readFile({
+                path: jsonPath
+            }, function (ret, err) {
+                if (ret.status) {
+                    var emotionArray = JSON.parse(ret.data);
+                    var emotion = {};
+                    for (var idx in emotionArray) {
+                        var emotionItem = emotionArray[idx];
+                        var emotionText = emotionItem["text"];
+                        var emotionUrl = "../../res/chatBox/emotion/" + emotionItem["name"] + ".png";
+                        emotion[emotionText] = emotionUrl;
+                    }
+                    if ("function" === typeof (callback)) {
+                        callback(emotion);
+                    }
+                }
+            });
+        }
+        catch (e) {
+            alert(e);
+        }
+    }
+</script>
+</html>

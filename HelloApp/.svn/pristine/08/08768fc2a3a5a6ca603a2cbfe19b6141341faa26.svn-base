@@ -1,0 +1,199 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>日程明细</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-input-row .aui-input-addon {
+            width: 80px;
+        }
+    </style>
+</head>
+<body>
+    <div class="aui-content">
+        <div class="aui-form aui-input-form" id="divGoodsTarget">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">日程标题</span>
+                <input id="Title" type="text" class="aui-input" placeholder="请填写标题" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">参与人</span>
+                <input id="PartInUusersName" type="text" class="aui-input" readonly="readonly" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">日程时间</span>
+                <input id="ScheduleTime" type="text" class="aui-input" readonly="readonly" />
+            </div>
+            <div class="aui-input-row" style="padding-right: 3px;">
+                <span class="aui-input-addon" style="vertical-align: top;">日程安排</span>
+                <textarea id="Arrangement" class="aui-input" placeholder="请填写日程安排" style="height: 100px; border: 1px solid #c8c7cc; overflow-y: auto"></textarea>
+            </div>
+            <div class="aui-btn-row" id="divSave" style="display: none">
+                <div id="btnSave" class="aui-btn aui-btn-block aui-btn-warning">
+                    保存
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _ID, _Index;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _Index = api.pageParam.Index == undefined ? "-1" : api.pageParam.Index;
+            _ID = api.pageParam.ID || new $honesty.GUID().NewGUID();
+            _OrganizeID = api.pageParam.OrganizeID;
+            _Date = $honesty.NowDate();
+            today = new Date(_Date.Format("yyyy/MM/dd"))
+            _Day = api.pageParam.day;
+            _Year = api.pageParam.year;
+            _Month = api.pageParam.month;
+            date = new Date(_Year + "/" + _Month + "/" + _Day);
+            if (( _OrganizeID.toUpperCase() == GetSession("OrganizeID").toUpperCase() && GetSession("IsLeader") != "0") && ((today - date < 0) || (today - date == 0))) {
+                $("#divSave").css("display", "");
+            }
+            else {
+                $(".aui-input").attr("readonly", "readonly");
+            };
+            var _options = {
+                PostData: {
+                    Params: {
+                        Result: "SelectInfo",
+                        ID: _ID
+                    },
+                    ProcName: "proc_SOM_ISR_Calendar",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        $.each(_result.Data, function (i, item) {
+                            $("#Title").val(item.Title);
+                            $("#PartInUusersName").val(item.PartInUusersName);
+                            $("#ScheduleTime").val(item.ScheduleTime);
+                            $("#Arrangement").val(item.Arrangement);
+                        })
+                    }
+                }
+            })
+            //点击获取员工列表
+            $("#PartInUusersName").tap(function () {
+                if (( _OrganizeID.toUpperCase() == GetSession("OrganizeID").toUpperCase() && GetSession("IsLeader") != "0") && ((today - date < 0) || (today - date == 0))) {
+                    $honesty.ShopEmpSelect({
+                        LevelNum: 2,
+                        ChooseType: "checkbox",
+                        callback: function (ret) {
+                            var PartInUusersName = "";
+                            $.each(ret.UserName, function (i, item) {
+                                PartInUusersName += "," + ret.UserName[i];
+                            })
+                            PartInUusersName = PartInUusersName.replace(",", "");
+                            if (ret.IsAll != "0") {
+                                $("#PartInUusersName").val(PartInUusersName);
+                            }
+                            else
+                                $("#PartInUusersName").val("全员");
+                        }
+                    });
+                };
+            })
+        });
+        //保存函数点击
+        $("#btnSave").tap(function () {
+            if (CheckInfo()) {
+                var _options = {
+                    PostData: {
+                        Params: {
+                            Result: "MaintainInfo",
+                            OrganizeID: _OrganizeID,
+                            ID: _ID,
+                            ZYear: _Year,
+                            ZMonth: _Month,
+                            ZDate: _Day,
+                            Title: $("#Title").val(),
+                            PartInUusersName: $("#PartInUusersName").val(),
+                            ScheduleTime: $("#ScheduleTime").val(),
+                            Arrangement: $("#Arrangement").val(),
+                            CreateUserID: GetSession("UserID"),
+                            CreateName: GetSession("UserName")
+                        },
+                        ProcName: "proc_SOM_ISR_Calendar",
+                        DataType: "Bool",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    }
+                };
+                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                    if (_result.Code == "1") {
+                        if (_result.Data == "True") {
+                            $honesty.ShowMsg({
+                                title: "提示",
+                                msg: "保存成功",
+                                callback: function () {
+                                    api.sendEvent({
+                                        name: 'Operate_Calendar_Schedule',
+                                        extra: {
+                                            ID: _ID,
+                                            Title: $("#Title").val(),
+                                            PartInUusersName: $("#PartInUusersName").val(),
+                                            ScheduleTime: $("#ScheduleTime").val(),
+                                            Index: _Index
+                                        }
+                                    });
+                                    $honesty.CloseWin();
+                                }
+                            })
+                        }
+                        else {
+                            $honesty.ShowMsg({ title: "错误", msg: "系统错误" });
+                        }
+                    }
+                });
+            }
+        });
+        //验证函数
+        function CheckInfo() {
+            if ($.trim($("#Title").val()) == "") {
+                $honesty.ShowMsg({ title: "警告", msg: "标题不能为空！" });
+                return false;
+            }
+            else if ($("#PartInUusersName").val() == "") {
+                $honesty.ShowMsg({ title: "警告", msg: "请选择参与人！" });
+                return false
+            }
+            else if ($("#ScheduleTime").val() == "") {
+                $honesty.ShowMsg({ title: "警告", msg: "请选择日程时间！" });
+                return false
+            }
+            else if ($.trim($("#Arrangement").val()) == "") {
+                $honesty.ShowMsg({ title: "警告", msg: "请填写日程安排！" });
+                return false
+            }
+            else {
+                return true;
+            }
+        }
+        $("#ScheduleTime").tap(function () {
+            if (( _OrganizeID.toUpperCase() == GetSession("OrganizeID").toUpperCase() && GetSession("IsLeader") != "0") && ((today - date < 0) || (today - date == 0))) {
+                $honesty.DateTimeSelect({
+                    LevelNum: 2,
+                    Type: "Time",
+                    ControlID: "ScheduleTime",
+                    ControlValue: $("#ScheduleTime").val(),
+                });
+            }
+        });
+    }
+</script>
+</html>

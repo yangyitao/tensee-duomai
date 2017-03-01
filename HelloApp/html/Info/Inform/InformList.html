@@ -1,0 +1,111 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>通知列表</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="aui-content">
+        <ul class="aui-list-view aui-in" id="ulList">
+        </ul>
+    </div>
+</body>
+</html>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _PageNum = 1, PTypeName = "";
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            LoadData();
+            //下拉刷新
+            api.setRefreshHeaderInfo({
+                visible: true,
+                loadingImg: "widget://image/refresh.png",
+                bgColor: "#fff",
+                textColor: "#000",
+                textDown: "下拉刷新...",
+                textUp: "松开刷新...",
+                showTime: true
+            }, function (ret, err) {
+                $("#ulList").html("");
+                _PageNum = 1;
+                LoadData();
+                api.refreshHeaderLoadDone();
+            });
+            api.addEventListener({
+                name: "scrolltobottom",
+                extra: {
+                    threshold: 60
+                }
+            }, function (ret, err) {
+                LoadData();
+            });
+        });
+    }
+    //数据加载函数
+    function LoadData() {
+        PTypeName = api.pageParam.PTypeName || "";
+        if (_PageNum != 0) {
+            var _options = {
+                PostData: {
+                    Params: {
+                        result: "InitList",
+                        InfoTitle: api.pageParam.InfoTitle || "",
+                        InfoPType: api.pageParam.InfoPType,
+                        Date1: api.pageParam.Date1,
+                        Date2: api.pageParam.Date2,
+                        UserID: GetSession("UserID"),
+                        UserName: api.pageParam.UserName || "",
+                        PageNum: _PageNum,
+                        PageSize: 15
+                    },
+                    ProcName: "proc_SOM_ISR_InformInfo",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    var _Content = "";
+                    if (_result.Data.length > 0) {
+                        $.each(_result.Data, function (i, item) {
+                            _Content += "<li class='aui-list-view-cell' tapmode onclick=\'ShowInfo(\"" + item.InfoID + "\")\'>" +
+                                        "<a class='aui-arrow-right'><label>" + item.InfoTitle + "</label><p>" + item.UserName +
+                                        "&nbsp;" + item.InfoDate + "</p></a></li>";
+                        });
+                        _PageNum++;
+                        $("#ulList").append(_Content);
+                    }
+                    else {
+                        if (_PageNum == 1) {
+                            $("#ulList").html("<li style='text-align:center'>尊敬的用户，您好，无" + PTypeName + "数据</li>")
+                        }
+                        else {
+                            $honesty.ShowToast({ msg: "没有更多的数据", location: "bottom" });
+                        }
+                        _PageNum = 0;
+                    }
+                    api.parseTapmode();
+                }
+            });
+        }
+    }
+    function ShowInfo(InfoID) {
+        $honesty.OpenWin({
+            name: "Info_Inform_InformContent",
+            url: "Info/Inform/InformContent.html",
+            title: PTypeName,
+            LevelNum: 2,
+            pageParam: {
+                InfoID: InfoID
+            }
+        });
+    }
+</script>

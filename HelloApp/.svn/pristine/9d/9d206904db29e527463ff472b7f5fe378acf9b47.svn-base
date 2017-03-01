@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>可调休时数</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+    <style>
+        .div-height {
+            height: 10px;
+        }
+
+        .aui-list-view-cell {
+            padding: 5px;
+        }
+
+            .aui-list-view-cell table {
+                width: 100%;
+                font-size: 13px;
+                color: gray;
+                table-layout: fixed;
+                border-collapse: collapse;
+            }
+
+                .aui-list-view-cell table .value {
+                    word-break: keep-all;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    text-align: right;
+                    padding-right: 5px;
+                    text-align: right;
+                }
+    </style>
+</head>
+<body>
+    <div class="div-height "></div>
+    <div class="aui-content" id="Content"></div>
+    <div class="div-height "></div>
+</body>
+<script src="../../script/api.js"></script>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        var _Content = ""
+        api.parseTapmode();
+        $(function () {
+            var _options = {
+                PostData: {
+                    Params: {
+                        Result: "InitOverSurplus",
+                        OrganizeID: GetSession("OrganizeID")
+                    },
+                    ProcName: "proc_SOM_HR_EmpAttendReport",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        $.each(_result.Data, function (i, item) {
+                            _Content += "<div class='aui-content aui-card'><ul class='aui-list-view'><li class='aui-list-view-cell'><p style='color:#000'>" +
+                                      "" + item.Account + "&nbsp;" + item.EmpName + "</p></li><li class='aui-list-view-cell'><table><tr><td style='width: 90px;'>加班时数:</td><td class='value'>" +
+                                      "" + item.OverTime + "</td></tr><tr><td>可调休时数:</td><td class='value'>" + item.SurplusTime + "</td></tr></table></li></ul></div>"
+                        });
+                        $("#Content").html(_Content);
+                    }
+                }
+            });
+        });
+    };
+</script>
+</html>

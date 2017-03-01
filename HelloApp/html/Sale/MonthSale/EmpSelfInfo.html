@@ -1,0 +1,119 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>月销售计划(员工页面)</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="aui-content">
+        <ul class="aui-list-view aui-in" style="margin-bottom: 0px;">
+            <li class="aui-list-view-cell">
+                <label id="EmpCode"></label>
+                <p>工号</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="EmpName"></label>
+                <p>姓名</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="EmpPost"></label>
+                <p>岗位</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="TargetSale"></label>
+                <p>目标</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="CustomerUnitPrice"></label>
+                <p>客单价</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="CustomerSingle"></label>
+                <p>客单件</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="OrderNum"></label>
+                <p>单数</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="ClothesNum"></label>
+                <p>件数</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="CardTarget"></label>
+                <p>开卡目标</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="CardActual"></label>
+                <p>实际开卡</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="ActualSale"></label>
+                <p>实际销售</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="SaleReach"></label>
+                <p>销售达成</p>
+            </li>
+        </ul>
+    </div>
+    <div style="height:10px;"></div>
+</body>
+</html>
+
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+
+        $(function () {
+            LoadData();
+
+
+        });
+    }
+
+    //初始化数据函数
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "GetEmpInfo",
+                    MonthID: api.pageParam.MonthID,
+                    EmpID: GetSession("UserID"),
+                },
+                ProcName: "proc_SOM_ISR_MonthSale",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        $("#EmpCode").html(item.EmpCode);
+                        $("#EmpName").html(item.EmpName);
+                        $("#EmpPost").html(item.EmpPost);
+                        $("#TargetSale").html(item.TargetSale);
+                        $("#CustomerUnitPrice").html(item.CustomerUnitPrice);
+                        $("#CustomerSingle").html(item.CustomerSingle);
+                        $("#OrderNum").html(item.OrderNum);
+                        $("#ClothesNum").html(item.ClothesNum);
+                        $("#CardTarget").html(item.CardTarget);
+                        $("#CardActual").html(item.CardActual);
+                        $("#ActualSale").html(Number(item.ActualSale) + Number(item.ShareSale));
+                        $("#SaleReach").html((item.TargetSale == "0" ? "0" : ((Number(item.ActualSale) + Number(item.ShareSale)) / Number(item.TargetSale) * 100).toFixed(0)) + "%");
+                    });
+                }
+            }
+
+        });
+    }
+
+</script>

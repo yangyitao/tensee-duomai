@@ -1,0 +1,201 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>时段报数报表</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        body {
+            background: #fff;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        td, th {
+            padding: 0;
+        }
+
+        .aui-list-view-cell {
+            padding: 5px;
+        }
+
+        .form {
+            width: 100%;
+            text-align: center;
+            font-size: 13px;
+            border-collapse: collapse;
+        }
+
+            .form td, .form th {
+                border: 1px solid rgba(216, 216, 216, 0.1);
+                height: 35px;
+                letter-spacing: 0.4px;
+            }
+
+            .form th {
+                font-weight: 400;
+            }
+
+            .form tbody td {
+                color: #8f8f94;
+                height: 40px;
+            }
+
+            .form thead tr:last-child td {
+                border-bottom: 1px solid rgba(216, 216, 216, 0.5);
+            }
+
+        ::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="aui-content" style="margin-bottom: 0px;">
+        <table style="table-layout: fixed;">
+            <tr>
+                <td>
+                    <table class="form" style="width: 150px">
+                        <thead>
+                            <tr>
+                                <td style="width: 150px">店铺名称</td>
+                            </tr>
+                        </thead>
+                    </table>
+                </td>
+                <td>
+                    <div id="divTitle" style="overflow-x: scroll">
+                        <table class="form" style="width: 430px">
+                            <thead>
+                                <tr>
+                                    <td style="width: 100px">报数时间</td>
+                                    <td style="width: 60px">今日目标</td>
+                                    <td style="width: 60px">累计完成</td>
+                                    <td style="width: 50px">完成率</td>
+                                    <td style="width: 50px">客单价</td>
+                                    <td style="width: 50px">客单量</td>
+                                    <td style="width: 60px">vip占比</td>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div id="divShopName" style="width: 150px; overflow: hidden;">
+                        <table class="form" style="width: 150px">
+                            <tbody id="tbShopName">
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+                <td>
+                    <div id="divBody" style="overflow-x: scroll;">
+                        <table class="form" style="width: 430px">
+                            <tbody id="tbList">
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>
+
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _OrganizeID;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _OrganizeID = api.pageParam.OrganizeID;
+
+            $("#divBody").width(window.screen.width - 150);
+            $("#divTitle").width(window.screen.width - 150);
+            $("#divBody").height(api.frameHeight - $("#divTitle").height());
+            $("#divShopName").height(api.frameHeight - $("#divTitle").height());
+            LoadData();
+
+            $("#divBody").scroll(function () {
+                $("#divTitle").scrollLeft($("#divBody").scrollLeft());
+                $("#divShopName").scrollTop($("#divBody").scrollTop());
+            });
+        });
+
+    }
+
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "GetPeriodInfo",
+                    UserID: GetSession("UserID"),
+                    OrganizeID: _OrganizeID
+                },
+                ProcName: "proc_SOM_ISR_PeriodNumber",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    var _Content = "";
+                    var _ShopList = "";
+                    var targetSale = 0, totalSale = 0, orderNum = 0,
+                        clothesNum = 0, vipSale = 0;
+                    $.each(_result.Data, function (i, item) {
+                        _ShopList += '<tr><td style="width: 150px;text-align:left;font-size:11px">' + item.Name + '</td></tr>';
+                        _Content += '<tr>' +
+                                    '<td style="width:100px">' + item.PeriodDate + '</td>' +
+                                    '<td style="width: 60px">' + item.TargetSale + '</td>' +
+                                    '<td style="width: 60px">' + item.TotalSale + '</td>' +
+                                    '<td style="width: 50px">' + (item.TargetSale == "0" ? "0" : (Number(item.TotalSale) / Number(item.TargetSale) * 100).toFixed(0)) + '%</td>' +
+                                    '<td style="width: 50px">' + (item.OrderNum == "0" ? "0" : (Number(item.TotalSale) / Number(item.OrderNum)).toFixed(0)) + '</td>' +
+                                    '<td style="width: 50px">' + (item.OrderNum == "0" ? "0" : (Number(item.ClothesNum) / Number(item.OrderNum)).toFixed(1)) + '</td>' +
+                                    '<td style="width: 60px">' + (item.TotalSale == "0" ? "0" : (Number(item.VIPSale) / Number(item.TotalSale) * 100).toFixed(0)) + '%</td></tr>';
+                        targetSale += Number(item.TargetSale);
+                        totalSale += Number(item.TotalSale);
+                        orderNum += Number(item.OrderNum);
+                        clothesNum += Number(item.ClothesNum);
+                        vipSale += Number(item.VIPSale);
+                    });
+
+                    _ShopList += '<tr><td style="width: 150px;font-size:12px;background:rgb(240,240,240)">汇总</td></tr>';
+                    _Content += '<tr style="background:rgb(240,240,240)">' +
+                                '<td style="width:100px"></td>' +
+                                '<td style="width: 60px">' + targetSale + '</td>' +
+                                '<td style="width: 60px">' + totalSale + '</td>' +
+                                '<td style="width: 50px">' + (targetSale == "0" ? "0" : (totalSale / targetSale * 100).toFixed(0)) + '%</td>' +
+                                '<td style="width: 50px">' + (orderNum == "0" ? "0" : (totalSale / orderNum).toFixed(0)) + '</td>' +
+                                '<td style="width: 50px">' + (orderNum == "0" ? "0" : (clothesNum / orderNum).toFixed(1)) + '</td>' +
+                                '<td style="width: 60px">' + (totalSale == "0" ? "0" : (vipSale / totalSale * 100).toFixed(0)) + '%</td></tr>';
+                    $("#tbList").html(_Content);
+                    $("#tbShopName").html(_ShopList);
+                }
+                else {
+                    $("#tbList").html('<tr><td style="text-align:left">尊敬的用户，您好，无时段报数数据</td></tr>');
+                }
+            }
+        });
+    }
+
+    function ItemClick(title) {
+        var e = event || window.event;
+        var obj = api.require('bubbleMenu');
+        obj.open({
+            centerX: api.frameWidth / 2,
+            centerY: e.clientY + $honesty.RangeTop(45),
+            btnArray: [{ title: title, length: (title.length * 20 > api.frameWidth - 50 ? api.frameWidth - 50 : title.length * 20) }],
+        });
+    }
+</script>

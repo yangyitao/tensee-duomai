@@ -1,0 +1,226 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>HonestyWin</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+    <style type="text/css">
+        .aui-card {
+            margin-top: 15px;
+        }
+
+        .aui-input-addon.aui-iconfont {
+            font-size: 20px !important;
+        }
+
+        .aui-input-row {
+            width: 100% !important;
+        }
+    </style>
+</head>
+<body>
+    <input id="hEmpID" type="hidden" value="">
+    <div class="aui-content aui-card">
+        <div class="aui-form">
+            <div class="aui-input-row" style="text-align: center; padding-top: 2em; padding-bottom: 2em">
+                <img src="../../image/logo.png" />
+            </div>
+            <div class="aui-input-row">
+                <i class="aui-input-addon aui-iconfont aui-icon-people aui-text-info"></i>
+                <input type="text" class="aui-input" placeholder="姓名" tapmode id="txtEmpName" />
+            </div>
+            <div class="aui-input-row">
+                <i class="aui-input-addon aui-iconfont aui-icon-favor aui-text-primary"></i>
+                <input type="text" class="aui-input" placeholder="身份证号码" tapmode id="txtIdentityCode" />
+            </div>
+            <div class="aui-input-row">
+                <i class="aui-input-addon aui-iconfont aui-icon-phone aui-text-default"></i>
+                <input type="text" class="aui-input" placeholder="手机号码" tapmode id="txtPhone" />
+            </div>
+            <div class="aui-input-row">
+                <i class="aui-input-addon aui-iconfont aui-icon-lock aui-text-warning"></i>
+                <input type="password" id="txtPassword" tapmode class="aui-input" placeholder="密码" />
+                <i class="aui-input-addon aui-iconfont aui-icon-attention aui-text-default" data-role="IsHide" tapmode id="btnShowPass"></i>
+            </div>
+            <div class="aui-input-row">
+                <i class="aui-input-addon aui-iconfont aui-icon-location aui-text-pink"></i>
+                <input type="text" class="aui-input" tapmode placeholder="部门选择" id="txtOrganize" readonly="readonly" />
+            </div>
+            <div class="aui-btn-row">
+                <div class="aui-btn aui-btn-block" tapmode style="width: 48%; float: left" id="btnBack">返回</div>
+                <div class="aui-btn aui-btn-block aui-btn-warning" tapmode style="width: 48%; float: right" id="btnRegister">提交申请</div>
+                <div style="clear: both"></div>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="../../script/api.js"></script>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script src="../../script/honesty.valid.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            $("#btnShowPass").click(function () {
+                api.parseTapmode();
+                var _DataRole = $("#btnShowPass").attr("data-role");
+                switch (_DataRole) {
+                    case "IsHide":
+                        $("#txtPassword").attr("type", "text");
+                        $("#btnShowPass").removeClass("aui-icon-attention");
+                        $("#btnShowPass").addClass("aui-icon-attentionfill");
+                        $("#btnShowPass").attr("data-role", "IsShow")
+                        break;
+                    case "IsShow":
+                        $("#txtPassword").attr("type", "password");
+                        $("#btnShowPass").removeClass("aui-icon-attentionfill");
+                        $("#btnShowPass").addClass("aui-icon-attention");
+                        $("#btnShowPass").attr("data-role", "IsHide");
+                        break;
+                }
+            });
+            $("#btnRegister").tap(function () {
+                if (CheckInput()) {
+                    $("#hEmpID").val(new $honesty.GUID().NewGUID());
+                    var _options = {
+                        PostData: {
+                            Params: {
+                                result: "EmpEntry",
+                                EmpID: $("#hEmpID").val(),
+                                TelPhone: $("#txtPhone").val(),
+                                EmpName: $("#txtEmpName").val(),
+                                Password: $("#txtPassword").val(),
+                                OrganizeID: $("#txtOrganize").data("listid")[0],
+                                IdentityCode: $("#txtIdentityCode").val()
+                            },
+                            ProcName: "proc_SOM_HR_EmpInfo",
+                            DataType: "Text",
+                            ExecType: "PROC",
+                            Mode: "MSSQL"
+                        },
+                        async: false
+                    };
+                    var _result = $honesty.AjaxChannel(_options);
+                    //$.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                    if (_result.Code == "1") {
+                        if (_result.Data != "创建完成") {
+                            $honesty.ShowMsg({ title: "警告", msg: _result.Data });
+                            return false;
+                        }
+                        else {
+                            var _paramEmpID = $("#hEmpID").val();
+                            var _paramPassword = $("#txtPassword").val();
+                            var _paramPhone = $("#txtPhone").val();
+                            $("#hEmpID,#txtPhone,#txtPassword,#txtOrganize,#txtIdentityCode").val("");
+                            $("#txtOrganize").removeData("listid");
+                            $("#txtOrganize").removeData("list");
+                            var PushKey = GetSession("PushKey");
+                            var UserName = $("#txtEmpName").val();
+                            localStorage.clear();
+                            $("#txtEmpName").val("");
+                            SetSession("PushKey", PushKey);
+                            SetSession("UserName", UserName);
+                            if (!$honesty.IsLocal()) {
+                                if (GetSession("PushKey") != "" && GetSession("PushKey") != null) {
+                                    api.openWin({
+                                        bounces: false,
+                                        name: "EmpEntry",
+                                        url: "widget://html/HRFlow/EmpEntry/EntryTitle.html",
+                                        slidBackEnabled: false,
+                                        pageParam: { instanceid: _paramEmpID, LoginCode: _paramPhone, Password: _paramPassword, PushKey: GetSession("PushKey") }
+                                    });
+                                }
+                                else {
+                                    try {
+                                        jpush.getRegistrationId(function (ret, err) {
+                                            api.openWin({
+                                                bounces: false,
+                                                name: "EmpEntry",
+                                                url: "widget://html/HRFlow/EmpEntry/EntryTitle.html",
+                                                slidBackEnabled: false,
+                                                pageParam: { instanceid: _paramEmpID, LoginCode: _paramPhone, Password: _paramPassword, PushKey: ret.id }
+                                            });
+                                        });
+                                    }
+                                    catch (e) {
+                                        alert(e);
+                                    }
+                                }
+                            }
+                            else {
+                                try {
+                                    $honesty.InitUserInfo(_paramPhone, _paramPassword.trim(), _paramEmpID, GetSession("PushKey"));
+                                }
+                                catch (e) {
+                                    alert(e);
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        //$honesty.ShowMsg({ title: "警告", msg: "数据交互出现异常，请重试!" });
+                        return false;
+                    }
+                    //});
+                }
+            });
+            $("#btnBack").tap(function () {
+                $honesty.CloseWin();
+            });
+            $("#txtOrganize").tap(function () {
+                $honesty.Organize({
+                    control: "txtOrganize", ismore: "false", typemode: "S", root: false
+                });
+            });
+        });
+    }
+    function CheckInput() {
+        if ($("#txtEmpName").val().trim() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "姓名不能为空!" });
+            return false;
+        }
+        if ($("#txtIdentityCode").val().trim() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请输入您的身份证号码!" });
+            return false;
+        }
+        else {
+            var _CardResult = valid_cardid($("#txtIdentityCode").val());
+            if (_CardResult != "验证通过!") {
+                $honesty.ShowMsg({ title: "警告", msg: _CardResult });
+                return false;
+            }
+        }
+        if ($("#txtPhone").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请填写手机号码!" });
+            return false;
+        }
+        else {
+            if (valid_phone($("#txtPhone").val())) {
+                $honesty.ShowMsg({ title: "警告", msg: "手机号码格式不正确!" });
+                return false;
+            }
+        }
+        if ($("#txtPassword").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请设置登陆密码!" });
+            return false;
+        }
+        else {
+            if ($("#txtPassword").val().length < 6) {
+                $honesty.ShowMsg({ title: "警告", msg: "登陆密码长度请大于6位!" });
+                return false;
+            }
+        }
+        if ($("#txtOrganize").data("listid") == "" || $("#txtOrganize").data("listid") == undefined) {
+            $honesty.ShowMsg({ title: "警告", msg: "请选择部门!" });
+            return false;
+        }
+        if ($("#txtIdentityCode").val().trim() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请输入您的身份证号码!" });
+            return false;
+        }
+        return true;
+    }
+</script>
+</html>

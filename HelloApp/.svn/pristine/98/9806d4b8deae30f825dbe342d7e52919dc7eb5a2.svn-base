@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>title</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-input-row .aui-input-addon
+        {
+            width: 90px;
+        }
+
+        #btnForm
+        {
+            text-align: center;
+            padding-left: 5px;
+            width: 46px;
+        }
+    </style>
+</head>
+<body>
+    <div class="aui-content">
+        <!--      <ul class="aui-list-view aui-in" style="margin-bottom: 0px;">
+            <li class="aui-list-view-cell">
+                <label id="EmpCode"></label>
+                <p>活动名称</p>
+            </li>
+        </ul>-->
+        <div class="aui-form aui-input-form" id="divEmpTarget">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">活动名称</span>
+                <input id="PromotionSummary_ActivityContent" type="text" class="aui-input aui-important" placeholder="请填写活动名称" readonly="readonly" />
+                <span class="aui-input-addon  aui-btn" id="btnForm">报表</span>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">销售目标</span>
+                <input id="PromotionSummary_SaleTarget" type="text" class="aui-input aui-important" placeholder="请输入正整数" />
+            </div>
+            <div class="aui-input-row" style="padding-right: 3px;">
+                <span class="aui-input-addon" style="vertical-align: top;">活动计划</span>
+                <textarea id="PromotionSummary_SalePlan" class="aui-input" style="height: 70px; border: 1px solid #c8c7cc; overflow-y: auto"></textarea>
+            </div>
+            <div class="aui-input-row" style="padding-right: 3px;">
+                <span class="aui-input-addon" style="vertical-align: top;">取得成绩</span>
+                <textarea id="PromotionSummary_Results" class="aui-input" style="height: 70px; border: 1px solid #c8c7cc; overflow-y: auto"></textarea>
+            </div>
+            <div class="aui-input-row" style="padding-right: 3px;">
+                <span class="aui-input-addon" style="vertical-align: top;">得到进步</span>
+                <textarea id="PromotionSummary_Progress" class="aui-input" style="height: 70px; border: 1px solid #c8c7cc; overflow-y: auto"></textarea>
+            </div>
+            <div class="aui-input-row" style="padding-right: 3px;">
+                <span class="aui-input-addon" style="vertical-align: top;">发现不足</span>
+                <textarea id="PromotionSummary_Bad" class="aui-input" style="height: 70px; border: 1px solid #c8c7cc; overflow-y: auto"></textarea>
+            </div>
+            <div class="aui-input-row" style="padding-right: 3px;">
+                <span class="aui-input-addon" style="vertical-align: top;">改善计划</span>
+                <textarea id="PromotionSummary_Improve" class="aui-input" style="height: 70px; border: 1px solid #c8c7cc; overflow-y: auto"></textarea>
+            </div>
+        </div>
+    </div>
+    <div style="height: 39px"></div>
+    <footer class="aui-nav" id="footer" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7; display: none">
+        <div id="btnSave" class="aui-btn aui-btn-block aui-btn-warning" style="height: 45px; width: 100%; line-height: 0.9;">
+            保存
+        </div>
+    </footer>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _IsLeader = "0";
+    var _ID;
+    var _ShopCode;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _IsLeader = api.pageParam.IsLeader;
+            _ShopCode = api.pageParam.ShopCode;
+            _ID = api.pageParam.ID;
+            if (_IsLeader != "0") {
+                $("#footer").css("display", "");
+            }
+            else {
+                $(".aui-input").attr("readonly", "readonly");
+            }
+            var _options = {
+                PostData: {
+                    Params: {
+                        Result: "SelectInfo",
+                        ID: _ID,
+                        ShopCode: _ShopCode
+                    },
+                    ProcName: "proc_SOM_ISR_Promotion",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        $.each(_result.Data, function (i, item) {
+                            $("#PromotionSummary_ActivityContent").val(item.ActivityContent);
+                            $("#PromotionSummary_SaleTarget").val(item.SaleTarget);
+                            $("#PromotionSummary_SalePlan").val(item.SalePlan);
+                            $("#PromotionSummary_Results").val(item.Results);
+                            $("#PromotionSummary_Progress").val(item.Progress);
+                            $("#PromotionSummary_Bad").val(item.Bad);
+                            $("#PromotionSummary_Improve").val(item.Improve);
+                        })
+                    }
+                }
+            });
+            //点击报表
+            $("#btnForm").tap(function () {
+                $honesty.OpenWin({
+                    name: "Sale_PromotionSale_PromotionForm",
+                    url: "Sale/PromotionSale/PromotionForm.html",
+                    title: "促销总结报表",
+                    LevelNum: 2,
+                    pageParam: {
+                        ID: _ID,
+                        ShopCode: _ShopCode
+                    }
+                });
+            });
+        })
+    };
+</script>
+</html>

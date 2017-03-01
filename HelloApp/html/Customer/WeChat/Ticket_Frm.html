@@ -1,0 +1,220 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>优惠券</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div id="main">
+        <div data-role="80" class="aui-card aui-input-form aui-input-flow" style="margin-bottom: 0px; margin-top: 15px">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">名称</span>
+                <input id="TicketName" type="text" class="aui-input" tapmode placeholder="请填写优惠券名称!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">类型</span>
+                <select id="TicketType" class="aui-input aui-important">
+                    <option value="现金券">现金券</option>
+                    <option value="折扣券">折扣券</option>
+                </select>
+            </div>
+            <div class="aui-input-row" id="divMoney">
+                <span class="aui-input-addon">面值</span>
+                <input id="TicketMoney" type="text" class="aui-input" tapmode placeholder="请填写现金券面值!" />
+            </div>
+            <div id="divScale" class="aui-input-row" style="display: none">
+                <span class="aui-input-addon">折扣</span>
+                <input id="TicketScale" type="text" class="aui-input" tapmode placeholder="请填写折扣比例!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">开始日期</span>
+                <input id="BeginDate" type="text" class="aui-input" tapmode placeholder="请选择开始日期!" readonly="readonly" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">结束日期</span>
+                <input id="EndDate" type="text" class="aui-input" tapmode placeholder="请选择结束日期!" readonly="readonly" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">发放对象</span>
+                <select id="UseType" class="aui-input aui-important">
+                    <option value="所有会员">所有会员</option>
+                    <option value="所有粉丝">所有粉丝</option>
+                    <option value="指定会员">指定会员</option>
+                </select>
+            </div>
+        </div>
+        <footer class="aui-nav" id="footer" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7;">
+            <div id="btnSave" class="aui-btn aui-btn-block aui-btn-info" style="height: 45px; width: 100%; line-height: 0.9;">
+                发放优惠券
+            </div>
+        </footer>
+    </div>
+    <div class="aui-dialog aui-hidden" id="dialog">
+        <div class="aui-input-row">
+            <span class="aui-input-addon">订单编号</span>
+            <input id="OrderCode" type="text" class="aui-input" placeholder="请输入订单编号!" />
+        </div>
+        <div class="aui-dialog-footer">
+            <div class="aui-dialog-btn aui-text-info" tapmode id="btnOK">确定</div>
+        </div>
+    </div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script src="../../../script/honesty.valid.js"></script>
+<script type="text/javascript">
+    var TicketNum = "";
+    apiready = function () {
+        $(function () {
+            $("#BeginDate,#EndDate").tap(function () {
+                $honesty.DateTimeSelect({
+                    Type: "Date",
+                    LevelNum: 2,
+                    ControlID: $(this).attr("id"),
+                    ControlValue: $(this).val()
+                });
+            });
+
+            $("#TicketType").change(function () {
+                if ($("#TicketType").val() == "现金券") {
+                    $("#divMoney").show();
+                    $("#divScale").hide();
+                }
+                else {
+                    $("#divMoney").hide();
+                    $("#divScale").show();
+                }
+            });
+
+            $("#btnSave").tap(function () {
+                if (CheckInput()) {
+                    var _options = {
+                        PostData: {
+                            Params: {
+                                result: "ModifyTicketInfo",
+                                EmpID: GetSession("UserID"),
+                                TicketName: $("#TicketName").val(),
+                                TicketType: $("#TicketType").val(),
+                                BeginDate: $("#BeginDate").val(),
+                                EndDate: $("#EndDate").val(),
+                                UseType: $("#UseType").val()
+                            },
+                            ProcName: "proc_SOM_Chat_Ticket",
+                            DataType: "Bool",
+                            ExecType: "PROC",
+                            Mode: "MSSQL"
+                        }
+                    };
+                    if ($("#TicketType").val() == "现金券") {
+                        _options.PostData.Params["TicketMoney"] = $("#TicketMoney").val();
+                    }
+                    else {
+                        _options.PostData.Params["TicketScale"] = $("#TicketScale").val();
+                    }
+                    $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                        if (_result.Data == "True") {
+                            $honesty.ShowMsg({ title: "提示", msg: "发放成功!" });
+                            ResetPage();
+                        }
+                        else {
+                            $honesty.ShowMsg({ title: "警告", msg: "保存出现异常!" });
+                        }
+                    });
+                }
+            });
+
+            $("#btnOK").tap(function () {
+                if ($("#OrderCode").val() == "") {
+                    $honesty.ShowMsg({ title: "提示", msg: "请输入订单编号!" });
+                }
+                else {
+                    var _options = {
+                        PostData: {
+                            Params: {
+                                result: "UseTicket",
+                                TicketNum: TicketNum,
+                                EmpID: GetSession("UserID"),
+                                OrderCode: $("#OrderCode").val()
+                            },
+                            ProcName: "proc_SOM_Chat_Ticket",
+                            DataType: "Text",
+                            ExecType: "PROC",
+                            Mode: "MSSQL"
+                        }
+                    };
+                    $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                        $honesty.ShowMsg({ title: "提示", msg: _result.Data });
+                        TicketNum = "";
+                        $("#dialog").addClass("aui-hidden");
+                        $(".aui-mask").remove();
+                    });
+                }
+            });
+            api.addEventListener({
+                name: "TicketScan",
+            }, function (ret, err) {
+                if (ret) {
+                    TicketNum = ret.value.TicketNum;
+                    $("body").append("<div class=\"aui-mask\" style=\"background: rgba(0, 0, 0, 0.6);\"></div>");
+                    $(".aui-dialog.aui-hidden").removeClass("aui-hidden");
+                }
+            });
+        });
+    }
+
+    function CheckInput() {
+        if ($("#TicketName").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请填写优惠券名称!" });
+            return false;
+        }
+        if ($("#TicketType").val() == "现金券") {
+            if ($("#TicketMoney").val() == "") {
+                $honesty.ShowMsg({ title: "警告", msg: "现金券请填写面值!" });
+                return false;
+            }
+            else {
+                if (valid_float($("#TicketMoney").val())) {
+                    $honesty.ShowMsg({ title: "警告", msg: "面值请填写数字!" });
+                    return false;
+                }
+            }
+        }
+        else {
+            if ($("#TicketScale").val() == "") {
+                $honesty.ShowMsg({ title: "警告", msg: "折扣券请填写折扣比例!" });
+                return false;
+            }
+            else {
+                if (valid_float($("#TicketScale").val())) {
+                    $honesty.ShowMsg({ title: "警告", msg: "折扣比例请填写数字!" });
+                    return false;
+                }
+            }
+        }
+        if ($("#BeginDate").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请选择优惠券有效期开始日期!" });
+            return false;
+        }
+        if ($("#EndDate").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请选择优惠券有效期结束日期!" });
+            return false;
+        }
+        if ($("#BeginDate").val() > $("#EndDate").val()) {
+            $honesty.ShowMsg({ title: "警告", msg: "有效期开始日期不得大于结束日期!" });
+            return false;
+        }
+        return true;
+    }
+
+    function ResetPage() {
+        $("input[type=text]").val("");
+        $("#TicketType").val("现金券");
+        $("#divMoney").show();
+        $("#divScale").hide();
+    }
+</script>
+</html>

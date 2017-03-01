@@ -1,0 +1,695 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>请假申请流程</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div id="main">
+        <p class="aui-padded-5 aui-text-center" style="color: #3175af">基本资料</p>
+        <div class="aui-card" style="margin-bottom: 0px;">
+            <ul class="aui-list-view aui-list-flow" style="margin-bottom: 0px;">
+                <li class="aui-list-view-cell">
+                    <label id="InfoSN"></label>
+                    <p>单据编号</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="InfoEmpName"></label>
+                    <p>申请人</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="InfoEmpCode"></label>
+                    <p>申请人工号</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="InfoEmpPosition"></label>
+                    <p>申请人岗位</p>
+                </li>
+                <li class="aui-list-view-cell" style="padding: 0px; padding-left: 15px;">
+                    <div class="aui-input-row" style="padding: 0px">
+                        <span class="aui-input-addon" style="color: #3175af; font-size: 14px; padding: 0px;">请假类别<font color="red">*</font></span>
+                        <select id="LeaveType" class="aui-input">
+                            <option value="">请选择...</option>
+                            <option value="年假">年假</option>
+                            <option value="婚假">婚假</option>
+                            <option value="产假">产假</option>
+                            <option value="陪产假">陪产假</option>
+                            <option value="恩恤假">恩恤假</option>
+                            <option value="产检假">产检假</option>
+                            <option value="事假">事假</option>
+                            <option value="调休">调休</option>
+                            <option value="病假">病假</option>
+                            <option value="停薪留职">停薪留职</option>
+                        </select>
+                    </div>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="InfoSumTime">0天</label>
+                    <p>总天数</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoYearTime" value="0">0天</label>
+                    <p>年假额度</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoExtraTime" value="0">0小时</label>
+                    <p>调休额度</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoWriteDate"></label>
+                    <p>日期</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoShopName"></label>
+                    <p>店铺名称</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoAreaName"></label>
+                    <p>大区</p>
+                </li>
+                <li class="aui-list-view-cell aui-list-view-cell-last" style="display: none">
+                    <label id="InfoCompanyName"></label>
+                    <p>所属公司</p>
+                </li>
+                <li data-role="colspan" data-show="hide" class="aui-list-view-cell" id="liBaseMore">
+                    <p style="text-align: center">点击显示详情</p>
+                </li>
+            </ul>
+        </div>
+        <div class="aui-card aui-input-form" style="margin-bottom: 0px; margin-top: 5px">
+            <div class="aui-btn-row">
+                <div class="aui-btn aui-btn-warning aui-iconfont aui-icon-upload" id="btnSlaves" style="float: left">上传附件</div>
+                <div class="aui-btn aui-btn-danger aui-iconfont aui-icon-delete" id="btnClear" style="float: left; margin-left: 5px">清空附件</div>
+                <table class="aui-salves" id="Slaves_List">
+                </table>
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-center" style="color: #3175af">请假明细</p>
+        <div id="InfoList">
+        </div>
+        <div id="divAdd" style="width: 100%; padding-left: 10px; padding-right: 10px;">
+            <div id="btnAdd" tapmode class="aui-btn aui-btn-block aui-btn-warning aui-iconfont aui-icon-add1" style="padding: 10px;">
+                添加一行
+            </div>
+        </div>
+        <div style="height: 100px"></div>
+    </div>
+</body>
+</html>
+<script src="../../script/api.js"></script>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script src="../../script/honesty.flow.js"></script>
+<script type="text/javascript">
+    var ID = "", IsRead = false;;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            $honestyFlow.InitFlow({ Async: false });
+            var InstanceID = $honestyFlow.GetFlowInfo("instanceid");
+            if (api.pageParam.instanceid != undefined) {
+                ID = InstanceID;
+            }
+            InitBase();
+            $("#btnSend").unbind("tap").tap(function () {
+                if (SaveData()) {
+                    $honestyFlow.SendFlow();
+                }
+            });
+
+            $("#btnPause").unbind("tap").tap(function () {
+                if (SaveData()) {
+                    $honestyFlow.PauseFlow();
+                }
+            });
+
+            $("#btnDelete").unbind("tap").tap(function () {
+                $honesty.ConfirmWin({
+                    title: "提示",
+                    msg: "是否要删除该流程?",
+                    buttons: ["确认", "取消"],
+                    callback: function (ret, err) {
+                        if (ret.buttonIndex == 1) {
+                            if ($("#LeaveType").val() == "年假" || $("#LeaveType").attr("ovalue") == "年假") {
+                                try {
+                                    var _options = {
+                                        PostData: {
+                                            Params: {
+                                                empId: GetSession("UserID").toUpperCase(),
+                                                sn: $honestyFlow.GetFlowInfo("sn"),
+                                                zYear: new Date().Format("yyyy"),
+                                                zDays: 0,
+                                                edit: "X"
+                                            },
+                                            URL: "employeeEvent/holiday",
+                                            Mode: "ESB",
+                                            Handle: "GET"
+                                        },
+                                        Loading: {
+                                            Title: "更新年假额度年假额度...",
+                                            Show: true
+                                        }
+                                    };
+                                    $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                                        if (_result.Code == "1") {
+                                            if (_result.Data.returnMsg == "没有找到人员编号" || _result.Data.returnCode == "000" || _result.Data.returnMsg == "未维护年假定额信息类型数据或未到年假可休息日") {
+                                                var _params = {
+                                                    PostData: {
+                                                        Params: {
+                                                            EmpID: GetSession("UserID"),
+                                                            LID: ID,
+                                                            LeaveType: "事假"
+                                                        },
+                                                        ProcName: "proc_SOM_HR_EmpLeaveOver",
+                                                        DataType: "Bool",
+                                                        ExecType: "PROC",
+                                                        Mode: "MSSQL"
+                                                    },
+                                                    async: false
+                                                };
+                                                $honesty.AjaxChannel(_params);
+                                                $honestyFlow.DeleteFlow({
+                                                    Callback: function () {
+                                                        $honesty.CloseWin();
+                                                    }
+                                                });
+                                            }
+                                            else {
+                                                $honesty.ShowMsg({ title: "警告", msg: _result.Data.returnMsg });
+                                            }
+                                        }
+                                    });
+                                }
+                                catch (e) {
+                                    $honesty.ShowMsg({ title: "警告", msg: "年假额度同步SAP接口出现异常!" });
+                                }
+                            }
+                            else {
+                                $honestyFlow.DeleteFlow({
+                                    Callback: function () {
+                                        $honesty.CloseWin();
+                                    }
+                                });
+                            }
+                        }
+                    }
+                });
+            });
+
+            $("#liBaseMore").tap(function () {
+                $("[data-role='baseMore']").fadeToggle(200);
+                if ($("#liBaseMore").attr("data-show") == "hide") {
+                    $("#liBaseMore").children("p").html("点击收起");
+                    $("#liBaseMore").attr("data-show", "show");
+                }
+                else {
+                    $("#liBaseMore").children("p").html("点击显示详情");
+                    $("#liBaseMore").attr("data-show", "hide");
+                }
+            });
+
+            $("#LeaveType").change(function () {
+                if ($("#LeaveType").attr("ovalue") == "事假" || $("#LeaveType").attr("ovalue") == "调休" || $("#LeaveType").attr("ovalue") == "病假" || $("#LeaveType").attr("ovalue") == "") {
+                    if ($("#LeaveType").val() != "事假" && $("#LeaveType").val() != "调休" && $("#LeaveType").val() != "病假" && $("#LeaveType").val() != "") {
+                        if ($("#InfoList div").length > 0) {
+                            $("#LeaveType").val($("#LeaveType").attr("ovalue"));
+                            $honesty.ShowMsg({ title: "警告", msg: "请假类型切换(单位：时间转天的请先删除原先的明细)!" });
+                            return;
+                        }
+                    }
+                }
+                else {
+                    if ($("#LeaveType").val() == "事假" || $("#LeaveType").val() == "调休" || $("#LeaveType").val() == "病假") {
+                        if ($("#InfoList div").length > 0) {
+                            $("#LeaveType").val($("#LeaveType").attr("ovalue"));
+                            $honesty.ShowMsg({ title: "警告", msg: "请假类型切换(单位：天转时间的请先删除原先的明细)!" });
+                            return;
+                        }
+                    }
+                }
+                $("#LeaveType").attr("ovalue", $("#LeaveType").val());
+            });
+
+            $("#LeaveType").blur(function () {
+                $("#LeaveType").val($("#LeaveType").attr("ovalue"));
+            });
+
+            $("#btnAdd").tap(function () {
+                if ($("#LeaveType").val() == "") {
+                    $honesty.ShowMsg({ title: "警告", msg: "请先选择请假类型!" });
+                    return false;
+                }
+                $honesty.OpenWin({
+                    title: "请假明细维护",
+                    name: "HRFlow_EmpLeaveInfo",
+                    url: "HRFlow/EmpLeaveInfo.html",
+                    pageParam: {
+                        ID: ID,
+                        StepName: $honestyFlow.GetFlowInfo("stepname"),
+                        LeaveType: $("#LeaveType").val()
+                    }
+                });
+            });
+
+            $("#btnSlaves").tap(function () {
+                $honesty.UploadSlaves("Slaves_List");
+            });
+
+            $("#btnClear").tap(function () {
+                $honesty.ConfirmWin({
+                    title: "提示",
+                    msg: "是否删除所有文件?",
+                    buttons: ["确认", "取消"],
+                    callback: function (ret, err) {
+                        if (ret.buttonIndex == 1) {
+                            $("#Slaves_List").html("");
+                        }
+                    }
+                });
+            });
+            api.addEventListener({
+                name: "HRFlow_EmpLeave_EmpLeaveInfo"
+            }, function (ret) {
+                if (ret && ret.value) {
+                    var _Content = ReturnList(ret.value);
+                    if (ret.value.IsNew) {
+                        $("#InfoList").append(_Content);
+                    }
+                    else {
+                        $("#" + ret.value.ID).html(_Content);
+                    }
+                    var _time = 0;
+                    $("#InfoSumTime").html(_time);
+                    $.each($("#InfoList div[data-role='divDel']"), function (i, item) {
+                        _time += parseFloat($(item).attr("data-value"));
+                    });
+                    $("#InfoSumTime").html(_time);
+                    api.parseTapmode();
+                }
+            });
+        });
+    };
+
+    function InitBase() {
+        IsRead = ($honestyFlow.GetFlowInfo("isread") == "false" ? true : false);
+        if (ID != "") {
+            var _options = {
+                PostData: {
+                    Params: {
+                        result: "InitEmpLeave",
+                        ID: ID
+                    },
+                    ProcName: "proc_SOM_HR_EmpLeave",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        $.each(_result.Data, function (i, item) {
+                            $("#InfoSN").html(item.SN);
+                            $("#InfoWriteDate").html(item.WriteDate);
+                            $("#InfoEmpCode").html(item.EmpCode);
+                            $("#InfoEmpName").html(item.EmpName);
+                            $("#InfoAreaName").html(item.AreaName);
+                            $("#InfoCompanyName").html(item.CompanyName);
+                            $("#InfoShopCode").html(item.ShopCode);
+                            $("#InfoShopName").html(item.ShopName);
+                            $("#InfoEmpPosition").html(item.EmpPosition);
+                            $("#SN").val(item.SN);
+                            $("#LeaveType").val(item.LeaveType);
+                            $("#LeaveType").attr("ovalue", item.LeaveType);
+                            $honesty.InitSlaves({ con_id: "Slaves_List", dataname: "Slaves_List", move: IsRead, files: item.Slaves });
+                            if (GetFlowInfo("stepname") != "提交请假申请") {
+                                $("#InfoYearTime").html(item.YearTime + "天");
+                                $("#InfoYearTime").attr("value", item.YearTime);
+                                $("#InfoExtraTime").html(item.ExtraTime + "小时");
+                                $("#InfoExtraTime").attr("value", item.ExtraTime);
+                            }
+                        })
+                    }
+                }
+            });
+            _options = {
+                PostData: {
+                    Params: {
+                        result: "InitEmpLeaveList",
+                        LeaveID: ID
+                    },
+                    ProcName: "proc_SOM_HR_EmpLeaveList",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            var _time = 0;
+            $("#InfoSumTime").html(_time);
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        var _Content = "";
+                        $.each(_result.Data, function (i, item) {
+                            _time += parseFloat(item.LeaveTime);
+                            _Content += ReturnList(item);
+                        });
+                        $("#InfoSumTime").html(_time);
+                        $("#InfoList").html(_Content);
+                    }
+                    api.parseTapmode();
+                    if ($honestyFlow.GetFlowInfo("stepname") != "提交请假申请") {
+                        $("#divAdd,[data-role='divDel']").hide();
+                    }
+                    if ($honestyFlow.GetFlowInfo("isread") == "true") {
+                        $("#flow_button").hide();
+                        $("#divAdd,[data-role='divDel']").hide();
+                    }
+                }
+            });
+        }
+        else {
+            ID = $honestyFlow.GetFlowInfo("instanceid");
+            $("#InfoWriteDate").html($honesty.NowDate().Format("yyyy-MM-dd"));
+            $("#InfoSN").html($honestyFlow.GetFlowInfo("SN"));
+            $("#InfoEmpCode").html(GetSession("UserCode"));
+            $("#InfoEmpName").html(GetSession("UserName"));
+            $("#InfoAreaName").html(GetSession("AreaName"));
+            $("#InfoCompanyName").html(GetSession("CompanyName"));
+            $("#InfoShopCode").html(GetSession("ShopCode"));
+            $("#InfoShopName").html(GetSession("ShopName"));
+            $("#InfoEmpPosition").html(GetSession("Position"));
+        }
+
+        if ($honestyFlow.GetFlowInfo("stepname") == "提交请假申请") {
+            var _options = {
+                PostData: {
+                    result: "ExtraTime",
+                    SN: $honestyFlow.GetFlowInfo("sn"),
+                    EmpID: GetSession("UserID")
+                },
+                MathType: "ExtraTime",
+                Loading: {
+                    Title: "获取调休额度...",
+                    Show: true
+                }
+            };
+            $.when($honesty.AjaxAttend(_options)).done(function (_result) {
+                if (_result.ExtraTime != "") {
+                    if (_result.ExtraTime < 0) {
+                        _result.ExtraTime = 0.0;
+                    }
+                    $("#InfoExtraTime").html(_result.ExtraTime + "小时");
+                    $("#InfoExtraTime").attr("value", _result.ExtraTime);
+                }
+            });
+
+            var _options = {
+                PostData: {
+                    Params: {
+                        empId: GetSession("UserID").toUpperCase(),
+                        sn: $honestyFlow.GetFlowInfo("sn"),
+                        zYear: new Date().Format("yyyy"),
+                        zDays: 0,
+                        edit: ""
+                    },
+                    URL: "employeeEvent/holiday",
+                    Mode: "ESB",
+                    Handle: "GET"
+                },
+                Loading: {
+                    Title: "获取年假额度...",
+                    Show: true
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.returnCode == "000") {
+                        $("#InfoYearTime").html(_result.Data.yearDay + "天");
+                        $("#InfoYearTime").attr("value", _result.Data.yearDay);
+                    }
+                }
+            });
+        }
+
+        if (!IsRead) {
+            $("div[data-role='divDel'],#btnSlaves,#btnClear").hide();
+        }
+    }
+
+    function SaveData() {
+        if ($honestyFlow.GetFlowInfo("stepname") == "提交请假申请") {
+            if ($("#InfoList div").length < 1) {
+                $honesty.ShowMsg({ title: "警告", msg: "请先维护请假申请明细!" });
+                return false;
+            }
+            else {
+                if ($("#LeaveType").val() == "调休" && $honestyFlow.GetFlowInfo("stepname") == "提交请假申请") {
+                    var _TimeCount = 0;
+                    $.each($("#InfoList div[data-role='divDel']"), function (i, item) {
+                        _TimeCount += parseFloat($(item).attr("data-count"));
+                    });
+                    if (_TimeCount > $("#InfoExtraTime").attr("value")) {
+                        $honesty.ShowMsg({ title: "警告", msg: "当前可调休额度只有" + $("#InfoExtraTime").html() + "，不可超额调休!" });
+                        return false;
+                    }
+                }
+                else if ($("#LeaveType").val() == "年假" && $honestyFlow.GetFlowInfo("stepname") == "提交请假申请") {
+                    var _TimeCount = 0;
+                    $.each($("#InfoList div[data-role='divDel']"), function (i, item) {
+                        _TimeCount += parseFloat($(item).attr("data-value"));
+                    });
+                    if (_TimeCount > $("#InfoYearTime").attr("value")) {
+                        $honesty.ShowMsg({ title: "警告", msg: "当前年假额度只有" + $("#InfoYearTime").html() + "，不可超额请年假!" });
+                        return false;
+                    }
+                    try {
+                        var _options = {
+                            PostData: {
+                                Params: {
+                                    empId: GetSession("UserID").toUpperCase(),
+                                    sn: $honestyFlow.GetFlowInfo("sn"),
+                                    zYear: new Date().Format("yyyy"),
+                                    zDays: _TimeCount,
+                                    edit: "X"
+                                },
+                                URL: "employeeEvent/holiday",
+                                Mode: "ESB",
+                                Handle: "GET"
+                            },
+                            Loading: {
+                                Title: "更新年假额度年假额度...",
+                                Show: true
+                            }
+                        };
+                        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                            if (_result.Code == "1") {
+                                if (_result.Data.returnMsg != "没有找到人员编号" && _result.Data.returnCode != "000" && _result.Data.returnMsg != "未维护年假定额信息类型数据或未到年假可休息日") {
+                                    $honesty.ShowMsg({ title: "警告", msg: _result.Data.returnMsg });
+                                    return false;
+                                }
+                            }
+                            else {
+                                $honesty.ShowMsg({ title: "警告", msg: "年假额度同步SAP接口出现异常!" });
+                                return false;
+                            }
+                        });
+                    }
+                    catch (e) {
+                        $honesty.ShowMsg({ title: "警告", msg: "年假额度同步SAP接口出现异常!" });
+                        return false;
+                    }
+                }
+                if ($("#LeaveType").val() != "年假" && $honestyFlow.GetFlowInfo("stepname") == "提交请假申请") {
+                    try {
+                        var _options = {
+                            PostData: {
+                                Params: {
+                                    empId: GetSession("UserID").toUpperCase(),
+                                    sn: $honestyFlow.GetFlowInfo("sn"),
+                                    zYear: new Date().Format("yyyy"),
+                                    zDays: 0,
+                                    edit: "X"
+                                },
+                                URL: "employeeEvent/holiday",
+                                Mode: "ESB",
+                                Handle: "GET"
+                            },
+                            Loading: {
+                                Title: "更新年假额度年假额度...",
+                                Show: false
+                            }
+                        };
+                        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                            if (_result.Code == "1") {
+                                if (_result.Data.returnMsg != "没有找到人员编号" && _result.Data.returnCode != "000" && _result.Data.returnMsg != "未维护年假定额信息类型数据或未到年假可休息日") {
+                                    $honesty.ShowMsg({ title: "警告", msg: _result.Data.returnMsg });
+                                    return false;
+                                }
+                            }
+                            else {
+                                $honesty.ShowMsg({ title: "警告", msg: "年假额度同步SAP接口出现异常!" });
+                                return false;
+                            }
+                        });
+                    }
+                    catch (e) {
+                        $honesty.ShowMsg({ title: "警告", msg: "年假额度同步SAP接口出现异常!" });
+                        return false;
+                    }
+                }
+                if ($("#InfoSumTime").html() >= 15 && $("#Slaves_List tr[dataname=Slaves_List]").length < 1 && $("#LeaveType").val() == "病假" && $honestyFlow.GetFlowInfo("stepname") == "提交请假申请") {
+                    $honesty.ShowMsg({ title: "警告", msg: "病假15天没有提示上传病假证明!" });
+                    return false;
+                }
+                var Slaves = "";
+                $.each($("#Slaves_List tr[dataname='Slaves_List']"), function (i, item) {
+                    Slaves += $(item).attr("value") + "|";
+                });
+                var _options = {
+                    PostData: {
+                        Params: {
+                            result: "ModifyEmpLeave",
+                            ID: ID,
+                            SN: $("#InfoSN").html(),
+                            EmpID: GetSession("UserID"),
+                            EmpCode: GetSession("UserCode"),
+                            EmpName: GetSession("UserName"),
+                            OrganizeID: GetSession("OrganizeID"),
+                            AreaName: GetSession("AreaName"),
+                            CompanyName: GetSession("CompanyName"),
+                            SapCode: GetSession("SapCode"),
+                            ShopCode: GetSession("ShopCode"),
+                            ShopName: GetSession("ShopName"),
+                            EmpPosition: GetSession("Position"),
+                            EmpLevel: GetSession("EmpLevel"),
+                            LevelDesc: GetSession("LevelDesc"),
+                            YearTime: $("#InfoYearTime").attr("value"),
+                            ExtraTime: $("#InfoExtraTime").attr("value"),
+                            LeaveType: $("#LeaveType").val(),
+                            TypeSort: $("#LeaveType").get(0).selectedIndex,
+                            Title: $honestyFlow.GetFlowInfo("title"),
+                            Slaves: Slaves
+                        },
+                        ProcName: "proc_SOM_HR_EmpLeave",
+                        DataType: "Bool",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    },
+                    async: false,
+                };
+                var _result = $honesty.AjaxChannel(_options);
+                if (_result.Code == "1") {
+                    if (_result.Data == "True") {
+                        return true
+                    }
+                    else {
+                        $honesty.ShowMsg({ title: "错误", msg: "业务数据保存失败!" });
+                        return false;
+                    }
+                }
+                else {
+                    return false;
+                }
+            }
+        }
+        else {
+            return true;
+        }
+    }
+
+    function DelInfo(id) {
+        $("[data-id]").css("pointer-events", "none");
+        setTimeout(function () {
+            $("[data-id]").css("pointer-events", "auto");
+        }, 350);
+        $honesty.ConfirmWin({
+            title: "提示",
+            msg: "是否要删除该条请假明细?",
+            buttons: ["确认", "取消"],
+            callback: function (ret, err) {
+                if (ret.buttonIndex == 1) {
+                    var _ItemXML = "<root><Item ID=\"" + id + "\" /></root>";
+                    var _options = {
+                        PostData: {
+                            Params: {
+                                result: "DeleteEmpLeaveList",
+                                ItemXML: _ItemXML
+                            },
+                            ProcName: "proc_SOM_HR_EmpLeaveList",
+                            DataType: "Bool",
+                            ExecType: "PROC",
+                            Mode: "MSSQL"
+                        }
+                    };
+                    $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                        if (_result.Code == "1") {
+                            if (_result.Data == "True") {
+                                $("#" + id).remove();
+                                var _time = 0;
+                                $("#InfoSumTime").html(_time);
+                                $.each($("#InfoList div[data-role='divDel']"), function (i, item) {
+                                    _time += parseFloat($(item).attr("data-value"));
+                                });
+                                $("#InfoSumTime").html(_time);
+                            }
+                            else {
+                                $honesty.ShowMsg({ title: "错误", msg: "删除数据失败!" });
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    function ShowInfo(options) {
+        $honesty.OpenWin({
+            title: "请假明细维护",
+            name: "HRFlow_EmpLeaveInfo",
+            url: "HRFlow/EmpLeaveInfo.html",
+            pageParam: {
+                ID: ID,
+                StepName: $honestyFlow.GetFlowInfo("stepname"),
+                ListInfo: options,
+                LeaveType: $("#LeaveType").val()
+            }
+        });
+    }
+
+    function ReturnList(options) {
+        var defaults = {
+            ID: "",
+            LeaveBegin: "",
+            LeaveEnd: "",
+            LeaveTime: "",
+            TimeCount: "",
+            Reason: "",
+            WorkContent: "",
+            RelayEmpCode: ""
+        }
+        _opts = $.extend(defaults, options);
+        var DateType = "yyyy-MM-dd";
+        if ($("#LeaveType").val() == "事假" || $("#LeaveType").val() == "病假" || $("#LeaveType").val() == "调休") {
+            DateType = "yyyy-MM-dd hh:mm";
+        }
+        return "<div id='" + _opts.ID + "' class='aui-card aui-noborder' style='pointer-events:auto' >" +
+               "<div data-role='divDel' data-value='" + _opts.LeaveTime + "' data-count='" + _opts.TimeCount + "' tapmode onclick=\"DelInfo(\'" + _opts.ID + "\')\"  style='position: absolute; right: -.2em; top: -.6em; zoom: 2;z-index:2' class='aui-iconfont aui-icon-roundclosefill aui-text-danger'></div>" +
+               "<div class='aui-form' data-id=\'" + _opts.ID + "\' tapmode  onclick='ShowInfo({ID:\"" + _opts.ID + "\",LeaveBegin:\"" + _opts.LeaveBegin + "\",LeaveEnd:\"" + _opts.LeaveEnd + "\",LeaveTime:\"" + _opts.LeaveTime + "\",TimeCount:\"" + _opts.TimeCount + "\",Reason:\"" + _opts.Reason + "\",WorkContent:\"" + _opts.WorkContent + "\",RelayEmpCode:\"" + _opts.RelayEmpCode + "\"})'>" +
+               "<div class='aui-input-row'>" +
+               "<div class='aui-div' style='padding: 5px;'>" + new Date(_opts.LeaveBegin.replace(/-/g, "/")).Format(DateType) + "至" + new Date(_opts.LeaveEnd.replace(/-/g, "/")).Format(DateType) + "</div></div>" +
+               "<div class='aui-input-row'>" +
+               "<span class='aui-input-addon aui-label-title'>请假天数：</span>" +
+               "<div class='aui-div' style='padding: 5px;'>" + _opts.LeaveTime + "天</div></div>" +
+               "<div class='aui-input-row'>" +
+               "<span class='aui-input-addon aui-label-title'>请假原因：</span>" +
+               "<div class='aui-div' style='padding: 5px;'>" + _opts.Reason + "</div></div>" +
+               "<div class='aui-input-row'>" +
+               "<span class='aui-input-addon aui-label-title'>工作接收人：</span>" +
+               "<div class='aui-div' style='padding: 5px;'>" + _opts.RelayEmpCode + "</div></div>" +
+               "</div></div>";
+    }
+</script>

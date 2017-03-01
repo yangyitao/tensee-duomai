@@ -1,0 +1,160 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>店铺人员</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .div-height {
+            height: 10px;
+        }
+
+        .aui-list-view-cell {
+            padding: 5px;
+        }
+
+            .aui-list-view-cell table {
+                width: 100%;
+                font-size: 13px;
+                color: gray;
+                table-layout: fixed;
+                border-collapse: collapse;
+            }
+
+                .aui-list-view-cell table .value {
+                    word-break: keep-all;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    text-align: left;
+                    padding-right: 5px;
+                }
+    </style>
+</head>
+<body>
+    <div class="aui-content" id="UserInfo"></div>
+    <div class="div-height"></div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            var _UserContent = "";
+            $("#UserInfo").html("");
+            var _Position = "";
+            var _options = {
+                PostData: {
+                    Params: {
+                        Result: "InitUserList",
+                        OrganizeID: api.pageParam.OrganizeID
+                    },
+                    ProcName: "proc_SOM_ISR_ShopInfo",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        $.each(_result.Data, function (i, item) {
+                            
+                            if (item.RewardType == "") {
+                                _UserContent += "<div class='aui-content aui-card'><ul class='aui-list-view'><li class='aui-list-view-cell'>" +
+                                                "<p style='color:#000'>" + item.Account + "&nbsp;" + item.EmpName + "(" + item.PositionText + ")</p></li><li class='aui-list-view-cell'>" +
+                                                "<table tapmode onclick=\'SendUsersInfo(\"" + item.Account + "\",\"" + item.EmpName + "\",\"" + item.CardMachineNum + "\",\"" + item.IsLeader + "\")\'><tr><td style='width: 95px;'>入司日期:</td><td class='value'>" + item.InDate + "</td></tr>" +
+                                                "<tr><td>联系电话:</td><td class='value'>" + item.TelPhone + "</td></tr>" +
+                                                "<tr data-Account=\'" + item.Account + "\' style='display: none'><td>出生日期:</td><td class='value'>" + item.BirthDate + "</td></tr>" +
+                                                "<tr data-Account=\'" + item.Account + "\' style='display: none'><td>身份证地址:</td><td class='value'>" + item.Address + "</td></tr>" +
+                                                "<tr data-Account=\'" + item.Account + "\' style='display: none'><td>紧急联系人:</td><td class='value'>" + item.UrgencyName + "</td></tr>" +
+                                                "<tr data-Account=\'" + item.Account + "\' style='display: none'><td>紧急联系方式:</td><td class='value'>" + item.UrgencyPhone + "</td></tr></table></li>" +
+                                                "<li data-role='colspan' data-show='hide' class='aui-list-view-cell'>" +
+                                                "<p style='text-align: left' tapmode onclick=\"ShowAdress(\'" + item.Account + "\',this)\" readonly='true;'>点击显示详情</p> </li></ul></div>"
+
+                            }
+                            else {
+                                _UserContent += "<div class='aui-content aui-card'><ul class='aui-list-view'><li class='aui-list-view-cell'>" +
+                                                "<p style='color:#000'>" + item.Account + "&nbsp;" + item.EmpName + "(" + item.PositionText + ")<span style='color:red'>* </span></p></li><li class='aui-list-view-cell'>" +
+                                                "<table tapmode><tr><td style='width: 95px;'>入司日期:</td><td class='value'>" + item.InDate + "</td></tr>" +
+                                                "<tr><td>联系电话:</td><td onclick=\'SendUsersInfo(\"" + item.Account + "\",\"" + item.EmpName + "\",\"" + item.CardMachineNum + "\",\"" + item.IsLeader + "\")\' class='value'>" + item.TelPhone + "</td></tr>" +
+                                                "<tr data-Account=\'" + item.Account + "\' style='display: none'><td>出生日期:</td><td onclick=\'SendUsersInfo(\"" + item.Account + "\",\"" + item.EmpName + "\",\"" + item.CardMachineNum + "\",\"" + item.IsLeader + "\")\' class='value'>" + item.BirthDate + "</td></tr>" +
+                                                "<tr data-Account=\'" + item.Account + "\' style='display: none'><td>身份证地址:</td><td onclick=\'SendUsersInfo(\"" + item.Account + "\",\"" + item.EmpName + "\",\"" + item.CardMachineNum + "\",\"" + item.IsLeader + "\")\' class='value'>" + item.Address + "</td></tr>" +
+                                                "<tr data-Account=\'" + item.Account + "\' style='display: none'><td>紧急联系人:</td><td onclick=\'SendUsersInfo(\"" + item.Account + "\",\"" + item.EmpName + "\",\"" + item.CardMachineNum + "\",\"" + item.IsLeader + "\")\' class='value'>" + item.UrgencyName + "</td></tr>" +
+                                                "<tr data-Account=\'" + item.Account + "\' style='display: none'><td>紧急联系方式:</td><td onclick=\'SendUsersInfo(\"" + item.Account + "\",\"" + item.EmpName + "\",\"" + item.CardMachineNum + "\",\"" + item.IsLeader + "\")\' class='value'>" + item.UrgencyPhone + "</td></tr>" +
+                                                "<tr data-Account=\'" + item.Account + "\' style='display: none' onclick=\"alertCustom(\'" + item.Deeds + "\')\"'><td>奖惩类型:</td><td class='value'>" + item.RewardType + "</td></tr>" +
+                                                "<tr data-Account=\'" + item.Account + "\' style='display: none' onclick=\"alertCustom(\'" + item.Deeds + "\')\"'><td>奖惩时间:</td><td class='value'>" + item.RewardDate + "</td></tr>" +
+                                                "<tr data-Account=\'" + item.Account + "\' style='display: none' onclick=\"alertCustom(\'" + item.Deeds + "\')\"'><td>奖惩概述:</td><td class='value'>" + item.Deeds + "</td></tr>" +
+                                                "</table></li>" +
+                                                "<li data-role='colspan' data-show='hide' class='aui-list-view-cell'>" +
+                                                "<p style='text-align: left' tapmode onclick=\"ShowAdress(\'" + item.Account + "\',this)\" readonly='true;'>点击显示详情</p> </li></ul></div>"
+                            }
+                        });
+                        $("#UserInfo").html(_UserContent);
+                        api.parseTapmode();
+                    }
+                }
+            })
+
+        });
+    }
+    function alertCustom(Deeds) {
+        $honesty.ShowMsg({
+            title: "奖惩概述",
+            msg: Deeds
+        })
+    }
+    function ShowAdress(Account, control) {
+        $("[data-Account='" + Account + "']").fadeToggle(200);
+        if ($(control).attr("data-show") == "hide") {
+            $(control).html("点击显示详情");
+            $(control).attr("data-show", "show");
+        }
+        else {
+            $(control).html("点击收起");
+            $(control).attr("data-show", "hide");
+        }
+    }
+
+    function SendUsersInfo(account, empname, cardMachineNum, isLeader) {
+        $honesty.ConfirmWin({
+            msg: "是否把" + empname + "下发到考勤机?",
+            callback: function (ret, err) {
+                if (ret.buttonIndex == "1") {
+                    var _options = {
+                        PostData: {
+                            Params: {
+                                deviceSN: cardMachineNum,
+                                userCode: account,
+                                userName: empname,
+                                power: (isLeader == "1" ? "18" : "0")
+                            },
+                            URL: "iclock/modifyManager",
+                            Mode: "ESB",
+                            Handle: "POST"
+                        },
+                        Loading: {
+                            Title: "正在下发...",
+                            Show: true
+                        }
+                    };
+                    $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                        if (_result.Code == "1") {
+                            if (_result.Data.return == "1") {
+                                $honesty.ShowMsg({ title: "提示", msg: "下发成功" });
+                            }
+                            else {
+                                $honesty.ShowMsg({ title: "错误", msg: "下发失败" });
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    }
+</script>
+</html>

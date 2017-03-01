@@ -1,0 +1,66 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+        content="width = 320,minimum-scale =1,maximum-scale = 1.3 ,user-scalable =no" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>门店活动</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+    <style>
+        .div-height {
+            height: 10px;
+        }
+
+        .aui-list-view-cell {
+            padding: 5px;
+        }
+
+            .aui-list-view-cell table {
+                width: 100%;
+                font-size: 13px;
+                color: gray;
+                table-layout: fixed;
+                border-collapse: collapse;
+            }
+
+                .aui-list-view-cell table .value {
+                    word-break: keep-all;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    text-align: left;
+                    padding-right: 5px;
+                }
+    </style>
+</head>
+<body>
+    <div class="aui-content" id="UserInfo"></div>
+    <div class="div-height"></div>
+</body>
+</html>
+
+<script src="../../script/zepto.js"></script>
+<script src="../../script/api.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script src="../../script/honesty.flow.js"></script>
+<script src="../../script/echarts.min.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            var _UserContent = "";
+            $("#UserInfo").html("");
+            _UserContent += "<div class='aui-content aui-card'><ul class='aui-list-view'><li class='aui-list-view-cell'>" +
+                        "<p style='color:#000'>电子会员上线了</p></li><li class='aui-list-view-cell'>" +
+                        "<img src='../../image/vip.png' style='width:100%; height:150px'>" +
+                        "<p style='text-align: left' tapmode onclick=\"ShowAdress(this)\" readonly='true;'>点击显示详情</p> </li></ul></div>"
+            $("#UserInfo").html(_UserContent);
+            api.parseTapmode();
+
+        });
+    }
+    function ShowAdress() {
+        alert(1);
+    }
+</script>

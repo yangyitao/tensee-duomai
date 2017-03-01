@@ -1,0 +1,86 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>流程进度</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+    <style type="text/css">
+        .aui-content {
+            background: #ffffff;
+            overflow: hidden;
+            padding: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="aui-content">
+        <ul class="aui-timeline" id="FlowProgress">
+        </ul>
+    </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        $(function () {
+            var _options = {
+                PostData: {
+                    Params: {
+                        result: "FlowProgress",
+                        InstanceID: api.pageParam.instanceid || new $honesty.GUID().NewGUID()
+                    },
+                    ProcName: "proc_HC_WorkFlow",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                $("#FlowProgress").html("");
+                if (_result.Code == "1") {
+                    var SendDate = "";
+                    var Progress = _result.Data;
+                    //倒序
+                    //Progress = _result.Data.reverse();
+                    if (Progress.length > 0) {
+                        $.each(Progress, function (i, item) {
+                            var FlowSendDate = new Date(item.SenderTime.replace(/-/g, "/")).Format("yyyy-MM-dd");
+                            var FlowSendTime = new Date(item.SenderTime.replace(/-/g, "/")).Format("hh:mm:ss");
+                            if (SendDate != FlowSendDate) {
+                                $("#FlowProgress").append('<li class="aui-time-label"><span class="aui-bg-info">' + FlowSendDate + '</span></li>');
+                            }
+                            var icon = "aui-iconfont aui-icon-rounddown aui-bg-info";
+                            if (item.Note == "审批结束") {
+                                icon = "aui-iconfont aui-icon-focus aui-bg-danger";
+                            }
+                            else if (item.Status == "退回") {
+                                icon = "aui-iconfont aui-icon-repeal aui-bg-warning";
+                            }
+                            else if (item.Status == "待处理") {
+                                icon = "aui-iconfont aui-icon-warnfill aui-bg-success";
+                                FlowSendTime = "待处理";
+                            }
+                            var FlowInfo = '<li><i class="' + icon + '"></i>';
+                            FlowInfo += '<div class="aui-timeline-item"><span class="aui-timeline-time"><i class="aui-iconfont aui-icon-time"></i>' + FlowSendTime + '</span>';
+                            FlowInfo += '<h3 class="aui-timeline-header">' + item.StepName + '</h3>';
+                            FlowInfo += '<div class="aui-timeline-body">' + item.ReceiveName + "：" + item.Comment + '</div>';
+                            FlowInfo += '<div class="aui-timeline-footer">' + (item.Note == "审批结束" ? item.Note : item.Status) + '</div></div></li>';
+                            $("#FlowProgress").append(FlowInfo);
+                        });
+                    }
+                    else {
+                        $("#FlowProgress").removeClass("aui-timeline");
+                        $("#FlowProgress").append('<li class="aui-time-label" style="text-align:center">暂无审批办理进度!</li>');
+                    }
+                }
+                else {
+                    $("#FlowProgress").removeClass("aui-timeline");
+                    $("#FlowProgress").append('<li class="aui-time-label" style="text-align:center">暂无审批办理进度!</li>');
+                }
+            });
+        });
+    };
+</script>
+</html>

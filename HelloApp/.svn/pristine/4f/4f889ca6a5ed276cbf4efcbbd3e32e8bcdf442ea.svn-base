@@ -1,0 +1,180 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>零售部门报数</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div style="height: 10px;"></div>
+    <div class="aui-content aui-card">
+        <div class="aui-form">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">日期</span>
+                <div class="aui-counter aui-warning aui-info aui-pull-left " style="margin-left: 10px;">
+                    <div id="btnDateMinus" class="aui-counter-minus"></div>
+                    <input id="txtDate" class="aui-counter-input" type="text" value="" style="width: 100px; text-align: center" readonly="true">
+                    <div id="btnDatePlus" class="aui-counter-plus"></div>
+                </div>
+            </div>
+            <div class="aui-btn-row">
+                <div id="btnSearch" class="aui-btn aui-btn-block aui-btn-warning">
+                    查询
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _Date, _OrganizeID, _OrganizeName;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _Date = $honesty.NowDate();
+            _OrganizeID = api.pageParam.OrganizeID;
+            _OrganizeName = api.pageParam.Name;
+            LoadData();
+            //初始化日期
+            $("#txtDate").val(_Date.Format("yyyy-MM-dd"));
+
+            //日期减少按钮点击
+            $("#btnDateMinus").tap(function () {
+                _Date.addDays(-1);
+                $("#txtDate").val(_Date.Format("yyyy-MM-dd"));
+            });
+            //日期增加按钮点击
+            $("#btnDatePlus").tap(function () {
+                _Date.addDays(1);
+                $("#txtDate").val(_Date.Format("yyyy-MM-dd"));
+            });
+            //日期点击
+            $("#txtDate").tap(function () {
+                $honesty.DateTimeSelect({
+                    LevelNum: 2,
+                    Type: "Date",
+                    ControlID: "txtDate",
+                    ControlValue: $("#txtDate").val()
+                });
+            });
+
+
+            //查询按钮点击
+            $("#btnSearch").tap(function () {
+                var _options = {
+                    PostData: {
+                        Params: {
+                            Result: "GetID",
+                            ReportDate: $("#txtDate").val(),
+                            OrganizeId: _OrganizeID
+                        },
+                        ProcName: "proc_SOM_ISR_RetailSale",
+                        DataType: "Text",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    }
+                };
+                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                    if (_result.Code == "1") {
+                        if (_result.Data != "") {
+                            $honesty.OpenWin({
+                                name: "Sale_RetailSale_Index",
+                                url: "Sale/RetailSale/Index.html",
+                                title: "零售经理报数",
+                                LevelNum: 2,
+                                pageParam: {
+                                    RetailID: _result.Data,
+                                    OrganizeID: _OrganizeID,
+                                    OrganizeName: _OrganizeName,
+                                    TodayDate: $("#txtDate").val()
+                                }
+                            });
+                        }
+                        else {
+                            if ($("#txtDate").val() <= $honesty.NowDate().Format("yyyy-MM-dd")) {
+                                $honesty.ConfirmWin({
+                                    msg: "是否生成" + $("#txtDate").val() + "零售经理报数？",
+                                    callback: function (ret, err) {
+                                        if (ret.buttonIndex == "1") {
+                                            var _options = {
+                                                PostData: {
+                                                    Params: {
+                                                        Result: "CreateInfo",
+                                                        ReportDate: $("#txtDate").val(),
+                                                        OrganizeID: _OrganizeID,
+                                                        OrganizeName: _OrganizeName,
+                                                        CreateName: GetSession("UserName"),
+                                                        CreateID:GetSession("UserID")
+                                                    },
+                                                    ProcName: "proc_SOM_ISR_RetailSale",
+                                                    DataType: "Text",
+                                                    ExecType: "PROC",
+                                                    Mode: "MSSQL"
+                                                }
+                                            };
+                                            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                                                if (_result.Code == "1") {
+                                                    $honesty.OpenWin({
+                                                        name: "Sale_RetailSale_Index",
+                                                        url: "Sale/RetailSale/Index.html",
+                                                        title: "零售经理报数",
+                                                        LevelNum: 2,
+                                                        pageParam: {
+                                                            RetailID: _result.Data,
+                                                            OrganizeID: _OrganizeID,
+                                                            OrganizeName: _OrganizeName,
+                                                            TodayDate: $("#txtDate").val()
+                                                        }
+                                                    });
+                                                }
+                                                else {
+                                                    $honesty.ShowMsg({ title: "错误", msg: "创建失败" });
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    }
+                });
+
+            });
+
+
+        });
+
+    }
+
+    function LoadData() {
+        if (_OrganizeID == undefined) {
+            var _options = {
+                PostData: {
+                    Params: {
+                        Result: "GetList",
+                        UserID: GetSession("UserID"),
+                    },
+                    ProcName: "proc_SOM_ISR_RetailSale",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                async: false
+            };
+        }
+        var _result = $honesty.AjaxChannel(_options)
+        if (_result.Code == "1") {
+            if (_result.Data.length > 0) {
+                $.each(_result.Data, function (i, item) {
+                    _OrganizeID = item.ID;
+                    _OrganizeName = item.Name;
+                });
+            }
+        }
+    }
+</script>
+</html>

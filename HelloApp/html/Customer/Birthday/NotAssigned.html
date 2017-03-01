@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>未分配</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-list-view-cell {
+            padding: 5px 12px;
+        }
+
+        .aui-img-body {
+            font-size: 12px;
+        }
+
+            .aui-img-body p {
+                font-size: 10px;
+            }
+
+        .aui-checkbox {
+            margin: 13px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="aui-content" style="overflow: auto;">
+        <ul class="aui-list-view" id="content">
+        </ul>
+    </div>
+    <div style="height: 39px"></div>
+    <footer class="aui-nav" id="footer" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7">
+        <div id="btnDivide" class="aui-btn aui-btn-block aui-btn-info" style="height: 45px; width: 48%; line-height: 0.9; float: left;">
+            分配
+        </div>
+        <div id="btnBlockSelect" class="aui-btn aui-btn-block aui-btn-defaul" style="height: 45px; width: 48%; line-height: 0.9; float: right;">
+            块选
+        </div>
+    </footer>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _ShopCode;
+    var Leader;
+    var _OrganizeIDD;
+    var _UserID;
+    var _UserName;
+    var _w;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _ShopCode = api.pageParam.ShopCode;
+            Leader = api.pageParam.Leader;
+            _OrganizeID = api.pageParam.OrganizeID;
+            _UserID = GetSession("UserID");
+            //点击块选
+            $("#btnBlockSelect").tap(function () {
+                var selectNum = 0;
+                $("[id^='BirthdayList_']:checked").each(function () {
+                    selectNum++;
+                });
+                if (selectNum == 0 || selectNum == 1) {
+                    $honesty.ShowMsg({ msg: "请选择块选起始与截止要分配的VIP客户", title: "警告" })
+                }
+                else if (selectNum != 2) {
+                    $honesty.ShowMsg({ msg: "请只选择块选起始与截止要分配的VIP客户", title: "警告" })
+                }
+                else {
+                    selectNum = 0;
+                    $("[id^='BirthdayList_']").each(function () {
+                        if ($(this).is(':checked')) {
+                            selectNum++;
+                        }
+                        if (selectNum == 1) {
+                            if (!$(this).is(':checked')) {
+                                $(this).prop("checked", true);
+                            }
+                        }
+                    });
+                }
+            })
+            LoadData();
+            //下拉刷新
+            api.setRefreshHeaderInfo({
+                visible: true,
+                loadingImg: 'widget://image/refresh.png',
+                bgColor: '#fff',
+                textColor: '#000',
+                textDown: '下拉刷新...',
+                textUp: '松开刷新...',
+                showTime: true
+            }, function (ret, err) {
+                LoadData();
+                api.refreshHeaderLoadDone();
+            });
+
+            $("#btnDivide").tap(function () {
+                var temp = "";
+                var _Condition = "";
+                $("[id^='BirthdayList_']:checked").each(function () {
+                    temp += ",'" + $(this).attr("data-title") + "'";
+                });
+                _Condition = temp.replace(",", "");
+                if (_Condition == "") {
+                    $honesty.ShowMsg({ msg: "请选择要分配的VIP客户", title: "警告" });
+                }
+                else {
+                    _Condition = "(" + _Condition + ")";
+                    $honesty.ShopEmpSelect({
+                        LevelNum: 2,
+                        callback: function (ret) {
+                            if (ret) {
+                                _UserName = GetSession("UserName");
+                                var _options = {
+                                    PostData: {
+                                        Params: {
+                                            Result: "DivideInfo",
+                                            EmpID: ret.UserID[0],
+                                            EmpName: ret.UserName[0],
+                                            DivideID: _UserID,
+                                            DiveideName: _UserName,
+                                            Condition: _Condition
+                                        },
+                                        ProcName: "proc_SOM_ISR_VIPBirthday",
+                                        DataType: "Bool",
+                                        ExecType: "PROC",
+                                        Mode: "MSSQL"
+                                    }
+                                };
+                                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                                    if (_result.Code == "1") {
+                                        if (_result.Data == "True") {
+                                            $honesty.ShowMsg({
+                                                title: "提示",
+                                                msg: "分配成功",
+                                                callback: function () {
+                                                    LoadData();
+                                                    api.sendEvent({
+                                                        name: 'BirthdayDivideEvent',
+                                                        extra: {
+                                                            Index: 0
+                                                        }
+                                                    });
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
+            });
+        });
+    };
+
+    function LoadData() {
+
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "SelectList",
+                    ShopCode: _ShopCode,
+                    State: "0"
+                },
+                ProcName: "proc_SOM_ISR_VIPBirthday",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    var _Content = "";
+                    _w = api.frameWidth - 60;
+                    $.each(_result.Data, function (i, item) {
+                        _Content += "<li class='aui-list-view-cell'><div data-VipID='" + item.ID + "' data-EmpID='" + item.EmpID + "' class='aui-img-body aui-pull-left' style='width:" + _w + "px'><div>" + (i + 1) + "." + item.VIPName + "&nbsp;" + item.CardType + "</div><div>生日:" + item.Birthday + "</div>" +
+                                    "<p>负责人:" + item.EmpName + "</p></div><input class='aui-pull-right aui-checkbox' type='checkbox' data-title='" + item.ID + "' id='BirthdayList_" + i + "'></li>";
+                    })
+                    $("#content").html(_Content);
+                    $(".aui-img-body").tap(function () {
+                        $honesty.OpenWin({
+                            name: "Customer_Birthday_VipBirthdayMag",
+                            url: "Customer/Birthday/VipBirthdayMag.html",
+                            title: "VIP生日管理",
+                            LevelNum: 2,
+                            pageParam: {
+                                VipID: $(this).attr("data-VipID"),
+                                EmpID: $(this).attr("data-EmpID")
+                            }
+                        });
+                    });
+                }
+            }
+        });
+    }
+</script>
+</html>

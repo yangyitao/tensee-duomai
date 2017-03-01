@@ -1,0 +1,226 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>销售分析报表</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        table {
+            background: #fff;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        td {
+            border: 1px solid rgba(221,221,221,0.6);
+            width: 33.3333333%;
+            text-align: center;
+            padding: 5px 0;
+        }
+
+            td p:first-child {
+                color:black;
+            }
+    </style>
+</head>
+<body>
+    <div class="aui-content">
+        <table>
+            <tr>
+                <td colspan="3">
+                    <p>店名</p>
+                    <p id="ShopName"></p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p>店编号</p>
+                    <p id="ShopCode"></p>
+                </td>
+                <td>
+                    <p>开业时间</p>
+                    <p id="OpenTime"></p>
+                </td>
+                <td>
+                    <p>面积</p>
+                    <p id="ShopArea"></p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p>销售级别</p>
+                    <p id="Saleslevel"></p>
+                </td>
+                <td>
+                    <p>货品级别</p>
+                    <p id="Brandlevel"></p>
+                </td>
+                <td>
+                    <p>形象级别</p>
+                    <p id="Imagelevel"></p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p>去年实际累计</p>
+                    <p id="LastYearTotal"></p>
+                </td>
+                <td>
+                    <p>今年OTB目标</p>
+                    <p id="OTBTarget">0</p>
+                </td>
+                <td>
+                    <p>今年累计实际</p>
+                    <p id="ThisYearTotal"></p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p>去年实际(同比)</p>
+                    <p id="SingleLastYearSale"></p>
+                </td>
+                <td>
+                    <p>今年OTB(同比)</p>
+                    <p id="OTBSingleTarget">0%</p>
+                </td>
+                <td>
+                    <p>累计实际(同比)</p>
+                    <p id="SingleLastYearTotal"></p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p>本月目标</p>
+                    <p id="TargetSale"></p>
+                </td>
+                <td>
+                    <p>实际销售</p>
+                    <p id="ActualSale"></p>
+                </td>
+                <td>
+                    <p>达成</p>
+                    <p id="SaleRate"></p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p>日均</p>
+                    <p id="Daily"></p>
+                </td>
+                <td>
+                    <p>环比</p>
+                    <p id="QuarterOnQuarter"></p>
+                </td>
+                <td>
+                    <p>同比</p>
+                    <p id="YearOnYear"></p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p>客单价</p>
+                    <p id="CustomerUnitPrice"></p>
+                </td>
+                <td>
+                    <p>客单量</p>
+                    <p id="CustomerSingle"></p>
+                </td>
+                <td>
+                    <p>正价占比</p>
+                    <p id="PriceProportion"></p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p>活动占比</p>
+                    <p id="ActivityProportion"></p>
+                </td>
+                <td>
+                    <p>本月开卡</p>
+                    <p id="CardNum">0</p>
+                </td>
+                <td>
+                    <p>VIP销售占比</p>
+                    <p id="VIPProportion"></p>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>
+
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script src="../../../script/honesty.valid.js"></script>
+<script type="text/javascript">
+    var _Year, _Month, _ShopCode;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _Year = api.pageParam.Year;
+            _Month = api.pageParam.Month;
+            _ShopCode = api.pageParam.ShopCode;
+            LoadData();
+
+        });
+
+    }
+
+    //数据加载函数
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "SaleAnalysis",
+                    ShopCode: _ShopCode,
+                    Year: _Year,
+                    Month: _Month
+                },
+                ProcName: "proc_SOM_ISR_RankForm",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        $("#ShopCode").html(item.ShopCode);
+                        $("#ShopName").html(item.ShopName);
+                        $("#OpenTime").html(item.OpenTime);
+                        $("#NatureText").html(item.NatureText);
+                        $("#Saleslevel").html(item.Saleslevel || "未维护");
+                        $("#Imagelevel").html(item.Imagelevel || "未维护");
+                        $("#Brandlevel").html(item.Brandlevel || "未维护");
+                        $("#ShopArea").html(item.ShopArea);
+                        $("#LastYearSale").html(item.LastYearSale);
+                        $("#LastYearTotal").html(item.LastYearTotal);
+                        $("#ThisYearTotal").html(item.ThisYearTotal);
+                        $("#SingleLastYearSale").html((item.LastYearSale == "0" ? "0" : (Number(item.ThisYearSale) / Number(item.ThisYearSale) * 100 - 100).toFixed(0)) + "%");
+                        $("#SingleLastYearTotal").html((item.LastYearTotal == "0" ? "0" : (Number(item.ThisYearTotal) / Number(item.LastYearTotal) * 100 - 100).toFixed(0)) + "%");
+                        $("#TargetSale").html(item.TargetSale);
+                        $("#ActualSale").html(item.ActualSale);
+                        $("#SaleRate").html(item.SaleRate + "%");
+                        $("#Daily").html(item.Daily);
+                        $("#QuarterOnQuarter").html(item.QuarterOnQuarter + "%");
+                        $("#YearOnYear").html(item.YearOnYear + "%");
+                        $("#CustomerUnitPrice").html(item.CustomerUnitPrice);
+                        $("#CustomerSingle").html(item.CustomerSingle);
+                        $("#PriceProportion").html(item.PriceProportion + "%");
+                        $("#ActivityProportion").html(item.ActivityProportion + "%");
+                        $("#VIPProportion").html(item.VIPProportion + "%");
+                    });
+                }
+            }
+            else {
+                $("#footer").css("display", "none");
+            }
+        });
+    }
+
+</script>

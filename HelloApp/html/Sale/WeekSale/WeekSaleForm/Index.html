@@ -1,0 +1,136 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>周销售计划报表主页面</title>
+    <link href="../../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+</body>
+</html>
+<script src="../../../../script/zepto.js"></script>
+<script src="../../../../script/api.js"></script>
+<script src="../../../../script/honesty.base.js"></script>
+
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            var navigationBar = api.require('navigationBar');
+            navigationBar.open({
+                y: 0,
+                w: api.frameWidth,
+                h: 45,
+                itemSize: {
+                    w: (api.frameWidth / 6 > 90 ? api.frameWidth / 6 : 90)
+                },
+                bg: '#ffffff',
+                items: [{
+                    title: '本周目标',
+                    bg: '#ffffff',
+                    bgSelected: 'widget://image/NavBarSelected.png'
+                }, {
+                    title: '货品目标',
+                    bg: '#ffffff',
+                    bgSelected: 'widget://image/NavBarSelected.png'
+                }, {
+                    title: 'VIP目标',
+                    bg: '#ffffff',
+                    bgSelected: 'widget://image/NavBarSelected.png'
+                }, {
+                    title: '员工目标',
+                    bg: '#ffffff',
+                    bgSelected: 'widget://image/NavBarSelected.png'
+                }, {
+                    title: '措施总结',
+                    bg: '#ffffff',
+                    bgSelected: 'widget://image/NavBarSelected.png'
+                }, {
+                    title: '工作计划',
+                    bg: '#ffffff',
+                    bgSelected: 'widget://image/NavBarSelected.png'
+                }],
+                font: {
+                    color: '#000',
+                    size: 16,
+                    colorSelected: '#1abc9c'
+                },
+                fixedOn: api.frameName,
+                selectedIndex: 0,
+            }, function (ret, err) {
+                if (ret) {
+                    api.setFrameGroupIndex({
+                        name: 'WeekSalForm_Tab',
+                        index: ret.index,
+                        scroll: true
+                    });
+                }
+            });
+
+
+            var h = $honesty.RangeTop(45);
+            api.openFrameGroup({
+                name: 'WeekSalForm_Tab',
+                scrollEnabled: true,
+                rect: { x: 0, y: 45 + h, w: 'auto', h: 'auto' },
+                index: 0,
+                preload: 0,
+                frames:
+                [{
+                    name: 'Sale_WeekSale_WeekSaleForm_TargetForm',
+                    url: 'TargetForm.html',
+                    bounces: false,
+                    pageParam: {
+                        WeekID: api.pageParam.WeekID
+                    }
+                }, {
+                    name: 'Sale_WeekSale_WeekSaleForm_GoodsForm',
+                    url: 'GoodsForm.html',
+                    bounces: false,
+                    pageParam: {
+                        WeekID: api.pageParam.WeekID
+                    }
+                }, {
+                    name: 'Sale_WeekSale_WeekSaleForm_VipForm',
+                    url: 'VipForm.html',
+                    bounces: false,
+                    pageParam: {
+                        WeekID: api.pageParam.WeekID
+                    }
+                }, {
+                    name: 'Sale_WeekSale_WeekSaleForm_EmployeeForm',
+                    url: 'EmployeeForm.html',
+                    bounces: false,
+                    pageParam: {
+                        WeekID: api.pageParam.WeekID
+                    }
+                },
+                {
+                    name: 'Sale_WeekSale_WeekSaleForm_PlanSummaryForm',
+                    url: 'PlanSummaryForm.html',
+                    bounces: false,
+                    pageParam: {
+                        WeekID: api.pageParam.WeekID
+                    }
+                },
+                {
+                    name: 'Sale_WeekSale_WeekSaleForm_WorkPlanForm',
+                    url: 'WorkPlanForm.html',
+                    bounces: false,
+                    pageParam: {
+                        WeekID: api.pageParam.WeekID
+                    }
+                }]
+            },
+             function (ret, err) {
+                 navigationBar.config({
+                     key: 'selectedIndex',
+                     value: ret.index
+                 });
+             });
+        });
+
+    }
+</script>

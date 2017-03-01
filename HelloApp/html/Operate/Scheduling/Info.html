@@ -1,0 +1,747 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>店铺排班</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style type="text/css">
+        table.gridtable {
+            font-family: verdana,arial,sans-serif;
+            color: #333333;
+            border-width: 1px;
+            border-color: #666666;
+            border-collapse: collapse;
+            text-align: center;
+            font-size: 13px;
+        }
+
+            table.gridtable th {
+                border-width: 1px;
+                border-style: solid;
+                border-color: rgba(200,199,204, 0.8);
+                background-color: #dedede;
+                text-align: center;
+                height: 45px;
+            }
+
+            table.gridtable td {
+                border-width: 1px;
+                border-style: solid;
+                border-color: rgba(216, 216, 216, 0.5);
+                background-color: #ffffff;
+                text-align: center;
+                height: 47px;
+            }
+
+            table.gridtable select {
+                margin-bottom: 0px;
+                border: 0;
+            }
+
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        .aui-content {
+            background: #fff;
+        }
+    </style>
+</head>
+<body>
+    <p id="TabDate" class="aui-padded-10 aui-text-center"></p>
+    <div id="FromScheduling" class="aui-content" style="margin-bottom: 0px;">
+        <table style="table-layout: fixed;">
+            <tr>
+                <td style="padding: 0px; margin: 0px; vertical-align: top;">
+                    <div id="divSchedulingLeft">
+                        <div style="width: 160px">
+                            <table class="gridtable">
+                                <tr>
+                                    <th rowspan="2" style="width: 70px">姓名</th>
+                                    <th style="width: 90px">日期</th>
+                                </tr>
+                                <tr>
+                                    <th style="width: 90px">星期</th>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="divFixScheduling" style="width: 160px; overflow: hidden">
+                        <table class="gridtable" id="UserInfo">
+                        </table>
+                    </div>
+                </td>
+                <td style="padding: 0px; margin: 0px; border: 0px;">
+                    <div id="DivType" style="overflow-x: scroll; width: 300px">
+                        <div id="divDate" style="overflow: hidden;">
+                            <table class="gridtable" style="width: 560px;">
+                                <tr id="selectdate">
+                                </tr>
+                                <tr>
+                                    <th style="width: 80px">一</th>
+                                    <th>二</th>
+                                    <th>三</th>
+                                    <th>四</th>
+                                    <th>五</th>
+                                    <th>六</th>
+                                    <th>七</th>
+                                </tr>
+                            </table>
+                        </div>
+                        <div id="divTypeBody" style="overflow: auto;">
+                            <table class="gridtable" id="FormsContent" style="width: 560px;">
+                            </table>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+        <div class="aui-input-row aui-border-t" id="divRestDays">
+            <label class="aui-input-addon">本店每个员工最大休息天数为:</label>
+            <input type="text" id="MaxRestDays" class="aui-input" style="color: red" readonly="true" />
+        </div>
+        <div id="Setting" style="display: none" class="aui-btn-row">
+            <div class="aui-btn aui-btn-success" id="btnSave3" tapmode onclick="CherckUser()">补齐</div>
+            &nbsp;&nbsp;
+            <div class="aui-btn aui-btn-success" id="btnSave1">提交</div>
+            &nbsp;&nbsp;
+                <div class="aui-btn aui-btn-warning" id="btnSave2">暂存</div>
+        </div>
+    </div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script src="../../../script/honesty.valid.js"></script>
+<script type="text/javascript">
+    var _year, _month, _week, _pause, _OrganizeID, _Date, _Monthjob, _Monthjob1, Jobvalue, _value, _StarDate, _EndDate, _StarDate1, _EndDate1;
+    var _UserCode = GetSession("UserCode");
+    var _UserID = GetSession("UserID");
+    var _IsLeader = GetSession("IsLeader");
+    var _EmpLevel = GetSession("EmpLevel");
+    var _AreaName = GetSession("AreaName");
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _Date = $honesty.NowDate();
+            _OrganizeID = api.pageParam.OrganizeID;
+            _year = api.pageParam.Year;
+            _month = api.pageParam.Month;
+            _week = api.pageParam.Week;
+            _pause = api.pageParam.Pause;
+            $("#TabDate").html(_year + "年" + _month + "月" + "第" + _week + "周");
+            $("#divTypeBody").scroll(function () {
+                $("#divDate").scrollLeft($("#divTypeBody").scrollLeft());
+                $("#divFixScheduling").scrollTop($("#divTypeBody").scrollTop());
+            });
+            $("#DivType").width($("#FromScheduling").width() - $("#divSchedulingLeft").width() - 7);
+            $("#divFixScheduling,#divTypeBody").height(api.frameHeight - 255);
+
+            if (_IsLeader == 1) {
+                $("#Setting").css("display", "");
+            }
+            if (_AreaName != "华东") {
+                if (_EmpLevel < "E" && _EmpLevel != "C") {
+                    $("#Setting").css("display", "none");
+                }
+            }
+            else {
+                if (_EmpLevel < "E" && _EmpLevel != "B" && _EmpLevel != "C") {
+                    $("#Setting").css("display", "none");
+                }
+            }
+            //取店铺员工一个月的休息班次数据
+            var _StarDate = (Number(_year)) + "/" + _month + "/" + "01";
+            if ((Number(_month) + 1) > 12) {
+                _EndDate = (Number(_year)) + 1 + "/" + "01" + "/" + "01";
+            }
+            else {
+                _EndDate = (Number(_year)) + "/" + (Number(_month) + 1) + "/" + "01";
+            }
+            var _parjob = {
+                PostData: {
+                    Params: { "Result": "SelectMonth", "OrganizeID": _OrganizeID, "StarDate": _StarDate, "EndDate": _EndDate },
+                    ProcName: "proc_SOM_ISR_Scheduling",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                async: false
+            };
+
+            //取店铺员工跨月的休息班次数据
+            if ((Number(_month) + 1) > 12) {
+                _StarDate1 = (Number(_year)) + 1 + "/" + "01" + "/" + "01";
+                _EndDate1 = (Number(_year)) + 1 + "/" + "02" + "/" + "01";
+            }
+            else {
+                var _StarDate1 = (Number(_year)) + "/" + (Number(_month) + 1) + "/" + "01";
+                if ((Number(_month) + 2) > 12) {
+                    _EndDate1 = (Number(_year)) + 1 + "/" + "01" + "/" + "01";
+                }
+                else {
+                    _EndDate1 = (Number(_year)) + "/" + (Number(_month) + 2) + "/" + "01";
+                }
+            }
+            var _parjob1 = {
+                PostData: {
+                    Params: { "Result": "SelectMonth1", "OrganizeID": _OrganizeID, "StarDate1": _StarDate1, "EndDate1": _EndDate1 },
+                    ProcName: "proc_SOM_ISR_Scheduling",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                async: false
+            };
+            _Monthjob = $honesty.AjaxChannel(_parjob);
+            _Monthjob1 = $honesty.AjaxChannel(_parjob1);
+
+
+
+            LoadInfo();
+            $("#btnSave1").tap(function () {
+                $honesty.ConfirmWin({
+                    msg: "提交完即刻生效!",
+                    buttons: ["确认", "取消"],
+                    callback: function (ret, err) {
+                        if (ret.buttonIndex == "1") {
+                            SaveTable();
+                        }
+                    }
+                })
+            });
+            $("#btnSave2").tap(function () {
+
+                var _Pause = "1";
+                var _Datelist = $("#selectdate").children();
+                var _Typelist = $("#FormsContent").children();
+                var _Namelist = $("#UserInfo").children();
+
+                var Concent = "";
+                Concent = "<root>";
+                for (var j = 0 ; j < _Namelist.length; j++) {
+                    var _typeID = $(_Typelist[j]).children("td").children();
+                    var _UserCode = $(_Namelist[j]).attr("title");
+
+                    for (var i = 0; i < _Datelist.length; i++) {
+                        var _type = $(_typeID[i]).val();
+                        var _ActDate = $(_typeID[i]).attr("Date");
+                        var _Code = $(_typeID[i]).find("option:selected").attr("Code");
+                        if (_type != "000") {
+                            Concent += "<Item OrganizeID=\"" + _OrganizeID + "\" Year=\"" + _year + "\" Month=\"" + _month + "\" Week=\"" + _week + "\" UserCode=\"" + _UserCode + "\" Date=\"" + _ActDate + "\" Num=\"" + _type + "\" ShiftCode=\"" + _Code + "\" UserID=\"" + _UserID + "\" Pause=\"" + _Pause + "\"/>";
+                        }
+                    }
+                }
+
+                Concent += "</root>";
+                var _options = {
+                    PostData: {
+                        Params: {
+                            Result: "SaveTable",
+                            Sql: Concent
+                        },
+                        ProcName: "proc_SOM_ISR_Scheduling",
+                        DataType: "Bool",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    }
+                };
+                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                    if (_result.Code == "1") {
+                        if (_result.Data == "True") {
+                            $honesty.ShowMsg({
+                                title: "提示",
+                                msg: "暂存成功"
+                            })
+                        }
+                        else {
+                            $honesty.ShowMsg({ title: "错误", msg: "系统错误" });
+                        }
+                    }
+                });
+            });
+            $("#btnSave3").tap(function () {
+                $honesty.ConfirmWin({
+                    msg: "否确认新员工从入职日起的所有排班均已完成？",
+                    buttons: ["确认", "取消"],
+                    callback: function (ret, err) {
+                        if (ret.buttonIndex == "1") {
+                            var _UserID = "";
+                            var _Namelist = $("#UserInfo").children();
+                            for (var j = 0 ; j < _Namelist.length; j++) {
+                                var _UserCode = $(_Namelist[j]).attr("title");
+                                var _IsNew = $(_Namelist[j]).attr("New");
+                                if (_IsNew == 1) {
+                                    _UserID += ",'" + _UserCode + "'";
+                                }
+                            }
+                            _UserID = _UserID.replace(",", "");
+                            _UserID = "(" + _UserID + ")";
+                            var _options = {
+                                PostData: {
+                                    Params: {
+                                        Result: "UpdateIsNew",
+                                        SelectUserID: _UserID
+                                    },
+                                    ProcName: "proc_SOM_ISR_Scheduling",
+                                    DataType: "Bool",
+                                    ExecType: "PROC",
+                                    Mode: "MSSQL"
+                                }
+                            };
+                            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                                if (_result.Code == "1") {
+                                    if (_result.Data == "True") {
+                                        SaveTable();
+                                        GetUserInfo();
+                                    }
+                                    else {
+                                        $honesty.ShowMsg({ title: "错误", msg: "系统错误" });
+                                    }
+                                }
+                            });
+                        }
+                    }
+                })
+            });
+        });
+
+        //加载初始数据函数
+        function LoadInfo() {
+
+            var _dset = $honesty.NowDate();
+            _dset.setFullYear(_year, _month - 1, 1);
+            var w1 = _dset.getDay();
+            if (w1 == 0) w1 = 7;
+            _dset.setFullYear(_year, _month, 0);
+            var dd = _dset.getDate();
+            if (w1 != 1) d1 = 7 - w1 + 2;
+            else d1 = 1;
+            var monday = d1 + (_week - 1) * 7;
+            var sunday = monday + 6;
+
+            var from = _year + "/" + _month + "/" + monday;
+            var end;
+            if (sunday <= dd) {
+                end = _year + "/" + _month + "/" + sunday;
+            } else {
+                _dset.setFullYear(_month - 1, sunday);
+                end = _dset.getFullYear() + "/" + (_dset.getMonth() + 1) + "/" + _dset.getDate();
+            }
+            function toDate(str) {
+                var sd = str.split("/");
+                return new Date(sd[0], sd[1], sd[2]);
+            }
+            var d1 = new Date(from);
+            var d2 = new Date(end);
+            var _ContentDate = "";
+            $("#selectdate").html("");
+            for (var i = 0; i < 7; i++) {
+                var d3 = dateAdd("d", i, d1);
+                var strs = new Date(d3);
+                var d4 = strs.getMonth() + 1 + "/" + strs.getDate()
+                _ContentDate += "<th style='width: 80px'>" + d4 + "</td>";
+            };
+            $("#selectdate").html(_ContentDate);
+
+
+            var _ContentUserInfo = "";
+            var _Content = "";
+            //获取所有店铺所有人员
+            var _People = {
+                PostData: {
+                    Params: { "Result": "SelectPeople", "UserID": _UserID, "OrganizeID": _OrganizeID },
+                    ProcName: "proc_SOM_ISR_Meetting",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+
+            //获取店铺排班班次
+            var _Type = {
+                PostData: {
+                    Params: { "Result": "SelectShopType", "UserID": _UserID, "OrganizeID": _OrganizeID },
+                    ProcName: "proc_SOM_ISR_Scheduling",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                async: false
+            };
+
+            //取店铺最大休息天数
+            var _parDays = {
+                PostData: {
+                    Params: { "Result": "SelectMaxRestDays", "OrganizeID": _OrganizeID },
+                    ProcName: "proc_SOM_ISR_ShopInfo",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                Loading: {
+                    Show: false
+                }
+            };
+            $.when($honesty.AjaxChannel(_parDays)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        $.each(_result.Data, function (i, item) {
+                            $("#MaxRestDays").val(item.MaxRestDays + "天");
+                        });
+                    }
+                }
+            });
+
+            var today = $honesty.NowDate().Format("yyyy/MM/dd");
+            $("#UserInfo").html("");
+            $("#FormsContent").html("");
+            var _resultType = $honesty.AjaxChannel(_Type);
+            $.when($honesty.AjaxChannel(_People)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        $.each(_result.Data, function (i, item) {
+                            _ContentUserInfo += "<tr New='" + item.IsNew + "' begin='" + item.HolidayBegin + "' end='" + item.HolidayEnd + "' name='" + item.CreateDate + "' title ='" + item.UserID + "'><td style='width: 70px'>" + item.Name + "<span Name='Isnew' class='required' aria-required='true' style='color:red'>* </span></td>";
+                            _ContentUserInfo += "<td style='width: 90px'>" + item.Position + "</td></tr>";
+                            _Content += "<tr>";
+                            for (var j = 0; j < 7; j++) {
+                                var d3 = dateAdd("d", j, d1);
+                                var strs = new Date(d3);
+                                var d4 = strs.Format("yyyy/MM/dd");
+                                _Content += "<td style='width: 80px'><select begin='" + item.HolidayBegin + "' end='" + item.HolidayEnd + "'  Date=" + d4 + " type='text' title='" + item.UserID + "' onchange='Changevalue(this)'  onclick='Selvalue(this)' ><option value='000'></option>";
+                                if (d4 < today) {
+                                    if (_resultType["Data"].length > 0) {
+                                        $.each(_resultType["Data"], function (i, item2) {
+                                            if (item2.Title == "休息") {
+                                                _Content += "<option style='color:red !important' Code='" + item2.ID + "'  value='" + item2.Num + "'>" + item2.Title + "</option>";
+                                            }
+                                            else {
+                                                _Content += "<option style='color:black !important'Code='" + item2.ID + "'   value='" + item2.Num + "'>" + item2.Title + "</option>";
+                                            }
+                                        });
+                                    };
+                                }
+                                else {
+                                    if (_resultType["Data"].length > 0) {
+                                        $.each(_resultType["Data"], function (i, item2) {
+                                            if (item2.Title == "休息") {
+                                                _Content += "<option style='color:red !important' Code='" + item2.ID + "'  value='" + item2.Num + "'>" + item2.Title + "</option>";
+                                            }
+                                            else {
+                                                if (item2.DeFlag == false) {
+                                                    _Content += "<option style='color:black !important'Code='" + item2.ID + "'   value='" + item2.Num + "'>" + item2.Title + "</option>";
+                                                }
+                                            }
+                                        });
+                                    };
+                                }
+                                _Content += "</select></td>";
+                            }
+                            _Content += "</tr>"
+                            $("#FormsContent").html(_Content);
+                            $("#UserInfo").html(_ContentUserInfo);
+                        });
+                        LoadData();
+                    }
+                }
+            });
+        }
+        function GetUserInfo() {
+            //获取所有店铺所有人员
+            var _People = {
+                PostData: {
+                    Params: { "Result": "SelectPeople", "UserID": _UserID, "OrganizeID": _OrganizeID },
+                    ProcName: "proc_SOM_ISR_Meetting",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                async: false
+            };
+            var _resultPeople = $honesty.AjaxChannel(_People);
+            $("#UserInfo").html("");
+            var _ContentUserInfo = "";
+            if (_resultPeople["Data"].length > 0) {
+                $.each(_resultPeople["Data"], function (i, item) {
+                    _ContentUserInfo += "<tr New='" + item.IsNew + "' begin='" + item.HolidayBegin + "' end='" + item.HolidayEnd + "' name='" + item.CreateDate + "' title ='" + item.UserID + "'><td style='width: 70px'>" + item.Name + "<span Name='Isnew' class='required' aria-required='true' style='color:red'>* </span></td>";
+                    _ContentUserInfo += "<td style='width: 90px'>" + item.Position + "</td></tr>";
+                });
+                $("#UserInfo").html(_ContentUserInfo);
+            };
+            var _Namelist = $("#UserInfo").children();
+            var _New = 0;
+            for (var k = 0 ; k < _Namelist.length; k++) {
+                var _IsNew = $(_Namelist[k]).attr("New");
+                if (_IsNew == "" || _IsNew == 0) {
+                    $(_Namelist[k]).children("td").children("span").css("display", "none");
+                }
+                else {
+                    _New = 1;
+                }
+            }
+            if (_IsLeader == 1 && _New == 1) {
+                $("#btnSave3").css("display", "");
+            }
+            else {
+                $("#btnSave3").css("display", "none");
+            }
+        }
+        function LoadData() {
+            var _Datelist = $("#selectdate").children();
+            var _Typelist = $("#FormsContent").children();
+            var _Namelist = $("#UserInfo").children();
+            var _New = 0;
+            for (var k = 0 ; k < _Namelist.length; k++) {
+                var _IsNew = $(_Namelist[k]).attr("New");
+                if (_IsNew == "" || _IsNew == 0) {
+                    $(_Namelist[k]).children("td").children("span").css("display", "none");
+                }
+                else {
+                    _New = 1;
+                }
+            }
+            if (_IsLeader == 1 && _New == 1) {
+                $("#btnSave3").css("display", "");
+            }
+            else {
+                $("#btnSave3").css("display", "none");
+            }
+            if (_AreaName != "华东") {
+                if (_EmpLevel < "E" && _EmpLevel != "C") {
+                    $("#btnSave3").css("display", "none");
+                }
+            }
+            else {
+                if (_EmpLevel < "E" && _EmpLevel != "C" && _EmpLevel != "B") {
+                    $("#btnSave3").css("display", "none");
+                }
+            }
+
+
+            //取店铺当前日期已保存的数据
+            var _ResultType = {
+                PostData: {
+                    Params: { "Result": "LoadInfo", "OrganizeID": _OrganizeID, "Year": _year, "Month": _month, "Week": _week },
+                    ProcName: "proc_SOM_ISR_Scheduling",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                async: false
+            };
+            var _TypeTable = $honesty.AjaxChannel(_ResultType);
+            if (_TypeTable["Data"].length > 0) {
+                $.each(_TypeTable["Data"], function (k, item) {
+                    if (item.Pause == 0) {
+                        $("#btnSave2").attr("disabled", true);
+                        $("#btnSave2").css("background-Color", "#AAAAAA");
+                    }
+                    for (var j = 0 ; j < _Namelist.length; j++) {
+                        var _typeID = $(_Typelist[j]).children("td").children();
+                        var _UserCode = $(_Namelist[j]).attr("title");
+                        var _IsNew = $(_Namelist[j]).attr("New");
+                        for (var i = 0; i < _Datelist.length; i++) {
+                            var _date = $(_Datelist[i]).text();
+                            var _AtcDate = $(_typeID[i]).attr("Date");
+                            var strs = new Date(item.Date);
+                            var d1 = strs.getMonth() + 1 + "/" + strs.getDate();
+                            if (_IsLeader != 1) {
+                                $(_typeID[i]).attr("disabled", "disabled");
+                            }
+                            else {
+                                if (_AreaName != "华东") {
+                                    if (_EmpLevel != "C") {
+                                        if (new Date(_AtcDate).Format("yyyy/MM/dd") < _Date.Format("yyyy/MM/dd")) {
+                                            $(_typeID[i]).attr("disabled", "disabled");
+                                            if (_IsNew == 1) {
+                                                $(_typeID[i]).removeAttr("disabled", "");
+                                            }
+                                        }
+                                    }
+                                }
+                                else {
+                                    if (_EmpLevel != "C" && _EmpLevel != "B") {
+                                        if (new Date(_AtcDate).Format("yyyy/MM/dd") < _Date.Format("yyyy/MM/dd")) {
+                                            $(_typeID[i]).attr("disabled", "disabled");
+                                            if (_IsNew == 1) {
+                                                $(_typeID[i]).removeAttr("disabled", "");
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            if (item.UserCode == _UserCode && d1 == _date) {
+                                $(_typeID[i]).val(item.Num);
+                                $(_typeID[i]).css("color", $(_typeID[i]).find("option:selected").css("color"));
+                                break;
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        //日期增加函数
+        function dateAdd(strInterval, NumDay, dtDate) {
+            var dtTmp = new Date(dtDate);
+            if (isNaN(dtTmp)) dtTmp = GetNowDate();
+            switch (strInterval) {
+                case "s": return new Date(Date.parse(dtTmp) + (1000 * NumDay));
+                case "n": return new Date(Date.parse(dtTmp) + (60000 * NumDay));
+                case "h": return new Date(Date.parse(dtTmp) + (3600000 * NumDay));
+                case "d": return new Date(Date.parse(dtTmp) + (86400000 * NumDay));
+                case "w": return new Date(Date.parse(dtTmp) + ((86400000 * 7) * NumDay));
+                case "m": return new Date(dtTmp.getFullYear(), (dtTmp.getMonth()) + NumDay, dtTmp.getDate(), dtTmp.getHours(), dtTmp.getMinutes(), dtTmp.getSeconds());
+                case "y": return new Date((dtTmp.getFullYear() + NumDay), dtTmp.getMonth(), dtTmp.getDate(), dtTmp.getHours(), dtTmp.getMinutes(), dtTmp.getSeconds());
+            }
+        }
+
+        function SaveTable() {
+            _Date = $honesty.NowDate();
+            var _Pause = 0;
+            var _Datelist = $("#selectdate").children();
+            var _Typelist = $("#FormsContent").children();
+            var _Namelist = $("#UserInfo").children();
+
+            var Concent = "";
+            Concent = "<root>";
+
+            for (var j = 0 ; j < _Namelist.length; j++) {
+                var _typeID = $(_Typelist[j]).children("td").children();
+                var _UserCode = $(_Namelist[j]).attr("title");
+                var _UserName = $(_Namelist[j]).children("td").text();
+                var _UserCreate = $(_Namelist[j]).attr("name");
+                var _HolidayBegin = $(_Namelist[j]).attr("begin");
+                var _HolidayEnd = $(_Namelist[j]).attr("end");
+                for (var i = 0; i < _Datelist.length; i++) {
+                    var _date = $(_Datelist[i]).text();
+                    var _type = $(_typeID[i]).val();
+                    var _ActDate = $(_typeID[i]).attr("Date");
+                    var _Code = $(_typeID[i]).find("option:selected").attr("Code");
+                    if (_Date <= new Date(_ActDate)) {
+                        if (_HolidayBegin != "" && _HolidayEnd != "") {
+                            if (Date.parse(new Date(_HolidayBegin)) > Date.parse(new Date(_ActDate)) || Date.parse(new Date(_ActDate)) > Date.parse(new Date(_HolidayEnd))) {
+                                if ($(_typeID[i]).val() == "000") {
+                                    $honesty.ShowToast({ msg: _UserName + "在" + _date + "还未排班！！" });
+                                    return false;
+                                }
+                            }
+                        }
+                        else {
+                            if ($(_typeID[i]).val() == "000") {
+                                $honesty.ShowToast({ msg: _UserName + "在" + _date + "还未排班！！" });
+                                return false;
+                            }
+                        }
+                    }
+                    if (_type != "000") {
+                        Concent += "<Item OrganizeID=\"" + _OrganizeID + "\" Year=\"" + _year + "\" Month=\"" + _month + "\" Week=\"" + _week + "\" UserCode=\"" + _UserCode + "\" Date=\"" + _ActDate + "\" Num=\"" + _type + "\" ShiftCode=\"" + _Code + "\" UserID=\"" + _UserID + "\" Pause=\"" + _Pause + "\"/>";
+                    }
+                }
+            }
+            Concent += "</root>";
+            var _options = {
+                PostData: {
+                    Params: {
+                        Result: "SaveTable",
+                        Sql: Concent
+                    },
+                    ProcName: "proc_SOM_ISR_Scheduling",
+                    DataType: "Bool",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data == "True") {
+                        $honesty.ShowMsg({
+                            title: "提示",
+                            msg: "保存成功"
+                        })
+                    }
+                    else {
+                        $honesty.ShowMsg({ title: "错误", msg: "系统错误" });
+                    }
+                }
+            });
+        }
+    }
+    function Changevalue(ddl) {
+        $(ddl).css("color", $(ddl).find("option:selected").css("color"));
+        var BeginDay = $(ddl).attr("begin");
+        var EndDay = $(ddl).attr("end");
+        var item = $(ddl).find("option:selected").text();
+        var userID = $(ddl).attr("title");
+        var CheckDate = $(ddl).attr("Date");
+        if (new Date(BeginDay) <= new Date(CheckDate) && new Date(CheckDate) <= new Date(EndDay)) {
+            $honesty.ShowMsg({
+                msg: "该员工今天处于休假状态，请勿安排任何班次！"
+            })
+            $(ddl).val(_value);
+        }
+        else {
+            if (Jobvalue == "休息") {
+                Sumdays(userID, "-", _value, ddl, CheckDate);
+
+            }
+            if (item == "休息")
+            { Sumdays(userID, "+", _value, ddl, CheckDate); }
+        }
+    }
+    //取当前表示值
+    function Selvalue(ddl) {
+        Jobvalue = $(ddl).find("option:selected").text();
+        _value = $(ddl).val();
+    }
+
+    //判断是否休息日是否大于规定天数
+    function Sumdays(userID, Operater, _value, ddl, CheckDate) {
+        if (new Date(CheckDate) < new Date(_EndDate)) {
+            $.each(_Monthjob["Data"], function (i, item) {
+                if (item.UserID == userID) {
+                    if (Operater == "+") {
+                        item.CountNum++;
+                    }
+                    else {
+                        item.CountNum--;
+                    }
+                    if (item.CountNum > Number($("#MaxRestDays").val().replace("天", ''))) {
+                        $honesty.ShowMsg({
+                            msg: "该人员休息次数已经达到最大数，请重新安排班次！",
+                            callback: function () {
+                                item.CountNum--;
+                                $(ddl).val(_value);
+                            }
+                        })
+
+                    }
+                }
+            });
+        }
+        else {
+            $.each(_Monthjob1["Data"], function (i, item) {
+                if (item.UserID == userID) {
+                    if (Operater == "+") {
+                        item.CountNum++;
+                    }
+                    else {
+                        item.CountNum--;
+                    }
+                    if (item.CountNum > Number($("#MaxRestDays").val().replace("天", ''))) {
+                        $honesty.ShowMsg({
+                            msg: "该人员休息次数已经达到最大数，请重新安排班次！",
+                            callback: function () {
+                                item.CountNum--;
+                                $(ddl).val(_value);
+                            }
+                        })
+                    }
+                }
+            });
+        }
+    }
+</script>
+</html>

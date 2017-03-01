@@ -1,0 +1,96 @@
+﻿<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title id="PageTitle">组织架构选择</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+    <link href="../css/aui-win.css" rel="stylesheet" />
+</head>
+<body>
+    <header id="hHeader" class="aui-bar aui-bar-nav aui-bar-warning">
+        <a id="btnLeft" class="aui-btn aui-btn-warning aui-pull-left">
+            <span class="aui-iconfont aui-icon-left"></span>
+        </a>
+        <a id="btnClose" class="aui-btn aui-btn-warning aui-pull-left">
+            <span class="aui-iconfont aui-icon-close"></span>
+        </a>
+        <div id="hTitle" class="aui-title">组织架构选择</div>
+        <a id="btnOK" class="aui-btn aui-btn-warning aui-pull-right">
+            <span id="lblCount">确认(0)</span>
+        </a>
+    </header>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/zepto.js"></script>
+<script type="text/javascript" src="../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var parentwin = "Null";
+    var parentid = "04F12BEB-D99D-43DF-AC9A-3042957D6BDA";
+    apiready = function () {
+        $(function () {
+            api.parseTapmode();
+            var header = $api.byId("hHeader");
+            $api.fixStatusBar(header);
+            var headerPos = $api.offset(header);
+            var body_h = $api.offset($api.dom("body")).h;
+            var PageParam = api.pageParam;
+            if (PageParam != null) {
+                parentwin = PageParam.parentwin || "";
+                var deptname = PageParam.deptname || "组织架构选择";
+                $("#lblCount").html("确认(" + (PageParam.count || "0") + ")");
+                $("#hTitle").html(deptname);
+                api.openFrame({
+                    name: PageParam.parentid,
+                    url: "widget://html/SelectPage/Organize_Frm.html",
+                    pageParam: PageParam,
+                    rect: {
+                        x: 0,
+                        y: headerPos.h,
+                        w: headerPos.w,
+                        h: "auto"
+                    }
+                });
+                api.addEventListener({
+                    name: parentwin + "|ItemCount"
+                }, function (ret, err) {
+                    if (ret) {
+                        $("#lblCount").html("确认(" + ret.value.Count + ")");
+                    } else {
+                        $("#lblCount").html("确认(0)");
+                    }
+                });
+            }
+            $("#btnClose").tap(function () {
+                api.closeToWin({
+                    name: parentwin,
+                    animation: {
+                        type: "flip",
+                        subType: "from_bottom",
+                        duration: 200
+                    }
+                });
+            });
+            $("#btnOK").tap(function () {
+                api.closeToWin({
+                    name: parentwin,
+                    animation: {
+                        type: "flip",
+                        subType: "from_bottom",
+                        duration: 200
+                    }
+                });
+                api.sendEvent({
+                    name: parentwin + "|OrganizeOK",
+                    extra: {
+                        Result: true
+                    }
+                });
+            });
+            $("#btnLeft").tap(function () {
+                api.closeWin();
+            });
+        });
+    };
+</script>
+</html>

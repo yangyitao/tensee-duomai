@@ -1,0 +1,188 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>工作经历行项目维护</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="aui-content">
+        <p class="aui-padded-5 aui-text-center" id="pTitle">工作经历信息详情</p>
+        <div data-role="90" class="aui-form aui-input-form aui-input-flow" id="divGoodsTarget">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">工作单位</span>
+                <input id="JobUnitName" type="text" class="aui-input" placeholder="请填写工作单位名称!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">部门职务</span>
+                <input id="JobDeptPosition" type="text" class="aui-input" placeholder="请填写部门+职务!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">证明人电话</span>
+                <input id="JobProvePhone" type="text" class="aui-input" placeholder="请填写证明人电话!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">离职原因</span>
+                <input id="JobLeaveReason" type="text" class="aui-input" placeholder="请填写离职原因!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">开始日期</span>
+                <input id="JobBeginDate" type="text" class="aui-input" placeholder="请选择开始日期!" readonly="readonly" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">结束日期</span>
+                <input id="JobEndDate" type="text" class="aui-input" placeholder="请选择结束日期!" readonly="readonly" />
+            </div>
+        </div>
+    </div>
+    <div id="divFooter" style="height: 40px; display: none"></div>
+    <footer class="aui-nav" id="footer" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7; display: none">
+        <div id="btnSave" class="aui-btn aui-btn-block aui-btn-info" style="height: 45px; width: 100%; line-height: 0.9;">
+            保存
+        </div>
+    </footer>
+</body>
+</html>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script src="../../../script/honesty.flow.js"></script>
+<script src="../../../script/honesty.valid.js"></script>
+<script type="text/javascript">
+    var InstanceID = "", ListID = "", StepName = "", SN = "", IsRead = false;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            LoadData();
+            $("#btnSave").click(function () {
+                if ($("#JobUnitName").val() == "") {
+                    $honesty.ShowMsg({ title: "警告", msg: "请填写工作单位名称!" });
+                    return false;
+                }
+                if ($("#JobDeptPosition").val() == "") {
+                    $honesty.ShowMsg({ title: "警告", msg: "请填写部门+职务!" });
+                    return false;
+                }
+                if ($("#JobProvePhone").val() == "") {
+                    $honesty.ShowMsg({ title: "警告", msg: "请填写证明人电话!" });
+                    return false;
+                }
+                else {
+                    if (valid_phone($("#JobProvePhone").val())) {
+                        $honesty.ShowMsg({ title: "警告", msg: "电话格式不正确!" });
+                        return false;
+                    }
+                }
+                if ($("#JobLeaveReason").val() == "") {
+                    $honesty.ShowMsg({ title: "警告", msg: "请填写离职原因!" });
+                    return false;
+                }
+                if ($("#JobBeginDate").val() == "") {
+                    $honesty.ShowMsg({ title: "警告", msg: "请选择开始日期!" });
+                    return false;
+                }
+                if ($("#JobEndDate").val() == "") {
+                    $honesty.ShowMsg({ title: "警告", msg: "请选择结束日期!" });
+                    return false;
+                }
+                if (Date.parse($("#JobBeginDate").val().replace(/-/g, "/")) > Date.parse($("#JobEndDate").val().replace(/-/g, "/"))) {
+                    $honesty.ShowMsg({ title: "警告", msg: "结束日期小于开始日期!" });
+                    return false;
+                }
+                var _options = {
+                    PostData: {
+                        Params: {
+                            result: "ModifyEmpJob",
+                            ID: ListID,
+                            EmpID: InstanceID,
+                            BeginDate: $("#JobBeginDate").val(),
+                            EndDate: $("#JobEndDate").val(),
+                            UnitName: $("#JobUnitName").val(),
+                            DeptPosition: $("#JobDeptPosition").val(),
+                            ProvePhone: $("#JobProvePhone").val(),
+                            LeaveReason: $("#JobLeaveReason").val()
+                        },
+                        ProcName: "proc_SOM_HR_EmpJob",
+                        DataType: "Bool",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    }
+                };
+                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                    if (_result.Code == "1") {
+                        if (_result.Data == "True") {
+                            api.sendEvent({
+                                name: "HRFlow_EmpEntry_OtherInfo",
+                                extra: {
+                                    Type: "Job",
+                                    ID: ListID,
+                                    BeginDate: $("#JobBeginDate").val(),
+                                    EndDate: $("#JobEndDate").val(),
+                                    UnitName: $("#JobUnitName").val(),
+                                    DeptPosition: $("#JobDeptPosition").val(),
+                                    ProvePhone: $("#JobProvePhone").val(),
+                                    LeaveReason: $("#JobLeaveReason").val(),
+                                    IsNew: (api.pageParam.ListInfo == undefined ? true : false)
+                                }
+                            });
+                            api.closeWin();
+                        }
+                        else {
+                            $honesty.ShowMsg({ title: "错误", msg: "保存失败" });
+                        }
+                    }
+                    else {
+                        $honesty.ShowMsg({ title: "错误", msg: "保存失败" });
+                    }
+                });
+            });
+
+            $("#JobBeginDate,#JobEndDate").tap(function () {
+                if (StepName == "提交资料") {
+                    $honesty.DateTimeSelect({
+                        Type: "Date",
+                        ControlID: $(this).attr("id"),
+                        ControlValue: $(this).val(),
+                        LevelNum: 2,
+                        onchange: function (ret) {
+                            if (ret) {
+                                if ($("#JobBeginDate").val() != "" && $("#JobEndDate").val() != "") {
+                                    if (Date.parse($("#JobBeginDate").val().replace(/-/g, "/")) > Date.parse($("#JobEndDate").val().replace(/-/g, "/"))) {
+                                        $honesty.ShowMsg({ title: "警告", msg: "结束日期小于开始日期!" });
+                                        $("#JobEndDate").val("");
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+        });
+    };
+    function LoadData() {
+        InstanceID = api.pageParam.ID;
+        StepName = api.pageParam.StepName;
+        if (api.pageParam.ListInfo) {
+            var ListInfo = api.pageParam.ListInfo;
+            ListID = api.pageParam.ListInfo.ID;
+            $("#JobBeginDate").val(ListInfo.BeginDate);
+            $("#JobEndDate").val(ListInfo.EndDate);
+            $("#JobUnitName").val(ListInfo.UnitName);
+            $("#JobDeptPosition").val(ListInfo.DeptPosition);
+            $("#JobProvePhone").val(ListInfo.ProvePhone);
+            $("#JobLeaveReason").val(ListInfo.LeaveReason);
+        }
+        else {
+            ListID = new $honesty.GUID().NewGUID();
+        }
+        if (api.pageParam.StepName != "提交资料") {
+            $("#footer,#divFooter").hide();
+        }
+        else {
+            $("#footer,#divFooter").show();
+        }
+    }
+</script>

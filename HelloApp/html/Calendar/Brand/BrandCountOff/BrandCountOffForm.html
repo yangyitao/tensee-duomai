@@ -1,0 +1,170 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>竞品报数报表</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-list-view-cell {
+            padding: 5px;
+        }
+
+        .form {
+            width: 100%;
+            text-align: center;
+            font-size: 13px;
+            border-collapse: collapse;
+        }
+
+            .form td, .form th {
+                border-bottom: 1px solid rgba(216, 216, 216, 0.1);
+                height: 35px;
+                letter-spacing: 0.4px;
+            }
+
+            .form th {
+                font-weight: 400;
+            }
+
+            .form tbody td {
+                color: #8f8f94;
+            }
+
+                .form tbody td:first-child {
+                    color: #000;
+                }
+    </style>
+</head>
+<body>
+    <div class="aui-content">
+        <ul class="aui-list-view" style="margin-bottom: 0px;">
+            <li class="aui-list-view-cell">
+                <label id="ShopName"></label>
+                <p>店铺名称</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="CompetitionType"></label>
+                <p>竞争类型</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="MonthTarget"></label>
+                <p>本月目标</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="ActualCompletion"></label>
+                <p>实际完成</p>
+            </li>
+            <li class="aui-list-view-cell" style="padding: 3px;">
+                <table class="form">
+                    <thead>
+                        <tr>
+                            <td style="width: 40px;">排名</td>
+                            <td style="width: 60px;">品牌</td>
+                            <td style="min-width: 60px;">当日销售</td>
+                            <td>当日活动</td>
+                            <td style="min-width: 60px;">当月累计</td>
+                        </tr>
+                    </thead>
+                    <tbody id="tbInfo">
+                    </tbody>
+                </table>
+            </li>
+        </ul>
+    </div>
+    <div style="height: 40px;"></div>
+    <footer class="aui-nav" id="footer" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7;">
+        <div id="btnShare" class="aui-btn aui-btn-block aui-btn-success" style="height: 45px; width: 100%; line-height: 0.9;">
+            分享
+        </div>
+    </footer>
+</body>
+</html>
+
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _OrganizeID, _Today;
+
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _OrganizeID = api.pageParam.OrganizeID;
+            _Today = api.pageParam.Today;
+
+            //下拉刷新
+            api.setRefreshHeaderInfo({
+                visible: true,
+                loadingImg: 'widget://image/refresh.png',
+                bgColor: '#fff',
+                textColor: '#000',
+                textDown: '下拉刷新...',
+                textUp: '松开刷新...',
+                showTime: true
+            }, function (ret, err) {
+                LoadData();
+                api.refreshHeaderLoadDone();
+            });
+
+            LoadData();
+
+            $("#btnShare").tap(function () {
+                var wx = api.require('wx');
+                wx.shareWebpage({
+                    scene: 'session',
+                    title: "竞品报数",
+                    description: GetSession("ShopName") + " " + _Today + "竞品报数",
+                    thumb: "widget://res/img/weixin.png",
+                    contentUrl: $honesty.GetSite() + "/SOM/SharePage/BrandCountOff?OrganizeID=" + _OrganizeID + "&CountOffDate=" + _Today,
+                }, function (ret, err) {
+                    if (ret.status) {
+                        $honesty.ShowToast({ msg: '分享成功' });
+                    }
+                });
+            });
+
+        });
+
+    }
+
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "CountOffForm",
+                    CountOffDate: _Today,
+                    OrganizeID: _OrganizeID
+                },
+                ProcName: "proc_SOM_ISR_Brand",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                var _Content = "";
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        if ($("#ShopName").html() == "") {
+                            $("#ShopName").html(item.BrandCode + "-" + item.ShopName);
+                            $("#MonthTarget").html(item.MonthTarget);
+                            $("#CompetitionType").html(item.CompetitionType);
+                            $("#ActualCompletion").html(item.ActualCompletion + "%");
+                        }
+                        _Content += "<tr><td>" + item.RankID + "</td>" +
+                                    "<td>" + item.BrandName + "</td>" +
+                                    "<td>" + item.DaySale + "</td>" +
+                                    "<td>" + item.DayActivity + "</td>" +
+                                    "<td>" + item.MonthSale + "</td>" +
+                                    "</tr>"
+                    });
+                }
+                $("#tbInfo").html(_Content);
+            }
+        });
+    }
+</script>

@@ -1,0 +1,257 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>销售分配列表（月计划）</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-list-view-cell {
+            padding: 5px;
+        }
+
+            .aui-list-view-cell p {
+                color: #000;
+            }
+
+            .aui-list-view-cell table {
+                width: 100%;
+                text-align: center;
+                border-collapse: collapse;
+                font-size: 14px;
+                letter-spacing: 0.4px;
+                color: #8f8f94;
+            }
+
+                .aui-list-view-cell table td {
+                    border-bottom: 1px solid rgba(216, 216, 216, 0.1);
+                }
+
+        .content {
+            color: #000;
+        }
+
+            .content td:first-child {
+                color: #8f8f94;
+            }
+    </style>
+</head>
+<body>
+    <div style="height: 10px;"></div>
+    <div id="divList">
+    </div>
+    <div id="divFooter" style="height: 10px;"></div>
+    <footer class="aui-nav" id="footer" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7; display: none">
+        <div id="btnSubmit" class="aui-btn aui-btn-block aui-btn-warning" style="height: 45px; width: 100%; line-height: 0.9;">
+            提交
+        </div>
+    </footer>
+</body>
+</html>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script src="../../../script/honesty.function.js"></script>
+<script type="text/javascript">
+    var _MonthID, _IsSubmit;
+    var _Year, _Month, _OrganizeID;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _MonthID = api.pageParam.MonthID;
+            _IsSubmit = api.pageParam.IsSubmit;
+            _Year = api.pageParam.Year;
+            _Month = api.pageParam.Month;
+            _OrganizeID = api.pageParam.OrganizeID;
+
+            if (_IsSubmit == "False") {
+                $("#footer").css("display", "");
+                $("#divFooter").height(50);
+            }
+
+            LoadData();
+
+            //提交按钮点击
+            $("#btnSubmit").tap(function () {
+                $honesty.ConfirmWin({
+                    msg: "是否提交？提交后将不能分配销售额？",
+                    buttons: ["提交", "取消"],
+                    callback: function (ret, err) {
+                        if (ret.buttonIndex == "1") {
+                            var _options = {
+                                PostData: {
+                                    Params: {
+                                        Result: "GetSingleEmpSale",
+                                        MonthID: _MonthID
+                                    },
+                                    ProcName: "proc_SOM_ISR_MS_EmpTarget",
+                                    DataType: "DataTable",
+                                    ExecType: "PROC",
+                                    Mode: "MSSQL"
+                                },
+                                Loading: {
+                                    Title: "正在获取人员信息...",
+                                    Show: true
+                                },
+                                async: false
+                            };
+                            var _result = $honesty.AjaxChannel(_options);
+                            if (_result.Code == "1") {
+                                var saleJson = new Array();
+                                if (_result.Data.length > 0) {
+                                    $.each(_result.Data, function (i, item) {
+                                        saleJson.push({
+                                            EMPID: item.EmpID,
+                                            PERNR: item.EmpCode,
+                                            SOM_ID: item.EmpCode,
+                                            SOM_NAME: item.EmpName,
+                                            ZZ_YGJB: item.LevelDesc,
+                                            Z_SAPCODE: item.SapCode,
+                                            Z_XSDCL: item.SaleRate,
+                                            Z_XSJE: item.ActualSale,
+                                            Z_XSMB: item.TargetSale,
+                                            Z_YEAR1: item.ZYear,
+                                            Z_MONTH1: item.ZMonth,
+                                            Z_QR_EMPID: GetSession("UserID"),
+                                            Z_DATE: $honesty.NowDate(),
+                                            Z_TIME: $honesty.NowDate()
+                                        });
+                                    });
+                                    var _options = {
+                                        PostData: {
+                                            Export: [
+                                                "POC_RETURN_ID"
+                                            ],
+                                            ITable: {
+                                                "PTI_ZHR_YXSSJ": saleJson
+                                            },
+                                            FunctionName: "ZHR_FM_RFC_XSSJ",
+                                            Mode: "RFC"
+                                        },
+                                        Loading: {
+                                            Title: "正在提交数据...",
+                                            Show: true
+                                        }
+                                    };
+                                    $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                                        if (_result.Code == "1") {
+                                            if (_result.Data.Export.POC_RETURN_ID == "000") {
+                                                var _Return = PostWageLevel({ ZYear: _Year, ZMonth: _Month, OrganizeID: _OrganizeID });
+                                                if (_Return.Code == "1") {
+                                                    if (_Return.Data == "True") {
+                                                        _options = {
+                                                            PostData: {
+                                                                Params: {
+                                                                    Result: "SubmitSaleAssign",
+                                                                    MonthID: _MonthID
+                                                                },
+                                                                ProcName: "proc_SOM_ISR_MS_EmpTarget",
+                                                                DataType: "Bool",
+                                                                ExecType: "PROC",
+                                                                Mode: "MSSQL"
+                                                            }
+                                                        };
+                                                        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                                                            if (_result.Code == "1") {
+                                                                if (_result.Data == "True") {
+                                                                    $honesty.ShowMsg({
+                                                                        title: "提示",
+                                                                        msg: "提交成功",
+                                                                        callback: function () {
+                                                                            api.sendEvent({
+                                                                                name: 'Sale_MonthSale_SaleAssignList',
+                                                                                extra: {
+                                                                                    IsTrue: true
+                                                                                }
+                                                                            });
+                                                                            api.closeWin();
+                                                                        }
+                                                                    });
+                                                                }
+                                                            }
+                                                        });
+                                                    }
+                                                    else {
+                                                        $honesty.ShowMsg({ title: "错误", msg: "提交排名失败" });
+                                                    }
+                                                }
+                                            }
+                                            else {
+                                                $honesty.ShowMsg({ title: "错误", msg: "提交失败" });
+                                            }
+                                        }
+                                    });
+                                }
+                                else {
+                                    $honesty.ShowMsg({ title: "警告", msg: "请在下月初提交本月销售" });
+                                }
+                            }
+                        }
+                    }
+                })
+            });
+
+            api.addEventListener({
+                name: 'Sale_MonthSale_SaleAssignInfo'
+            }, function (ret) {
+                if (ret && ret.value) {
+                    LoadData();
+                }
+            });
+        });
+
+    }
+
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "GetAssignList",
+                    MonthID: _MonthID
+                },
+                ProcName: "proc_SOM_ISR_MS_EmpTarget",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    var _Content = "";
+                    $.each(_result.Data, function (i, item) {
+                        _Content += "<div class='aui-content aui-card' tapmode onclick=\"EmpClick(\'" + item.UserID + "\',\'" + item.DelFlag + "\')\"><ul class='aui-list-view'><li class='aui-list-view-cell'>" +
+                                    "<p>" + item.Account + "&nbsp;" + item.Name + "<label style='float: right'>" + item.Title + (item.EmpState == "" ? (item.DelFlag == "True" ? "(离职)" : "") : "(" + item.EmpState + (item.DelFlag == "True" ? "离职" : "") + ")") +
+                                    "</label></p></li><li class='aui-list-view-cell'><table><tr><td style='width:60px;'></td>" +
+                                    "<td>分配前</td><td>分配后</td></tr><tr class='content'><td>销售额</td><td>" + item.ActualSale + "</td>" +
+                                    "<td>" + item.AssignSale + "</td></tr><tr class='content'><td>达成率</td><td>" + item.PreRate + "%</td>" +
+                                    "<td>" + item.AfterRate + "%</td></tr><tr><td>排名:<span style='color:red'>" + item.RankID + "</span></td><td colspan='2' style='text-align:left'>激励津贴档级:<span style='color:blue'>" + item.WageLevelTxt + "</span></td></tr></table></li></ul></div>";
+                    });
+                    $("#divList").html(_Content);
+                    api.parseTapmode();
+                }
+            }
+        })
+    }
+
+    //员工点击函数
+    function EmpClick(userID, delFlag) {
+        if (delFlag == "False") {
+            if (_IsSubmit == "False") {
+                $honesty.OpenWin({
+                    name: "Sale_MonthSale_SaleAssignInfo",
+                    url: "Sale/MonthSale/SaleAssignInfo.html",
+                    title: "月计划",
+                    LevelNum: 2,
+                    pageParam: {
+                        MonthID: _MonthID,
+                        IsSubmit: _IsSubmit,
+                        UserID: userID
+                    }
+                });
+            }
+        }
+    }
+</script>

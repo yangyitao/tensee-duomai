@@ -1,0 +1,241 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>日常巡店</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .sale-header {
+            background: url('../../../image/mybg.png') no-repeat;
+            background-size: cover;
+            min-height: 150px;
+            position: relative;
+        }
+
+        .sale-info {
+            position: relative;
+            padding: 20px 0;
+            width: 100%;
+            bottom: 0;
+            text-align: center;
+        }
+
+            .sale-info p.ratename {
+                margin-top: 15px;
+                color: #ffffff;
+                font-size: 16px;
+            }
+
+            .sale-info p.ratevalue {
+                margin-top: 5px;
+                color: #ffffff;
+                font-size: 30px;
+            }
+
+        .aui-grid-nine li p {
+            color: #2ecc71;
+            font-size: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="aui-content sale-header" style="margin-bottom: 0px;">
+        <div class="sale-info" id="divForm">
+            <p class="ratename" id="pShopName"></p>
+            <p class="ratename" id="pTitle"></p>
+            <p class="ratevalue" id="pScore"></p>
+        </div>
+    </div>
+    <ul class="aui-grid-nine" id="ulList">
+    </ul>
+    <div style="height: 40px;"></div>
+    <footer class="aui-nav" id="footer" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7; display: none">
+        <div id="btnSubmit" class="aui-btn aui-btn-block aui-btn-info" style="height: 45px; width: 100%; line-height: 0.9;">
+            提交
+        </div>
+    </footer>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _Date, _OrganizeID,
+        _TodayDate, _PatrolID, _ImageScore;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _TodayDate = api.pageParam.TodayDate;
+            _PatrolID = api.pageParam.PatrolID;
+            _ImageScore = api.pageParam.ImageScore;
+
+            $("#pTitle").html(_TodayDate + "日常巡店");
+            $("#pScore").html((_ImageScore == -1 ? "未提交" : _ImageScore + "分"));
+
+            if (_ImageScore == -1) {
+                $("#footer").show();
+            }
+
+            LoadData();
+
+            $("#btnSubmit").tap(function () {
+                var _options = {
+                    PostData: {
+                        Params: {
+                            Result: "SumScore",
+                            PatrolID: _PatrolID
+
+                        },
+                        ProcName: "proc_SOM_ISR_PS_ImageManage",
+                        DataType: "Text",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    }
+                };
+                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                    if (_result.Code == "1") {
+                        var _Score = _result.Data;
+                        $honesty.ConfirmWin({
+                            msg: "巡店分数为" + _Score + "是否提交？提交后将不可修改",
+                            buttons: ["提交", "取消"],
+                            callback: function (ret, err) {
+                                if (ret.buttonIndex == "1") {
+                                    _options = {
+                                        PostData: {
+                                            Params: {
+                                                Result: "SubmitImage",
+                                                PatrolID: _PatrolID,
+                                                ImageScore: _Score,
+                                                ImageUserID: GetSession("UserID"),
+                                                ImageUserName: GetSession("UserName")
+                                            },
+                                            ProcName: "proc_SOM_ISR_PatrolShop",
+                                            DataType: "Bool",
+                                            ExecType: "PROC",
+                                            Mode: "MSSQL"
+                                        },
+                                        Loading: {
+                                            Title: "正在提交...",
+                                            Show: true
+                                        }
+                                    };
+                                    $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                                        if (_result.Code == "1") {
+                                            if (_result.Data == "True") {
+                                                $honesty.ShowMsg({
+                                                    title: "提示", msg: "提交成功", callback: function () {
+                                                        _ImageScore = _Score;
+                                                        $("#footer").hide();
+                                                        $("#pScore").html(_ImageScore + "分");
+                                                    }
+                                                });
+                                            }
+                                            else {
+                                                $honesty.ShowMsg({ title: "错误", msg: "提交失败" });
+                                            }
+                                        }
+                                    });
+                                }
+                            }
+                        })
+                    }
+                });
+            });
+
+            //巡店模块保存监听事件
+            api.addEventListener({
+                name: 'PatrolShop_DailyPatrol_PatrolList'
+            }, function (ret) {
+                if (ret && ret.value) {
+                    $("#" + ret.value.ProjectID).html(ret.value.Score)
+                }
+            });
+
+            //问题保存监听事件
+            api.addEventListener({
+                name: 'PatrolShop_DailyPatrol_ProblemInfo'
+            }, function (ret) {
+                if (ret && ret.value) {
+                    $("#ProblemNum").html(Number($("#ProblemNum").html()) + 1);
+                }
+            });
+        });
+    };
+
+    //初始化函数
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "GetProjectList",
+                    PatrolID: _PatrolID
+
+                },
+                ProcName: "proc_SOM_ISR_PS_ImageManage",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    var _Content = "";
+                    var _ProblemNum = 0;
+                    $.each(_result.Data, function (i, item) {
+                        _Content += '<li class="aui-col-xs-4 aui-text-center" tapmode onclick=\"ProjectClick(\'' + item.ProjectID + '\')\">' +
+                                    '<label>' + item.ProjectName + '</label><p id="' + item.ProjectID + '">' + item.GetScore + '</p></li>';
+                        if ($("#pShopName").html() == "") {
+                            $("#pShopName").html(item.Name);
+                        }
+                        _ProblemNum = item.ProblemNum;
+                    });
+                    _Content += '<li class="aui-col-xs-4 aui-text-center" tapmode onclick=\"ProblemClick()\">' +
+                                '<label>巡店问题</label><p id="ProblemNum">' + _ProblemNum + '</p></li>';
+                    var _Num = 3 - (_result.Data.length + 1) % 3;
+                    if (_Num != 3) {
+                        for (var i = 0; i < _Num; i++) {
+                            _Content += '<li class="aui-col-xs-4 aui-text-center"><label>&nbsp;</label><p>&nbsp;</p></li>';
+                        }
+                    }
+
+                    $("#ulList").html(_Content);
+                    api.parseTapmode();
+                }
+            }
+            else {
+                $honesty.CloseWin();
+            }
+        });
+    }
+    //模块点击函数
+    function ProjectClick(projectID) {
+        $honesty.OpenWin({
+            title: "日常巡店",
+            name: "PatrolShop_DailyPatrol_PatrolList",
+            url: "PatrolShop/DailyPatrol/PatrolList.html",
+            LevelNum: 2,
+            pageParam: {
+                PatrolID: _PatrolID,
+                ProjectID: projectID,
+                ImageScore: _ImageScore
+            }
+        })
+    }
+
+    //问题模块点击
+    function ProblemClick() {
+        $honesty.OpenWin({
+            title: "日常巡店",
+            name: "PatrolShop_DailyPatrol_ProblemList",
+            url: "PatrolShop/DailyPatrol/ProblemList.html",
+            LevelNum: 2,
+            pageParam: {
+                PatrolID: _PatrolID,
+                ImageScore: _ImageScore
+            }
+        });
+    }
+</script>
+</html>

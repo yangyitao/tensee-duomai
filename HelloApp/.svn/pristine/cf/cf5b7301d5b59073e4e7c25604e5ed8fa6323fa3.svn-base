@@ -1,0 +1,102 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>共享资料查询</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-input-row .aui-input-addon {
+            width: 90px;
+        }
+    </style>
+</head>
+<body>
+    <div style="height: 10px;"></div>
+    <div class="aui-content aui-card">
+        <div class="aui-form aui-input-form">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">起始日期:</span>
+                <input id="StartDate" type="text" class="aui-input aui-important" readonly="readonly" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">截止日期:</span>
+                <input id="EndDate" type="text" class="aui-input" readonly="readonly" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">发布人:</span>
+                <input id="txtCreateName" type="text" class="aui-input" placeholder="请输入发布人" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">通知标题:</span>
+                <input id="txtTitle" type="text" class="aui-input" placeholder="请输入通知标题" />
+            </div>
+            <div class="aui-btn-row">
+                <div id="btnSearch" class="aui-btn aui-btn-block aui-btn-warning">
+                    查询
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            var _Date = $honesty.NowDate();
+            //初始化结束时间结束时间
+            $("#EndDate").val(_Date.Format("yyyy-MM-dd"));
+            _Date.addYears(-1);
+            //初始化开始时间结束时间
+            $("#StartDate").val(_Date.Format("yyyy-MM-dd"));
+
+            //开始时间点击
+            $("#StartDate").tap(function () {
+                $honesty.DateTimeSelect({
+                    LevelNum: 2,
+                    Type: "Date",
+                    ControlID: "StartDate",
+                    ControlValue: $("#StartDate").val()
+                });
+            });
+            //结束时间点击
+            $("#EndDate").tap(function () {
+                $honesty.DateTimeSelect({
+                    LevelNum: 2,
+                    Type: "Date",
+                    ControlID: "EndDate",
+                    ControlValue: $("#EndDate").val()
+                });
+            });
+
+            //查询按钮点击
+            $("#btnSearch").tap(function () {
+                if (new Date($("#StartDate").val()) > new Date($("#EndDate").val())) {
+                    $honesty.ShowMsg({ title: "警告", msg: "开始时间不能大于结束时间，请重新选择!" });
+                }
+                else {
+                    $honesty.OpenWin({
+                        name: "Info_Datum_Index",
+                        url: "Info/Datum/Index.html",
+                        title: "共享资料",
+                        LevelNum: 2,
+                        pageParam: {
+                            StartDate: $("#StartDate").val(),
+                            EndDate: $("#EndDate").val(),
+                            CreateName: $("#txtCreateName").val().trim(),
+                            Title: $("#txtTitle").val().trim()
+                        }
+                    });
+                }
+            });
+        });
+
+    }
+
+</script>
+</html>

@@ -1,0 +1,176 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>竞品动态报表</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-list-view-cell {
+            padding: 5px;
+        }
+
+        .form {
+            width: 100%;
+            text-align: center;
+            font-size: 13px;
+            border-collapse: collapse;
+        }
+
+            .form td, .form th {
+                border-bottom: 1px solid rgba(216, 216, 216, 0.1);
+                height: 35px;
+                letter-spacing: 0.4px;
+            }
+
+            .form th {
+                font-weight: 400;
+            }
+
+            .form tbody td {
+                color: #8f8f94;
+            }
+
+                .form tbody td:first-child {
+                    color: #000;
+                }
+    </style>
+</head>
+<body>
+    <div class="aui-tab" id="divTab">
+        <ul id="TopBar" class="aui-tab-nav">
+            <li data-type="sale" class="active">销售数据</li>
+            <li data-type="kpi">KPI数据</li>
+        </ul>
+    </div>
+    <div class="aui-content">
+        <ul class="aui-list-view" style="margin-bottom: 0px;">
+            <li class="aui-list-view-cell">
+                <label id="ShopName"></label>
+                <p>店铺名称</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="ShopNature"></label>
+                <p>店铺类型</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="CompetitionType"></label>
+                <p>竞争类型</p>
+            </li>
+            <li class="aui-list-view-cell" style="padding: 3px;">
+                <table class="form">
+                    <thead>
+                        <tr>
+                            <td style="width: 60px;">品牌</td>
+                            <td data-type="sale">本月目标</td>
+                            <td data-type="sale">当月销售</td>
+                            <td data-type="sale">实际完成</td>
+                            <td data-type="sale">年累计销售</td>
+                            <td data-type="kpi" style="display: none;">排名</td>
+                            <td data-type="kpi" style="display: none;">当月同比</td>
+                            <td data-type="kpi" style="display: none;">月&nbsp;人&nbsp;效</td>
+                            <td data-type="kpi" style="display: none;">月&nbsp;坪&nbsp;效</td>
+                        </tr>
+                    </thead>
+                    <tbody id="tbInfo">
+                    </tbody>
+                </table>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>
+
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _OrganizeID, _Year, _Month;
+
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _OrganizeID = api.pageParam.OrganizeID;
+            _Year = api.pageParam.Year;
+            _Month = api.pageParam.Month;
+
+            //下拉刷新
+            api.setRefreshHeaderInfo({
+                visible: true,
+                loadingImg: 'widget://image/refresh.png',
+                bgColor: '#fff',
+                textColor: '#000',
+                textDown: '下拉刷新...',
+                textUp: '松开刷新...',
+                showTime: true
+            }, function (ret, err) {
+                LoadData();
+                api.refreshHeaderLoadDone();
+            });
+
+            LoadData();
+
+            $("#TopBar").children("li").tap(function () {
+                $("#TopBar").find(".active").removeClass("active");
+                $(this).addClass("active");
+                switch ($(this).data("type")) {
+                    case "kpi":
+                        $(".form").find("[data-type='kpi']").fadeIn(700);
+                        $(".form").find("[data-type='sale']").hide();
+                        break;
+                    case "sale":
+                        $(".form").find("[data-type='kpi']").hide();
+                        $(".form").find("[data-type='sale']").fadeIn(700);
+                        break;
+                    default:
+
+                }
+            })
+        });
+
+    }
+
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "DynamicFrom",
+                    ZYear: _Year,
+                    ZMonth: _Month,
+                    OrganizeID: _OrganizeID
+                },
+                ProcName: "proc_SOM_ISR_Brand",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                var _Content = "";
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        if ($("#ShopName").html() == "") {
+                            $("#ShopName").html(item.BrandCode + "-" + item.ShopName);
+                            $("#ShopNature").html(item.ShopNature);
+                            $("#CompetitionType").html(item.CompetitionType);
+                        }
+                        _Content += "<tr><td>" + item.BrandName + "</td>" +
+                                    "<td data-type='sale'>" + item.MonthTarget + "</td>" +
+                                    "<td data-type='sale'>" + item.MonthSale + "</td>" +
+                                    "<td data-type='sale'>" + item.ActualCompletion + "%</td>" +
+                                    "<td data-type='sale'>" + item.TotalSale + "</td>" +
+                                    "<td data-type='kpi' style='display:none;'>" + item.RankID + "</td>" +
+                                    "<td data-type='kpi' style='display:none;'>" + item.MonthCompare + "%</td>" +
+                                    "<td data-type='kpi' style='display:none;'>" + item.PeopleSale + "</td>" +
+                                    "<td data-type='kpi' style='display:none;'>" + item.AreaSale + "</td>" +
+                                    "</tr>"
+                    });
+                }
+                $("#tbInfo").html(_Content);
+            }
+        });
+    }
+</script>

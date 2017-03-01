@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>调动申请流程</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-input-row .aui-input-addon {
+            width: 120px;
+            color: #8f8f94;
+            text-align: left;
+        }
+
+        .aui-input-form .aui-input-row .aui-input-addon {
+            padding-left: 8px;
+            font-weight: 300;
+            font-size: 13px;
+        }
+
+        .aui-list-view-cell {
+            padding: 5px 15px;
+        }
+
+        .aui-label-title {
+            text-align: right;
+            width: 90px;
+        }
+    </style>
+</head>
+<body>
+    <input id="EmpID" type="hidden" />
+    <input id="NewSapCode" type="hidden" />
+    <input id="TransEmpLevel" type="hidden" />
+    <input id="TransLevelDesc" type="hidden" />
+    <input id="TransSapCode" type="hidden" />
+    <input id="TransOrganizeID" type="hidden" />
+    <input id="TransUpLeaderID" type="hidden" />
+    <input id="NewOrganizeID" type="hidden" />
+    <input id="NewUpLeaderID" type="hidden" />
+    <input id="NewEmpLevel" type="hidden" />
+    <input id="NewLevelDesc" type="hidden" />
+    <input id="TransID" type="hidden" />
+    <input id="TransShopCode" type="hidden" />
+    <input id="TransDeviceSN" type="hidden" />
+    <input id="NewShopCode" type="hidden" />
+    <input id="NewDeviceSN" type="hidden" />
+    <input id="TransIsInstead" type="hidden" />
+    <input id="RankInfo" type="hidden" />
+
+
+    <div id="main">
+        <p class="aui-padded-5 aui-text-center" style="color: #3175af; font-size: 16px;">调动申请流程</p>
+        <div class="aui-card" style="margin-bottom: 0px;">
+            <ul class="aui-list-view" style="margin-bottom: 0px;">
+                <li class="aui-list-view-cell">
+                    <label id="InfoSN"></label>
+                    <p>单号</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="InfoEmpName"></label>
+                    <p>姓名</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="InfoWriteDate"></label>
+                    <p>日期</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="InfoEmpCode"></label>
+                    <p>工号</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoAreaName"></label>
+                    <p>大区</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoProvince"></label>
+                    <p>区域</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoEmpPosition"></label>
+                    <p>岗位</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoShopName"></label>
+                    <p>店铺名称</p>
+                </li>
+                <li data-role="colspan" data-show="hide" class="aui-list-view-cell" id="liBaseMore">
+                    <p style="text-align: center">点击显示详情</p>
+                </li>
+            </ul>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; margin: 0 10px; font-size: 15px;">基本信息</p>
+        <div class="aui-card aui-input-form" style="margin-bottom: 0px;">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">调动员工工号</span>
+                <input id="TransCode" type="text" class="aui-input aui-important" placeholder="请填写员工工号" onchange="UserInfo()" disabled="disabled" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">调动员工姓名</span>
+                <input id="TransName" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">调动类型</span>
+                <select class="aui-input aui-important" id="Reason" disabled="disabled">
+                    <option value="">请选择...</option>
+                    <option value="平级调动">平级调动</option>
+                    <option value="晋升调动">晋升调动</option>
+                    <option value="降级调动">降级调动</option>
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">是否享受异地补贴</span>
+                <select class="aui-input aui-important" id="IsSubsidy" onchange="Subsidy()" disabled="disabled">
+                    <option value="否">否</option>
+                    <option value="是">是</option>
+                </select>
+            </div>
+            <div class="aui-input-row" id="SubsidyMoneyform" style="display: none">
+                <span class="aui-input-addon">异地补贴金额</span>
+                <input id="SubsidyMoney" type="text" class="aui-input aui-important" disabled="disabled" placeholder="请填写金额" />
+            </div>
+            <div class="aui-input-row" id="EffectDateform" style="display: none">
+                <span class="aui-input-addon">补贴开始日期</span>
+                <input id="EffectDate" type="text" class="aui-input aui-important" readonly="readonly" />
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; margin: 0 10px; font-size: 15px;">调出信息</p>
+        <div class="aui-card aui-input-form" style="margin-bottom: 0px;">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">调出店铺</span>
+                <input id="TransShopName" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">调出岗位</span>
+                <input id="TransPosition" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">调出公司</span>
+                <input id="TransCompany" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">调出省份</span>
+                <input id="TransArea" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">调出城市</span>
+                <input id="TransCity" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; margin: 0 10px; font-size: 15px;">调入信息</p>
+        <div class="aui-form">
+            <div class="aui-card aui-input-form" style="margin-bottom: 0px;">
+                <div class="aui-input-row">
+                    <span class="aui-input-addon">调入店铺</span>
+                    <input id="NewShopName" type="text" placeholder="请选择调入店铺" class="aui-input aui-important" readonly="true" />
+                </div>
+                <div class="aui-input-row">
+                    <span class="aui-input-addon">调入岗位</span>
+                    <select class="aui-input aui-important" id="NewPosition" disabled="disabled">
+                        <option value="">请选择...</option>
+                        <option value="E1">店经理</option>
+                        <option value="F1">高级店长</option>
+                        <option value="F2">中级店长</option>
+                        <option value="F3">初级店长</option>
+                        <option value="H1">高级导购</option>
+                        <option value="H4">导购</option>
+                    </select>
+                </div>
+                <div class="aui-input-row">
+                    <span class="aui-input-addon">调入公司</span>
+                    <input id="NewCompany" type="text" class="aui-input aui-important" readonly="true" />
+                </div>
+                <div class="aui-input-row">
+                    <span class="aui-input-addon">调入省份</span>
+                    <input id="NewArea" type="text" class="aui-input aui-important" readonly="true" />
+                </div>
+                <div class="aui-input-row">
+                    <span class="aui-input-addon">调入城市</span>
+                    <input id="NewCity" type="text" class="aui-input aui-important" readonly="true" />
+                </div>
+            </div>
+        </div>
+        <p id="TextMsg1" class="aui-padded-5 aui-text-left" style="color: #3175af; margin: 0 10px; font-size: 15px; display: none">晋升员工情况</p>
+        <div class="aui-form" id="Fromdiv" style="display: none">
+            <div class="aui-card aui-input-form" style="margin-bottom: 0px;">
+                <div class="aui-input-row">
+                    <span id="TextMsg2" class="aui-input-addon">申请晋升时间</span>
+                    <input id="ApplyDate" type="text" class="aui-input aui-important" placeholder="请选择时间" />
+                </div>
+                <div class="aui-input-row">
+                    <span class="aui-input-addon">现任职位岗龄(月)</span>
+                    <input id="PositionAge" type="text" class="aui-input aui-important" readonly="true" />
+                </div>
+                <div class="aui-input-row">
+                    <span class="aui-input-addon">业绩达成率(累计)</span>
+                    <input id="AchieveRate" type="text" class="aui-input aui-important" readonly="true" />
+                </div>
+                <div class="aui-input-row">
+                    <span class="aui-input-addon" style="vertical-align: top">业绩排名情况</span>
+                    <textarea id="Ranking" class="aui-input" style="height: 70px; overflow-y: auto;" readonly="readonly"></textarea>
+                </div>
+                <div class="aui-input-row" title="Promote">
+                    <span class="aui-input-addon">陈列结果</span>
+                    <select class="aui-input aui-important" id="Exhibit">
+                        <option value="">请选择</option>
+                        <option value="否">合格</option>
+                        <option value="是">不合格</option>
+                    </select>
+                </div>
+                <div class="aui-input-row" title="Promote" name="shopowner">
+                    <span class="aui-input-addon">店长综合能力<br />
+                        考核成绩</span>
+                    <input id="Performance" type="text" class="aui-input aui-important" placeholder="请填写绩效成绩" />
+                </div>
+                <div class="aui-input-row" title="Promote" name="shopowner">
+                    <span class="aui-input-addon">储备人员培养人数</span>
+                    <input id="TrainCount" type="text" class="aui-input aui-important" placeholder="请填写培养人数" />
+                </div>
+                <div class="aui-input-row" title="Promote" name="shopguide">
+                    <span class="aui-input-addon">储备店长训练营</span>
+                    <input id="TestSubject" type="text" class="aui-input aui-important" readonly="true" />
+                </div>
+                <div class="aui-input-row" title="Promote">
+                    <span class="aui-input-addon">上级评价</span>
+                    <input id="Appraise" type="text" class="aui-input aui-important" placeholder="请填写评价内容" />
+                </div>
+                <div class="aui-btn-row">
+                    <div class="aui-btn aui-btn-warning aui-iconfont aui-icon-upload" id="btnSlaves" style="float: left">上传附件</div>
+                    <div class="aui-btn aui-btn-danger aui-iconfont aui-icon-delete" id="btnClear" style="float: left; margin-left: 5px">清空附件</div>
+                    <table class="aui-salves" id="tbSlaves">
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div style="height: 100px"></div>
+</body>
+<script src="../../script/api.js"></script>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script src="../../script/honesty.flow.js"></script>
+<script src="../../script/honesty.valid.js"></script>
+<script type="text/javascript">
+    var IsRead = false;
+    var TransferID = "";
+    var arry = ["E1", "F1", "F2", "F3", "H1", "H4"];
+    var NowDate = $honesty.NowDate();
+    var Isleader = GetSession("IsLeader");
+    var _ContentList = "";
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            if (Isleader >= 1) {
+                $honestyFlow.InitFlow({ Async: false, wapflowpage: "HRFlow/EmpTransfer" });
+                var InstanceID = $honestyFlow.GetFlowInfo("instanceid");
+                if (api.pageParam.instanceid != undefined) {
+                    TransferID = InstanceID;
+                }
+                if ($honestyFlow.GetFlowInfo("stepname") == "发起调动申请") {
+                    $("#Reason,#SubsidyMoney,#IsSubsidy,#NewShopName,#TransCode,#btnSlaves").removeAttr("disabled", "");
+                }
+                //基本信息点击展示隐藏
+                $("#liBaseMore").tap(function () {
+                    $("[data-role='baseMore']").fadeToggle(200);
+                    if ($("#liBaseMore").attr("data-show") == "hide") {
+                        $("#liBaseMore").children("p").html("点击收起");
+                        $("#liBaseMore").attr("data-show", "show");
+                    }
+                    else {
+                        $("#liBaseMore").children("p").html("点击显示详情");
+                        $("#liBaseMore").attr("data-show", "hide");
+                    }
+                });
+
+                InitBase();
+
+                $("#EffectDate").tap(function () {
+                    if ($honestyFlow.GetFlowInfo("stepname") == "发起调动申请") {
+                        $honesty.DateTimeSelect({
+                            Type: "Date",
+                            ControlID: "EffectDate",
+                            ControlValue: $(this).val(),
+                            onchange: function (ret) {
+                                if (ret) {
+                                    if ($("#EffectDate").val() != "") {
+                                        var _Date = new Date($("#EffectDate").val().replace(/-/g, "/"));
+                                        var _EffectDate = _Date.getFullYear() + "/" + (_Date.getMonth() + 1) + "/" + "01";
+                                        $("#EffectDate").val(new Date(_EffectDate).Format("yyyy/MM/dd"));
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+                $("#ApplyDate").tap(function () {
+                    if ($honestyFlow.GetFlowInfo("stepname") == "发起调动申请") {
+                        $honesty.DateTimeSelect({
+                            LevelNum: 1,
+                            Type: "Date",
+                            ControlID: "ApplyDate",
+                            ControlValue: $(this).val(),
+                            onchange: function (ret) {
+                                if (ret) {
+                                    if ($("#ApplyDate").val() != "") {
+                                        var _Date = new Date($("#ApplyDate").val().replace(/-/g, "/"));
+                                        var _ApplyDate = _Date.getFullYear() + "/" + (_Date.getMonth() + 1) + "/" + "01";
+                                        $("#ApplyDate").val(new Date(_ApplyDate).Format("yyyy/MM/dd"));
+                                        ApplyDate();
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+                $("#NewShopName").tap(function () {
+                    if ($honestyFlow.GetFlowInfo("stepname") == "发起调动申请") {
+                        $honesty.Organize({
+                            control: "NewShopName",
+                            ismore: "false",
+                            typemode: "S",
+                            root: false,
+                            callback: function (ret) {
+                                setTimeout(function () {
+                                    TransUserInfo($("#NewShopName").data("listid")[0]);
+                                    $("#NewOrganizeID").val($("#NewShopName").data("listid")[0]);
+                                }, 200)
+                            }
+                        })
+                    }
+                });
+                $("#NewPosition").change(function () {
+                    $("#NewEmpLevel").val($("#NewPosition").val().substring(0, 1));
+                    $("#NewLevelDesc").val($("#NewPosition").val());
+                });
+                $("#SubsidyMoney").change(function () {
+                    if (isNaN($("#SubsidyMoney").val())) {
+                        $("#SubsidyMoney").val("");
+                        $honesty.ShowMsg({ msg: "请输入数字！", title: "警告" });
+                    }
+                });
+                $("#Reason").change(function () {
+                    if ($("#TransCode").val() != "") {
+                        var TranLv = $.inArray($("#TransLevelDesc").val(), arry);
+                        var _TransIsInstead = $("#TransIsInstead").val();
+                        if ($("#Reason").val() == "平级调动") {
+                            $("#NewPosition").val($("#TransLevelDesc").val());
+                            $("#NewEmpLevel").val($("#TransEmpLevel").val());
+                            $("#NewLevelDesc").val($("#TransLevelDesc").val());
+                            $("#NewPosition").attr("disabled", "disabled");
+                            $("#TextMsg1,#Fromdiv").css("display", "none");
+                        }
+                        if ($("#Reason").val() == "晋升调动") {
+                            $("#TextMsg1,#Fromdiv").css("display", "");
+                            $("#TextMsg1").text("晋升员工情况");
+                            $("#TextMsg2").text("申请晋升时间");
+                            $("[title='Promote']").css("display", "");
+                            if (TranLv == 4 || (TranLv == 5 && _TransIsInstead != "True")) {
+                                $("#NewPosition").val(arry[TranLv - 1]);
+                                $("#NewEmpLevel").val(arry[TranLv - 1].substring(0, 1));
+                                $("#NewLevelDesc").val(arry[TranLv - 1]);
+                                $("#NewPosition").attr("disabled", "disabled");
+                                $("div[name='shopowner']").css("display", "none");
+                                $("div[name='shopguide']").css("display", "none");
+                                if ($("#NewLevelDesc").val() == "F3") {
+                                    $("div[name='shopguide']").css("display", "");
+                                    var _parames = {
+                                        PostData: {
+                                            Params: {
+                                                result: "GetTrainResults",
+                                                TransCode: $("#TransCode").val()
+                                            },
+                                            ProcName: "proc_SOM_HR_EmpTransfer",
+                                            DataType: "DataTable",
+                                            ExecType: "PROC",
+                                            Mode: "MSSQL"
+                                        },
+                                        async: false
+                                    };
+                                    var _table = $honesty.AjaxChannel(_parames);
+                                    if (_table.Data.length > 0) {
+                                        $.each(_table.Data, function (i, item) {
+                                            $("#TestSubject").val(item.Result)
+
+                                        });
+                                    }
+                                }
+                            }
+                            else {
+                                $("#NewPosition").removeAttr("disabled", "");
+                                for (var i = TranLv + 1 ; i <= arry.length + 1; i++) {
+                                    $("#NewPosition option:eq(" + i + ")").attr("disabled", "disabled");
+                                }
+                                $("div[name='shopowner']").css("display", "");
+                                $("div[name='shopguide']").css("display", "none");
+                            }
+
+                        }
+                        if ($("#Reason").val() == "降级调动") {
+                            $("#NewPosition").val("");
+                            $("#NewPosition").removeAttr("disabled", "");
+                            for (var i = 1 ; i <= TranLv + 1; i++) {
+                                $("#NewPosition option:eq(" + i + ")").attr("disabled", "disabled");
+                            }
+                            $("#TextMsg1,#Fromdiv").css("display", "");
+                            $("#TextMsg1").text("降职员工情况");
+                            $("#TextMsg2").text("申请降职时间");
+                            $("[title='Promote']").css("display", "none");
+                        }
+                    }
+                    else {
+                        $honesty.ShowMsg({ msg: "请先输入调动员工工号！", title: "警告" });
+                    }
+                });
+                $("#btnSlaves").tap(function () {
+                    if ($honestyFlow.GetFlowInfo("stepname") == "发起调动申请") {
+                        $honesty.UploadSlaves("tbSlaves");
+                    }
+                });
+                $("#btnClear").tap(function () {
+                    if ($honestyFlow.GetFlowInfo("stepname") == "发起调动申请") {
+                        $honesty.ConfirmWin({
+                            title: "提示",
+                            msg: "是否删除所有文件?",
+                            buttons: ["确认", "取消"],
+                            callback: function (ret, err) {
+                                if (ret.buttonIndex == 1) {
+                                    $("#tbSlaves").html("");
+                                }
+                            }
+                        });
+                    }
+                });
+                //点击排行情况                
+                $("#Ranking").tap(function () {
+                    if (_ContentList != "") {
+                        api.openFrame({
+                            name: 'Ranking',
+                            url: 'Ranking.html',
+                            bounces: false,
+                            pageParam: {
+                                ContentList: _ContentList,
+                                NewLevelDesc: $("#NewLevelDesc").val()
+                            },
+                            rect: {
+                                x: 0,
+                                y: 0,
+                                w: 'auto',
+                                h: 'auto'
+                            },
+                            animation: {
+                                type: "push",
+                                subType: "from_right",
+                                duration: 300
+                            }
+                        });
+                        api.bringFrameToFront({
+                            from: 'Ranking'
+                        });
+                    }
+                })
+
+                //提交
+                $("#btnSend").unbind("tap").tap(function () {
+                    if (SaveData()) {
+                        $honestyFlow.SendFlow();
+                    }
+                });
+                //暂存
+                $("#btnPause").unbind("tap").tap(function () {
+                    if (SaveData()) {
+                        $honestyFlow.PauseFlow();
+                    }
+                });
+                //完成
+                $("#btnComplete").unbind("tap").tap(function () {
+                    var _sapCode = $("#NewSapCode").val().split(",");
+                    var _oldshopCode = $("#TransShopCode").val().split(",");
+                    var _newshopCode = $("#NewShopCode").val().split(",");
+                    if ($.trim($("#EffectDate").val()) == "") {
+                        var _effectDate = 99991231;
+                    }
+                    else {
+                        var _effectDate = new Date($("#EffectDate").val()).Format("yyyyMMdd");
+                    }
+                    var EmpTransfer = {
+                        PostData: {
+                            Params: {
+                                empId: $("#TransID").val(),
+                                sn: $honestyFlow.GetFlowInfo("sn"),
+                                sapCode: _sapCode[0],
+                                transPosition: $("#NewPosition").val(),
+                                isSubsidy: $("#IsSubsidy").val(),
+                                subsidyMoney: $("#SubsidyMoney").val(),
+                                applyDate: new Date(NowDate).Format("yyyyMMdd"),
+                                applyTime: new Date(NowDate).Format("hhmmss"),
+                                effectDate: _effectDate,
+                                transCode: $("#TransCode").val(),
+                                oldShopCode: _oldshopCode[0],
+                                oldDeviceSN: $("#TransDeviceSN").val(),
+                                preShopCode: _newshopCode[0],
+                                predeviceSN: $("#NewDeviceSN").val(),
+                                transLevelDesc: $("#TransLevelDesc").val(),
+                                transSapCode: $("#TransSapCode").val()
+                            },
+                            URL: "employeeInfo/moveEmployee",
+                            Mode: "ESB",
+                            Handle: "POST"
+                        },
+                        Loading: {
+                            Title: "SAP数据传输中...",
+                            Show: true
+                        }
+                    };
+                    $.when($honesty.AjaxChannel(EmpTransfer)).done(function (_result) {
+                        if (_result.Data.returnCode == "000") {
+                            $honestyFlow.CompleteFlow({
+                                Callback: function () {
+                                    var _options = {
+                                        PostData: {
+                                            Params: {
+                                                result: "HandoverEmp",
+                                                EmpID: $("#TransID").val(),
+                                                EmpCode: $("#TransCode").val()
+                                            },
+                                            ProcName: "proc_SOM_HR_EmpHandover",
+                                            DataType: "DataTable",
+                                            ExecType: "PROC",
+                                            Mode: "MSSQL"
+                                        },
+                                        Loading: {
+                                            Title: "工作交接推送中...",
+                                            Show: true
+                                        },
+                                        async: false
+                                    };
+                                    var _result = $honesty.AjaxChannel(_options);
+                                    if (_result.Code == "1") {
+                                        $honesty.ShowMsg({ msg: "工作交接推送成功", title: "警告" });
+                                        $honesty.CloseWin();
+                                    }
+                                }
+                            });
+                        }
+                        else {
+                            $honesty.ShowMsg({ msg: _result.Data.returnMsg, title: "警告" });
+                        }
+                    })
+                });
+            }
+            else {
+                $honesty.ShowMsg({
+                    title: "警告",
+                    msg: "您暂无权限操作！",
+                    callback: function () {
+                        api.closeWin();
+                    }
+                });
+            }
+        })
+    }
+
+    //加载基础信息
+    function InitBase() {
+        if ($honestyFlow.GetFlowInfo("isread") == "false") {
+            IsRead = true;
+        }
+        if (TransferID != "") {
+            var _options = {
+                PostData: {
+                    Params: {
+                        Result: "InitEmpTransfer",
+                        ID: TransferID
+                    },
+                    ProcName: "proc_SOM_HR_EmpTransfer",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        $.each(_result.Data, function (i, item) {
+                            $("#InfoSN").html(item.SN);
+                            $("#InfoWriteDate").html(item.WriteDate);
+                            $("#InfoEmpCode").html(item.EmpCode);
+                            $("#InfoEmpName").html(item.EmpName);
+                            $("#InfoEmpPosition").html(item.EmpPosition);
+                            $("#InfoAreaName").html(item.AreaName);
+                            $("#InfoProvince").html(item.Province);
+                            $("#InfoShopName").html(item.ShopName);
+                            //加载附件列表
+                            $honesty.InitSlaves({
+                                con_id: "tbSlaves", dataname: "tbSlaves", move: IsRead, files: item.Slaves
+                            });
+                            $("#TransCode").val(item.TransCode);
+                            $("#TransName").val(item.TransName);
+                            $("#TransArea").val(item.TransArea);
+                            $("#TransCity").val(item.TransCity);
+                            $("#TransShopName").val(item.TransShopName);
+                            $("#TransPosition").val(item.TransPosition);
+                            $("#TransCompany").val(item.TransCompany);
+                            $("#TransEmpLevel").val(item.TransEmpLevel);
+                            $("#TransLevelDesc").val(item.TransLevelDesc);
+                            $("#TransSapCode").val(item.TransSapCode);
+                            $("#NewArea").val(item.NewArea);
+                            $("#NewCity").val(item.NewCity);
+                            $("#NewShopName").val(item.NewShopName);
+                            $("#NewSapCode").val(item.NewSapCode);
+                            $("#NewPosition").val(item.NewLevelDesc);
+                            $("#NewEmpLevel").val(item.NewEmpLevel);
+                            $("#NewLevelDesc").val(item.NewLevelDesc);
+                            $("#NewCompany").val(item.NewCompany);
+                            $("#IsSubsidy").val(item.IsSubsidy);
+                            $("#SubsidyMoney").val(item.SubsidyMoney);
+                            $("#EffectDate").val(item.EffectDate);
+                            $("#Reason").val(item.Reason);
+                            $("#TransIsInstead").val(item.TransIsInstead)
+                            $("#ApplyDate").val(item.ApplyDate);
+                            $("#PositionAge").val(item.PositionAge);
+                            $("#AchieveRate").val(item.AchieveRate);
+                            $("#RankInfo").val(item.RankInfo);
+                            $("#Ranking").val(item.Ranking);
+                            $("#Exhibit").val(item.Exhibit);
+                            $("#TrainCount").val(item.TrainCount);
+                            $("#Performance").val(item.Performance);
+                            $("#TestSubject").val(item.TestSubject);
+                            $("#Appraise").val(item.Appraise);
+                            $("#EmpID").val(item.EmpID);
+                            $("#TransID").val(item.TransID);
+                            $("#TransOrganizeID").val(item.TransOrganizeID);
+                            $("#NewOrganizeID").val(item.NewOrganizeID);
+                            $("#TransUpLeaderID").val(item.TransUpLeaderID);
+                            $("#NewUpLeaderID").val(item.NewUpLeaderID);
+                            $("#TransShopCode").val(item.TransShopCode);
+                            $("#TransDeviceSN").val(item.TransDeviceSN);
+                            $("#NewShopCode").val(item.NewShopCode);
+                            $("#NewDeviceSN").val(item.NewDeviceSN);
+                            _ContentList = "";
+                            var trList = $("#RankInfo").val().split("|");
+                            for (var i = 0 ; i < trList.length; i++) {
+                                var tdList = trList[i].split(",");
+                                if ($("#NewLevelDesc").val() == "H1") {
+                                    _ContentList += "<tr><td>" + tdList[0] + "</td><td>" + tdList[1] + "</td><td>" + tdList[2] + "</td><td>" + tdList[3] + "</td><td>" + tdList[4] + "</td><tr>";
+                                }
+                                else {
+                                    _ContentList += "<tr><td>" + tdList[0] + "</td><td>" + tdList[1] + "</td><td>" + tdList[2] + "</td><td>" + tdList[3] + "</td><tr>";
+                                }
+                            }
+                            var TranLv = $.inArray($("#TransLevelDesc").val(), arry);
+                            var _TransIsInstead = $("#TransIsInstead").val();
+                            if ($("#Reason").val() == "平级调动") {
+                                $("#NewPosition").attr("disabled", "disabled");
+                                $("#TextMsg1,#Fromdiv").css("display", "none");
+                            }
+                            if ($("#Reason").val() == "晋升调动") {
+                                $("#TextMsg1,#Fromdiv").css("display", "");
+                                $("#TextMsg1").text("晋升员工情况");
+                                $("#TextMsg2").text("申请晋升时间");
+                                $("[title='Promote']").css("display", "");
+                                if (TranLv == 4 || (TranLv == 5 && _TransIsInstead != "True")) {
+                                    $("#NewPosition").attr("disabled", "disabled");
+                                    $("div[name='shopowner']").css("display", "none");
+                                    $("div[name='shopguide']").css("display", "none");
+                                }
+                                else {
+                                    $("#NewPosition").removeAttr("disabled", "");
+                                    for (var i = TranLv + 1 ; i <= arry.length + 1; i++) {
+                                        $("#NewPosition option:eq(" + i + ")").attr("disabled", "disabled");
+                                    }
+                                    $("div[name='shopowner']").css("display", "");
+                                    $("div[name='shopguide']").css("display", "none");
+                                }
+
+                            }
+                            if ($("#Reason").val() == "降级调动") {
+                                $("#NewPosition").val("");
+                                $("#NewPosition").removeAttr("disabled", "");
+                                for (var i = 1 ; i <= TranLv + 1; i++) {
+                                    $("#NewPosition option:eq(" + i + ")").attr("disabled", "disabled");
+                                }
+                                $("#TextMsg1,#Fromdiv").css("display", "");
+                                $("#TextMsg1").text("降职员工情况");
+                                $("#TextMsg2").text("申请降职时间");
+                                $("[title='Promote']").css("display", "none");
+                            }
+
+                        });
+                    }
+                    if ($("#IsSubsidy").val() == "是") {
+                        $("#SubsidyMoneyform").css("display", "");
+                        $("#EffectDateform").css("display", "");
+                    }
+                    else {
+                        $("#SubsidyMoneyform").css("display", "none");
+                        $("#EffectDateform").css("display", "none");
+                    }
+                    if (IsRead) {
+                        $("#divMain input").attr("readonly", "readonly");
+                        $("#divMain select").attr("disabled", "disabled");
+                        $("#btnSlaves,#btnClear").hide();
+                    }
+                }
+            })
+        }
+        else {
+            TransferID = $honestyFlow.GetFlowInfo("instanceid");
+            $("#InfoSN").html($honestyFlow.GetFlowInfo("SN"));
+            $("#InfoWriteDate").html($honesty.NowDate().Format("yyyy-MM-dd"));
+            $("#InfoEmpCode").html(GetSession("UserCode"));
+            $("#InfoEmpName").html(GetSession("UserName"));
+            $("#InfoEmpPosition").html(GetSession("Position"));
+            $("#InfoAreaName").html(GetSession("AreaName"));
+            $("#InfoProvince").html(GetSession("Province"));
+            $("#InfoShopName").html(GetSession("ShopName"));
+        }
+    }
+    function SaveData() {
+
+        if ($honestyFlow.GetFlowInfo("stepname") == "发起调动申请") {
+
+            if ($("#TransCode").val() == "") {
+                $honesty.ShowMsg({ msg: "请填写员工工号!", title: "警告" });
+                return false;
+            }
+            if ($("#NewShopName").val() == "") {
+                $honesty.ShowMsg({ msg: "请选择调入店铺名称!", title: "警告" });
+                return false;
+            }
+            if ($("#NewPosition").val() == "") {
+                $honesty.ShowMsg({ msg: "请选择调入岗位!", title: "警告" });
+                return false;
+            }
+            if ($("#IsSubsidy").val() == "") {
+                $honesty.ShowMsg({ msg: "请选择是否补贴!", title: "警告" });
+                return false;
+            }
+            if ($("#SubsidyMoney").val() == "" && $("#IsSubsidy").val() == "是") {
+                $honesty.ShowMsg({ msg: "请填写补贴金额!", title: "警告" });
+                return false;
+            }
+            if ((Date.parse($("#EffectDate").val()) == undefined || $("#EffectDate").val() == "") && $("#IsSubsidy").val() == "是") {
+                $honesty.ShowMsg({ msg: "请选择补贴开始日期!", title: "警告" });
+                return false;
+            }
+            if ($("#Reason").val() == "") {
+                $honesty.ShowMsg({ msg: "请填写调动类型!", title: "警告" });
+                return false;
+            }
+            var Slaves = "";
+            $.each($("#tbSlaves tr[dataname='tbSlaves']"), function (i, item) {
+                Slaves += $(item).attr("value") + "|";
+            });
+            if ($("#SubsidyMoney").val() == "") {
+                $("#SubsidyMoney").val("0");
+            }
+            var _options = {
+                PostData: {
+                    Params: {
+                        result: "ModifyEmpTransfer",
+                        ID: TransferID,
+                        SN: $honestyFlow.GetFlowInfo("SN"),
+                        EmpID: GetSession("UserID"),
+                        EmpCode: GetSession("UserCode"),
+                        EmpName: GetSession("UserName"),
+                        OrganizeID: GetSession("OrganizeID"),
+                        AreaName: GetSession("AreaName"),
+                        Province: GetSession("Province"),
+                        CompanyName: GetSession("CompanyCode"),
+                        SapCode: GetSession("SapCode"),
+                        ShopCode: GetSession("ShopCode"),
+                        ShopName: GetSession("ShopName"),
+                        EmpPosition: GetSession("Position"),
+                        EmpLevel: GetSession("EmpLevel"),
+                        LevelDesc: GetSession("LevelDesc"),
+                        TransID: $("#TransID").val(),
+                        TransCode: $("#TransCode").val(),
+                        TransName: $("#TransName").val(),
+                        TransArea: $("#TransArea").val(),
+                        TransCity: $("#TransCity").val(),
+                        TransShopName: $("#TransShopName").val(),
+                        TransPosition: $("#TransPosition").val(),
+                        TransCompany: $("#TransCompany").val(),
+                        TransEmpLevel: $("#TransEmpLevel").val(),
+                        TransLevelDesc: $("#TransLevelDesc").val(),
+                        TransSapCode: $("#TransSapCode").val(),
+                        TransOrganizeID: $("#TransOrganizeID").val(),
+                        TransUpLeaderID: $("#TransUpLeaderID").val(),
+                        TransShopCode: $("#TransShopCode").val(),
+                        TransDeviceSN: $("#TransDeviceSN").val(),
+                        NewPosition: $("#NewPosition").find("option:selected").text(),
+                        NewEmpLevel: $("#NewEmpLevel").val(),
+                        NewLevelDesc: $("#NewLevelDesc").val(),
+                        NewOrganizeID: $("#NewOrganizeID").val(),
+                        NewUpLeaderID: $("#NewUpLeaderID").val(),
+                        //TransDate: $("#TransDate").val(),
+                        NewArea: $("#NewArea").val(),
+                        NewCity: $("#NewCity").val(),
+                        NewShopName: $("#NewShopName").val(),
+                        NewSapCode: $("#NewSapCode").val(),
+                        NewCompany: $("#NewCompany").val(),
+                        NewShopCode: $("#NewShopCode").val(),
+                        NewDeviceSN: $("#NewDeviceSN").val(),
+                        SubsidyMoney: $("#SubsidyMoney").val(),
+                        IsSubsidy: $("#IsSubsidy").val(),
+                        EffectDate: $("#EffectDate").val(),
+                        Reason: $("#Reason").val(),
+                        Slaves: Slaves,
+                        ApplyDate: $("#ApplyDate").val(),
+                        PositionAge: $("#PositionAge").val(),
+                        AchieveRate: $("#AchieveRate").val(),
+                        RankInfo: $("#RankInfo").val(),
+                        Ranking: $("#Ranking").val(),
+                        Exhibit: $("#Exhibit").val(),
+                        TrainCount: $("#TrainCount").val(),
+                        Performance: $("#Performance").val(),
+                        TestSubject: $("#TestSubject").val(),
+                        Appraise: $("#Appraise").val(),
+                        Title: $honestyFlow.GetFlowInfo("title"),
+                    },
+                    ProcName: "proc_SOM_HR_EmpTransfer",
+                    DataType: "Bool",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                async: false
+            };
+            var _result = $honesty.AjaxChannel(_options);
+            if (_result.Data == "True") {
+                return true;
+            }
+            else {
+                $honesty.ShowMsg({ msg: "业务数据保存失败", title: "警告" });
+                return false;
+            }
+        }
+        else {
+            return true;
+        }
+    }
+    function Subsidy() {
+        if ($("#IsSubsidy").val() == "是") {
+            $("#SubsidyMoneyform").css("display", "");
+            $("#EffectDateform").css("display", "");
+        }
+        else {
+            $("#SubsidyMoneyform").css("display", "none");
+            $("#EffectDateform").css("display", "none");
+        }
+    }
+    function UserInfo() {
+        if ($("#TransCode").val() == GetSession("UserCode")) {
+            $honesty.ShowMsg({ msg: "不可发起本人的调动流程!", title: "警告" });
+            $("#TransCode").val("");
+            return false;
+        }
+        $honesty.GetUserInfo({
+            account: $("#TransCode").val(),
+            callback: function (ret) {
+                if (ret.Code == 1) {
+                    var _TransUser = {
+                        PostData: {
+                            Params: {
+                                result: "IsTransStatus",
+                                TransID: ret.Data.UserID,
+                                EmpID: GetSession("UserID"),
+                                SN: $("#InfoSN").html()
+                            },
+                            ProcName: "proc_SOM_HR_EmpTransfer",
+                            DataType: "DataTable",
+                            ExecType: "PROC",
+                            Mode: "MSSQL"
+                        },
+                        async: false
+                    };
+                    var _Tabel = $honesty.AjaxChannel(_TransUser);
+                    var _Erre = true;
+                    if (_Tabel.Data.length > 0) {
+                        $.each(_Tabel.Data, function (i, item) {
+                            if (item.LinkSN == "") {
+                                if (item.FlowCompleted == "1") {
+                                    $honesty.ShowMsg({ msg: "调动流程已完成,请先完成工作交接！流程信息：" + item.SN, title: "警告" });
+                                    _Erre = false;
+                                }
+                                else {
+                                    $honesty.ShowMsg({ msg: "相同的调动流程已存在，请先完成前一条调动流程！流程信息：" + item.SN, title: "警告" });
+                                    _Erre = false;
+                                }
+                            }
+                            else {
+                                if (item.LinkSN != "" && item.HFlowCompleted != "1") {
+                                    $honesty.ShowMsg({ msg: "该调动流程的工作交接尚未完成，请耐心等待完成！流程信息：" + item.HSN, title: "警告" });
+                                    _Erre = false;
+                                }
+                            }
+                        });
+                    }
+                    else {
+                        if (_Erre == false) {
+                            return false;
+                        }
+                        $("#TransID").val(ret.Data.UserID);
+                        $("#TransName").val(ret.Data.UserName);
+                        $("#TransShopName").val(ret.Data.ShopName);
+                        $("#TransIsInstead").val(ret.Data.IsInstead);
+                        if (ret.Data.IsInstead == "True") {
+                            $("#TransPosition").val(ret.Data.Position + "(代班)");
+                        }
+                        else {
+                            $("#TransPosition").val(ret.Data.Position);
+                        }
+                        $("#TransArea").val(ret.Data.Province);
+                        $("#TransCity").val(ret.Data.City);
+                        $("#TransCompany").val(ret.Data.CompanyName);
+                        $("#TransEmpLevel").val(ret.Data.EmpLevel);
+                        $("#TransLevelDesc").val(ret.Data.LevelDesc);
+                        $("#TransSapCode").val(ret.Data.SapCode);
+                        $("#TransOrganizeID").val(ret.Data.OrganizeID);
+                        $("#TransShopCode").val(ret.Data.ShopCode);
+                        $("#TransDeviceSN").val(ret.Data.CardSN);
+                        $("#TransDeviceSN").val(ret.Data.CardSN);
+                        if ($("#TransEmpLevel").val() == GetSession("EmpLevel") && GetSession("IsInstead") != "True") {
+                            $honesty.ShowMsg({ msg: "店铺领导层级有区经发起！", title: "警告" });
+                            $("#TransCode").val("");
+                            return false;
+                        }
+
+
+                        var _PLeader = {
+                            PostData: {
+                                Params: {
+                                    Result: "UpLeader",
+                                    OrganizeID: ret.Data.OrganizeID
+                                },
+                                ProcName: "proc_SOM_HR_EmpTransfer",
+                                DataType: "DataTable",
+                                ExecType: "PROC",
+                                Mode: "MSSQL"
+                            },
+                            async: false
+                        };
+                        var _Tleader = $honesty.AjaxChannel(_PLeader);
+                        if (_Tleader.Data.length > 0) {
+                            $.each(_Tleader.Data, function (i, item) {
+                                $("#TransUpLeaderID").val(item.ID);
+
+                            });
+                        }
+                    }
+                }
+                else {
+                    $honesty.ShowMsg({ title: "警告", msg: "该工号不存在！" });
+                    $("#TransCode").val("");
+                }
+            }
+        });
+    }
+    function TransUserInfo(ShopOrID) {
+        var _parames = {
+            PostData: {
+                Params: {
+                    Result: "ShopAreaCity",
+                    OrganizeID: ShopOrID
+                },
+                ProcName: "proc_SOM_ISR_ShopInfo",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            },
+            async: false
+        };
+        var _table = $honesty.AjaxChannel(_parames);
+        if (_table.Data.length > 0) {
+            $.each(_table.Data, function (i, item) {
+                $("#NewArea").val(item.Province);
+                $("#NewCity").val(item.City);
+                $("#NewCompany").val(item.CompanyCode);
+                $("#NewSapCode").val(item.SapCode);
+                $("#NewShopCode").val(item.ShopCode);
+                $("#NewDeviceSN").val(item.CardMachineNum);
+            });
+        }
+
+
+        var _PLeader = {
+            PostData: {
+                Params: {
+                    Result: "UpLeader",
+                    OrganizeID: ShopOrID
+                },
+                ProcName: "proc_SOM_HR_EmpTransfer",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            },
+            async: false
+        };
+        var _Tleader = $honesty.AjaxChannel(_PLeader);
+        if (_Tleader.Data.length > 0) {
+            $.each(_Tleader.Data, function (i, item) {
+                $("#NewUpLeaderID").val(item.ID);
+            });
+        }
+    }
+    //选择时间
+    function ApplyDate() {
+        var _Date = new Date($("#ApplyDate").val());
+        var _ApplyDate = _Date.getFullYear() + "/" + (_Date.getMonth() + 1) + "/" + "01";
+        $("#ApplyDate").html(new Date(_ApplyDate).Format("yyyy/MM/dd"));
+        if ($("#NewPosition").val() == "") {
+            $honesty.ShowMsg({
+                msg: "请先选择晋升后岗位！", title: "警告", callback: function () {
+                    $("#ApplyDate").val("");
+                }
+            });
+        }
+        else {
+            var _JMonth = _Date.getMonth() + 1;
+            var _JYear = _Date.getFullYear();
+            //获取当前岗位岗龄  
+            var _options = {
+                PostData: {
+                    Import: {
+                        I_DATE1: $("#ApplyDate").val(),
+                        I_EMPID: $("#TransID").val(),
+                    },
+                    Export: [
+                        "O_DATE2",
+                        "O_GL",
+                        "POC_RETURN_DESC",
+                        "POC_RETURN_ID"
+                    ],
+                    FunctionName: "ZHR_FM_GLHQ",
+                    Mode: "RFC"
+                },
+                async: false
+            };
+            var _result = $honesty.AjaxChannel(_options);
+            if (_result.Code == "1") {
+                $("#PositionAge").val(_result.Data.Export.O_GL);
+                if ($("#Reason").val() == "晋升调动") {
+                    switch ($("#NewPosition").val()) {
+                        case "H1":
+                            if ($("#PositionAge").val() < 6) {
+                                $honesty.ShowMsg({
+                                    msg: "岗龄不符合，请重新确认！", title: "警告", callback: function () {
+                                        $("#ApplyDate").val("");
+                                    }
+                                });
+                                return false
+                            }
+                            break;
+                        case "F3":
+                            if ($("#PositionAge").val() < 6) {
+                                $honesty.ShowMsg({
+                                    msg: "岗龄不符合，请重新确认！", title: "警告", callback: function () {
+                                        $("#ApplyDate").val("");
+                                    }
+                                });
+                                return false
+                            }
+                            break;
+                        case "F2":
+                            if ($("#PositionAge").val() < 3) {
+                                $honesty.ShowMsg({
+                                    msg: "岗龄不符合，请重新确认！", title: "警告", callback: function () {
+                                        $("#ApplyDate").val("");
+                                    }
+                                });
+                                return false
+                            }
+                            break;
+                        case "F1":
+                            if ($("#PositionAge").val() < 3) {
+                                $honesty.ShowMsg({
+                                    msg: "岗龄不符合，请重新确认！", title: "警告", callback: function () {
+                                        $("#ApplyDate").val("");
+                                    }
+                                });;
+                                return false
+                            }
+                            break;
+                        case "E1":
+                            if (($("#TransLevelDesc").val() == "F3" && $("#PositionAge").val() < 12) || ($("#TransLevelDesc").val() == "F2" && $("#PositionAge").val() < 9) || ($("#TransLevelDesc").val() == "F1" && $("#PositionAge").val() < 6)) {
+                                $honesty.ShowMsg({
+                                    msg: "岗龄不符合，请重新确认！", title: "警告", callback: function () {
+                                        $("#ApplyDate").val("");
+                                    }
+                                });
+                                return false
+                            }
+                            break;
+                    }
+                }
+            }
+            else {
+                $honesty.ShowMsg({
+                    msg: "获取岗龄失败", title: "错误", callback: function () {
+                        $("#PositionAge").val("");
+                        $("#ApplyDate").val("");
+                    }
+                });
+
+            }
+            //获取业绩达成率
+            var _optionsKip = {
+                PostData: {
+                    Params: {
+                        result: "GetSaleKip",
+                        EmpID: $("#TransID").val(),
+                        ApplyDate: $("#ApplyDate").val()
+                    },
+                    ProcName: "proc_SOM_HR_EmpTransfer",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                async: false
+            };
+            var _resultKip = $honesty.AjaxChannel(_optionsKip);
+            if (_resultKip.Code == "1") {
+                var Sumrate = 0;
+                var Counts = 0;
+                var Content = "";
+                _ContentList = "";
+                var _RankInfo = "";
+                Ranking = "";
+                if (_resultKip.Data.length > 0) {
+                    if ($("#NewPosition").val() == "H1") {
+                        $.each(_resultKip.Data, function (i, item) {
+                            if (item.WageLevel == "1") {
+                                if (i != _resultKip.Data.length - 1) {
+                                    _RankInfo += item.ZYear + "," + item.ZMonth + "," + item.OrgRank + "," + item.AreaRank + "," + item.WageLevel + "|";
+                                }
+                                else {
+                                    _RankInfo += item.ZYear + "," + item.ZMonth + "," + item.OrgRank + "," + item.AreaRank + "," + item.WageLevel;
+                                }
+                                _ContentList += "<tr><td>" + item.ZYear + "</td><td>" + item.ZMonth + "</td><td>" + item.OrgRank + "</td><td>" + item.AreaRank + "</td><td>" + item.WageLevel + "</td><tr>"
+                                Sumrate += Number(item.rate);
+                                Content += item.ZYear + "年" + item.ZMonth + "月该员工在当前店铺排名为" + item.OrgRank + ",大区同级别员工中排名为" + item.AreaRank + ",薪资档级为" + item.WageLevel + "\n";
+                                Counts++;
+                            }
+                            else {
+                                $honesty.ShowMsg({ msg: "薪资档级未满足晋升条件！", title: "警告" });
+                            }
+                        });
+                    }
+                    else {
+                        $.each(_resultKip.Data, function (i, item) {
+                            if (i != _resultKip.Data.length - 1) {
+                                _RankInfo += item.ZYear + "," + item.ZMonth + "," + item.OrgRank + "," + item.AreaRank + "," + item.WageLevel + "|";
+                            }
+                            else {
+                                _RankInfo += item.ZYear + "," + item.ZMonth + "," + item.OrgRank + "," + item.AreaRank + "," + item.WageLevel;
+                            }
+                            _ContentList += "<tr><td>" + item.ZYear + "</td><td>" + item.ZMonth + "</td><td>" + item.OrgRank + "</td><td>" + item.AreaRank + "</td><tr>"
+                            Sumrate += Number(item.rate);
+                            Content += item.ZYear + "年" + item.ZMonth + "月该员工在当前店铺排名为" + item.OrgRank + ",大区同级别员工中排名为" + item.AreaRank + "\n";
+                            Counts++;
+                        });
+                    }
+                    $("#Ranking").val(Content);
+                    $("#AchieveRate").val(Number((Sumrate / Counts)).toFixed(2) + "%");
+                    $("#RankInfo").val(_RankInfo);
+                }
+                else {
+                    $honesty.ShowMsg({ msg: "暂无该员工业绩", title: "警告" });
+                }
+            }
+        }
+    }
+</script>
+</html>

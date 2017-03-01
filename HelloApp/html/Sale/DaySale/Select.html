@@ -1,0 +1,335 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>日销售计划</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div style="height: 10px;"></div>
+    <div class="aui-content aui-card">
+        <div class="aui-form">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">日期</span>
+                <div class="aui-counter aui-warning aui-info aui-pull-left " style="margin-left: 10px;">
+                    <div id="btnDateMinus" class="aui-counter-minus"></div>
+                    <input id="txtDate" class="aui-counter-input" type="text" value="" style="width: 100px; text-align: center" readonly="true">
+                    <div id="btnDatePlus" class="aui-counter-plus"></div>
+                </div>
+            </div>
+            <div class="aui-btn-row">
+                <div id="btnSearch" class="aui-btn aui-btn-block aui-btn-info">
+                    查询
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _Date, _OrganizeID, _ShopCode,
+        _WeekNum, _BeginDate, _EndDate,//今日数据
+        _WeekNum1, _BeginDate1, _EndDate1;//名日数据
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _Date = $honesty.NowDate();
+            _OrganizeID = api.pageParam.OrganizeID;
+            _ShopCode = api.pageParam.ShopCode;
+            //初始化日期
+            $("#txtDate").val(_Date.Format("yyyy-MM-dd"));
+            ChangeDate($("#txtDate").val());
+
+            //日期减少按钮点击
+            $("#btnDateMinus").tap(function () {
+                _Date.addDays(-1)
+                $("#txtDate").val(_Date.Format("yyyy-MM-dd"));
+                ChangeDate($("#txtDate").val());
+            });
+            //日期增加按钮点击
+            $("#btnDatePlus").tap(function () {
+                _Date.addDays(1)
+                $("#txtDate").val(_Date.Format("yyyy-MM-dd"));
+                ChangeDate($("#txtDate").val());
+            });
+            //日期点击
+            $("#txtDate").tap(function () {
+                $honesty.DateTimeSelect({
+                    LevelNum: 2,
+                    Type: "Date",
+                    ControlID: "txtDate",
+                    ControlValue: $("#txtDate").val(),
+                    onchange: function (ret) {
+                        if (ret) {
+                            _Date = new Date($("#txtDate").val());
+                            ChangeDate($("#txtDate").val().trim());
+                        }
+                    }
+                });
+            });
+
+
+            //查询按钮点击
+            $("#btnSearch").tap(function () {
+                var _Tommorow = new Date($("#txtDate").val());
+                _Tommorow.addDays(1);
+                var _options = {
+                    PostData: {
+                        Params: {
+                            Result: "SelectID",
+                            OrganizeID: _OrganizeID,
+                            ShopCode: _ShopCode,
+                            TodayDate: $("#txtDate").val()
+                        },
+                        ProcName: "proc_SOM_ISR_DS_Title",
+                        DataType: "DataTable",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    }
+                };
+                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                    if (_result.Code == "1") {
+                        if (_result.Data.length > 0) {
+                            $.each(_result.Data, function (i, item) {
+                                //if (_OrganizeID.toUpperCase() == GetSession("OrganizeID").toUpperCase() && GetSession("IsLeader") == "0" && (GetSession("EmpLevel").toUpperCase() == "H" || GetSession("EmpLevel").toUpperCase() == "I")) {
+                                //    $honesty.OpenWin({
+                                //        name: "Sale_DaySale_EmpSelfInfo",
+                                //        url: "Sale/DaySale/EmpSelfInfo.html",
+                                //        title: "日销售计划",
+                                //        LevelNum: 2,
+                                //        pageParam: {
+                                //            DayID: item.DayID
+                                //        }
+                                //    });
+                                //}
+                                //else {
+                                $honesty.OpenWin({
+                                    name: "Sale_DaySale_Index",
+                                    url: "Sale/DaySale/Index.html",
+                                    title: "日销售计划",
+                                    LevelNum: 2,
+                                    pageParam: {
+                                        DayID: item.DayID,
+                                        OrganizeID: _OrganizeID,
+                                        ShopCode: _ShopCode,
+                                        WeekNum: _WeekNum,
+                                        BeginDate: _BeginDate,
+                                        EndDate: _EndDate,
+                                        WeekNum1: _WeekNum1,
+                                        BeginDate1: _BeginDate1,
+                                        EndDate1: _EndDate1,
+                                        TodayDate: $("#txtDate").val(),
+                                        TomorrowDate: _Tommorow.Format("yyyy-MM-dd")
+                                    }
+                                });
+                                //}
+                            });
+                        }
+                        else {
+                            var _Tomorrow = $honesty.NowDate();
+                            var _YesterDay = $honesty.NowDate();
+                            _Tomorrow.addDays(1);
+                            _YesterDay.addDays(-1)
+                            if ( _OrganizeID.toUpperCase() == GetSession("OrganizeID").toUpperCase() && GetSession("IsLeader") != "0" &&
+                                ((_Tomorrow.Format("yyyy-MM-dd") == $("#txtDate").val()) ||    //明日
+                                (_YesterDay.Format("yyyy-MM-dd") == $("#txtDate").val()) ||    //昨日
+                                ($honesty.NowDate().Format("yyyy-MM-dd") == $("#txtDate").val()))           //今日
+                                ) {
+                                $honesty.ConfirmWin({
+                                    msg: "对应销售计划不存在，是否创建？",
+                                    buttons: ["创建", "取消"],
+                                    callback: function (ret, err) {
+                                        if (ret.buttonIndex == "1") {
+                                            _options = {
+                                                PostData: {
+                                                    Params: {
+                                                        Result: "CreateInfo",
+                                                        OrganizeID: _OrganizeID,
+                                                        ShopCode: _ShopCode,
+                                                        TodayDate: $("#txtDate").val(),
+                                                        ZYear: (new Date(_BeginDate).getFullYear()),
+                                                        ZMonth: (new Date(_BeginDate).getMonth()) + 1,
+                                                        WeekNum: _WeekNum,
+                                                        BeginDate: _BeginDate,
+                                                        EndDate: _EndDate,
+                                                        CreateUserID: GetSession("UserID"),
+                                                        CreateName: GetSession("UserName")
+                                                    },
+                                                    ProcName: "proc_SOM_ISR_DS_Title",
+                                                    DataType: "Text",
+                                                    ExecType: "PROC",
+                                                    Mode: "MSSQL"
+                                                },
+                                                Loading: {
+                                                    Show: true,
+                                                    Title: "创建中..."
+                                                }
+                                            };
+                                            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                                                if (_result.Code == "1") {
+                                                    $honesty.OpenWin({
+                                                        name: "Sale_DaySale_Index",
+                                                        url: "Sale/DaySale/Index.html",
+                                                        title: "日销售计划",
+                                                        LevelNum: 2,
+                                                        pageParam: {
+                                                            DayID: _result.Data,
+                                                            OrganizeID: _OrganizeID,
+                                                            ShopCode: _ShopCode,
+                                                            WeekNum: _WeekNum,
+                                                            BeginDate: _BeginDate,
+                                                            EndDate: _EndDate,
+                                                            WeekNum1: _WeekNum1,
+                                                            BeginDate1: _BeginDate1,
+                                                            EndDate1: _EndDate1,
+                                                            TodayDate: $("#txtDate").val(),
+                                                            TomorrowDate: _Tommorow.Format("yyyy-MM-dd")
+                                                        }
+                                                    });
+                                                }
+                                            });
+
+                                        }
+                                    }
+                                });
+                            }
+                            else {
+                                $honesty.ShowToast({ msg: "对应日销售计划不存在！", location: "bottom" });
+                            }
+
+                        }
+                    }
+                });
+
+            });
+
+
+        });
+
+    }
+
+
+
+    //根据日期确定周次 起始日期 截止日期
+    function ChangeDate(theDate) {
+        var today = new Date(theDate);
+        var year = today.getFullYear();
+        var month = today.getMonth();
+        var date = today.getDate()
+        var totalDays = 0;
+        var beginDay = 0;
+        var endDay = 0;
+
+
+        //年份月份天数初始化
+        var monthDays = new Array(12);
+        monthDays[0] = 31;
+        monthDays[1] = ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0) ? 29 : 28;
+        monthDays[2] = 31;
+        monthDays[3] = 30;
+        monthDays[4] = 31;
+        monthDays[5] = 30;
+        monthDays[6] = 31;
+        monthDays[7] = 31;
+        monthDays[8] = 30;
+        monthDays[9] = 31;
+        monthDays[10] = 30;
+        monthDays[11] = 31;
+
+        if ((today.getDay() == 0 ? 7 : today.getDay()) > date && Number(date) <= 7) {
+            if (month == 0) {
+                year = Number(year) - 1;
+                month = 11;
+                date = 30;
+
+                monthDays[1] = ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0) ? 29 : 28;
+            }
+            else {
+                month = Number(month) - 1;
+                date = monthDays[month];
+            }
+        }
+        var thisYear = new Date(year, 0, 1);
+        var endMonth = month;
+        var endYear = year;
+
+        for (var i = 0; i < month; i++) {
+            totalDays += monthDays[i];
+        }
+        _WeekNum = Math.ceil((totalDays - 8 + (thisYear.getDay() == 0 ? 7 : thisYear.getDay()) + date) / 7);
+
+        beginDay = _WeekNum * 7 - totalDays + 8 - thisYear.getDay() - 6;
+        endDay = _WeekNum * 7 - totalDays + 8 - thisYear.getDay();
+        if (Number(endDay) > monthDays[month]) {
+            endDay = Number(endDay) - monthDays[month];
+            if (month == 11) {
+                endYear = endYear + 1;
+                endMonth = 0;
+            }
+            else {
+                endMonth = endMonth + 1;
+            }
+        }
+        _BeginDate = year + "-" + ((month + 1).toString().length == 1 ? ("0" + (month + 1)) : (month + 1)) + "-" +
+                    (beginDay.toString().length == 1 ? ("0" + beginDay) : beginDay);
+        _EndDate = endYear + "-" + ((endMonth + 1).toString().length == 1 ? ("0" + (endMonth + 1)) : (endMonth + 1)) + "-" +
+                    (endDay.toString().length == 1 ? ("0" + endDay) : endDay);
+
+        //获取明日信息
+        var torrow = new Date(theDate);
+        torrow.addDays(1);
+        year = torrow.getFullYear();
+        month = torrow.getMonth();
+        date = torrow.getDate();
+        totalDays = 0;
+        beginDay = 0;
+        endDay = 0;
+
+        if ((torrow.getDay() == 0 ? 7 : torrow.getDay()) > date && Number(date) <= 7) {
+            if (month == 0) {
+                year = Number(year) - 1;
+                month = 11;
+                date = 30;
+
+                monthDays[1] = ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0) ? 29 : 28;
+            }
+            else {
+                month = Number(month) - 1;
+                date = monthDays[month];
+            }
+        }
+        thisYear = new Date(year, 0, 1);
+        endMonth = month;
+        endYear = year;
+
+        for (var i = 0; i < month; i++) {
+            totalDays += monthDays[i];
+        }
+        _WeekNum1 = Math.ceil((totalDays - 8 + thisYear.getDay() + date) / 7);
+
+        beginDay = _WeekNum1 * 7 - totalDays + 8 - thisYear.getDay() - 6;
+        endDay = _WeekNum1 * 7 - totalDays + 8 - thisYear.getDay();
+        if (Number(endDay) > monthDays[month]) {
+            endDay = Number(endDay) - monthDays[month];
+            if (month == 11) {
+                endYear = endYear + 1;
+                endMonth = 0;
+            }
+            else {
+                endMonth = endMonth + 1;
+            }
+
+        }
+
+        _BeginDate1 = year + "-" + ((month + 1).toString().length == 1 ? ("0" + (month + 1)) : (month + 1)) + "-" +
+                    (beginDay.toString().length == 1 ? ("0" + beginDay) : beginDay);
+        _EndDate1 = endYear + "-" + ((endMonth + 1).toString().length == 1 ? ("0" + (endMonth + 1)) : (endMonth + 1)) + "-" +
+                    (endDay.toString().length == 1 ? ("0" + endDay) : endDay);
+    }
+
+</script>
+</html>

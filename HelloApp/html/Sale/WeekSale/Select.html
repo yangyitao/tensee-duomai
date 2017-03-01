@@ -1,0 +1,336 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>周销售计划</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div style="height: 10px;"></div>
+    <div class="aui-content aui-card">
+        <div class="aui-form">
+            <div class="aui-input-row" style="padding: 2px 0">
+                <span class="aui-input-addon">日期</span>
+                <input id="txtDate" class="aui-counter-input" type="text" value="" style="width: 100%; border: 0; text-align: left; padding-left: 10px;" readonly="true">
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">年份</span>
+                <div class="aui-counter aui-warning aui-info aui-pull-left " style="margin-left: 10px;">
+                    <div id="btnYearMinus" class="aui-counter-minus"></div>
+                    <input id="txtYear" class="aui-counter-input" type="text" value="" style="width: 60px; text-align: center" readonly="true">
+                    <div id="btnYearPlus" class="aui-counter-plus"></div>
+                </div>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">月份</span>
+                <div class="aui-counter aui-warning aui-info aui-pull-left " style="margin-left: 10px;">
+                    <div id="btnMonthMinus" class="aui-counter-minus"></div>
+                    <select id="ddlMonth" class="aui-input" style="width: 60px; text-align: center; border: 1px solid #e6e4e3; border-style: solid none;">
+                        <option value="1">1月</option>
+                        <option value="2">2月</option>
+                        <option value="3">3月</option>
+                        <option value="4">4月</option>
+                        <option value="5">5月</option>
+                        <option value="6">6月</option>
+                        <option value="7">7月</option>
+                        <option value="8">8月</option>
+                        <option value="9">9月</option>
+                        <option value="10">10月</option>
+                        <option value="11">11月</option>
+                        <option value="12">12月</option>
+                    </select>
+                    <div id="btnMonthPlus" class="aui-counter-plus"></div>
+                </div>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">周次</span>
+                <div class="aui-counter aui-warning aui-info aui-pull-left " style="margin-left: 10px;">
+                    <div id="btnWeekMinus" class="aui-counter-minus"></div>
+                    <select id="ddlWeekNum" class="aui-input" style="width: 60px; text-align: center; border: 1px solid #e6e4e3; border-style: solid none;">
+                    </select>
+                    <div id="btnWeekPlus" class="aui-counter-plus"></div>
+                </div>
+            </div>
+            <div class="aui-btn-row">
+                <div id="btnSearch" class="aui-btn aui-btn-block aui-btn-info">
+                    查询
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _Date, _OrganizeID, _ShopCode, _NextDate;
+    var _BeginWeekNum = 0, _EndWeekNum = 0, _BeginDate = "", _EndDate = "";
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _Date = $honesty.NowDate();
+            _NextDate = $honesty.NowDate();
+            _NextDate.addDays(7);
+            _OrganizeID = api.pageParam.OrganizeID;
+            _ShopCode = api.pageParam.ShopCode;
+
+            //初始化年份
+            $("#txtYear").val(_Date.getFullYear());
+            //初始化月份
+            $("#ddlMonth").val(_Date.getMonth() + 1);
+
+            ChangeWeek({ "year": $("#txtYear").val(), "month": $("#ddlMonth").val() });
+
+            //年份减少按钮点击
+            $("#btnYearMinus").tap(function () {
+                $("#txtYear").val(Number($("#txtYear").val()) - 1);
+                ChangeWeek({ "year": $("#txtYear").val(), "month": $("#ddlMonth").val() });
+            });
+            //年份增加按钮点击
+            $("#btnYearPlus").tap(function () {
+                $("#txtYear").val(Number($("#txtYear").val()) + 1);
+                ChangeWeek({ "year": $("#txtYear").val(), "month": $("#ddlMonth").val() });
+            });
+
+
+            //月份减少按钮点击
+            $("#btnMonthMinus").tap(function () {
+                if ($("#ddlMonth").val() == "1") {
+                    $("#txtYear").val(Number($("#txtYear").val()) - 1);
+                    $("#ddlMonth").val("12");
+                }
+                else {
+                    $("#ddlMonth").val(Number($("#ddlMonth").val()) - 1);
+                }
+                ChangeWeek({ "year": $("#txtYear").val(), "month": $("#ddlMonth").val() });
+            });
+            //月份增加按钮点击
+            $("#btnMonthPlus").tap(function () {
+                if ($("#ddlMonth").val() == "12") {
+                    $("#txtYear").val(Number($("#txtYear").val()) + 1);
+                    $("#ddlMonth").val("1");
+                }
+                else {
+                    $("#ddlMonth").val(Number($("#ddlMonth").val()) + 1);
+                }
+                ChangeWeek({ "year": $("#txtYear").val(), "month": $("#ddlMonth").val() });
+            });
+            //月份改变
+            $("#ddlMonth").change(function () {
+                ChangeWeek({ "year": $("#txtYear").val(), "month": $("#ddlMonth").val() });
+            });
+
+            //周次减少按钮点击
+            $("#btnWeekMinus").tap(function () {
+                if ($("#ddlWeekNum").val() == _BeginWeekNum) {
+                    $("#ddlWeekNum").val(_EndWeekNum);
+                }
+                else {
+                    $("#ddlWeekNum").val(Number($("#ddlWeekNum").val()) - 1);
+                }
+                ChangeWeek({ "year": $("#txtYear").val(), "month": $("#ddlMonth").val(), weekNum: $("#ddlWeekNum").val() });
+            });
+            //周次增加按钮点击
+            $("#btnWeekPlus").tap(function () {
+                if ($("#ddlMonth").val() == _EndWeekNum) {
+                    $("#ddlWeekNum").val(_BeginWeekNum);
+                }
+                else {
+                    $("#ddlWeekNum").val(Number($("#ddlWeekNum").val()) + 1);
+                }
+                ChangeWeek({ "year": $("#txtYear").val(), "month": $("#ddlMonth").val(), weekNum: $("#ddlWeekNum").val() });
+            });
+            //周次改变
+            $("#ddlWeekNum").change(function () {
+                ChangeWeek({ "year": $("#txtYear").val(), "month": $("#ddlMonth").val(), weekNum: $("#ddlWeekNum").val() });
+            });
+
+
+            //查询按钮点击
+            $("#btnSearch").tap(function () {
+                var _options = {
+                    PostData: {
+                        Params: {
+                            Result: "SelectID",
+                            OrganizeID: _OrganizeID,
+                            ShopCode: _ShopCode,
+                            ZYear: $("#txtYear").val(),
+                            ZMonth: $("#ddlMonth").val(),
+                            WeekNum: $("#ddlWeekNum").val()
+                        },
+                        ProcName: "proc_SOM_ISR_WeekSale",
+                        DataType: "DataTable",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    }
+                };
+                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                    if (_result.Code == "1") {
+                        if (_result.Data.length > 0) {
+                            $.each(_result.Data, function (i, item) {
+                                //if (_OrganizeID.toUpperCase() == GetSession("OrganizeID").toUpperCase() && GetSession("IsLeader") == "0" && (GetSession("EmpLevel").toUpperCase() == "H" || GetSession("EmpLevel").toUpperCase() == "I")) {
+                                //    $honesty.OpenWin({
+                                //        name: "Sale_WeekSale_EmpSelfInfo",
+                                //        url: "Sale/WeekSale/EmpSelfInfo.html",
+                                //        title: "周销售计划",
+                                //        LevelNum: 2,
+                                //        pageParam: {
+                                //            WeekID: item.WeekID
+                                //        }
+                                //    });
+                                //}
+                                //else {
+                                $honesty.OpenWin({
+                                    name: "Sale_WeekSale_Index",
+                                    url: "Sale/WeekSale/Index.html",
+                                    title: "周销售计划",
+                                    LevelNum: 2,
+                                    pageParam: {
+                                        WeekID: item.WeekID
+                                    }
+                                });
+                                //}
+                            });
+                        }
+                        else {
+                            if (_OrganizeID.toUpperCase() == GetSession("OrganizeID").toUpperCase() && GetSession("IsLeader") != "0" &&
+                                ((new Date(_BeginDate) <= _Date && new Date(_EndDate) >= new Date(_Date.Format("yyyy/MM/dd"))) ||
+                                (new Date(_BeginDate) <= _NextDate && new Date(_EndDate) >= new Date(_NextDate.Format("yyyy/MM/dd"))))
+                                ) {
+                                $honesty.ConfirmWin({
+                                    msg: "对应销售计划不存在，是否创建？",
+                                    buttons: ["创建", "取消"],
+                                    callback: function (ret, err) {
+                                        if (ret.buttonIndex == "1") {
+                                            _options = {
+                                                PostData: {
+                                                    Params: {
+                                                        Result: "CreateInfo",
+                                                        OrganizeID: _OrganizeID,
+                                                        ShopCode: _ShopCode,
+                                                        ZYear: $("#txtYear").val(),
+                                                        ZMonth: $("#ddlMonth").val(),
+                                                        WeekNum: $("#ddlWeekNum").val(),
+                                                        BeginDate: _BeginDate,
+                                                        EndDate: _EndDate,
+                                                        CreateUserID: GetSession("UserID"),
+                                                        CreateName: GetSession("UserName")
+                                                    },
+                                                    ProcName: "proc_SOM_ISR_WeekSale",
+                                                    DataType: "Text",
+                                                    ExecType: "PROC",
+                                                    Mode: "MSSQL"
+                                                },
+                                                Loading: {
+                                                    Show: true,
+                                                    Title: "创建中..."
+                                                }
+                                            };
+                                            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                                                if (_result.Code == "1") {
+                                                    $honesty.OpenWin({
+                                                        name: "Sale_WeekSale_Index",
+                                                        url: "Sale/WeekSale/Index.html",
+                                                        title: "周销售计划",
+                                                        LevelNum: 2,
+                                                        pageParam: {
+                                                            WeekID: _result.Data
+                                                        }
+                                                    });
+                                                }
+                                            });
+
+                                        }
+                                    }
+                                });
+                            }
+                            else {
+                                $honesty.ShowToast({ msg: "对应周销售计划不存在！", location: "bottom" });
+                            }
+                        }
+                    }
+                });
+
+            });
+
+
+        });
+
+    }
+
+
+
+    //查询条件改变 改变周次 日期
+    function ChangeWeek(condition) {
+        var defaults = {
+            "year": "1900",
+            "month": "1",
+            "weekNum": ""
+        };
+        var _con = $.extend(defaults, condition);
+
+        var date = new Date(_con.year, 0, 1);
+        var thisMonth = new Date(_con.year, _con.month, 0);
+        var totalDays = 0;
+        var content = "";
+        var beginDay = 0;
+        var endDay = 0;
+
+        //年份月份天数初始化
+        var monthDays = new Array(12);
+        monthDays[0] = 31;
+        monthDays[1] = ((_con.year % 4 == 0 && _con.year % 100 != 0) || _con.year % 400 == 0) ? 29 : 28;
+        monthDays[2] = 31;
+        monthDays[3] = 30;
+        monthDays[4] = 31;
+        monthDays[5] = 30;
+        monthDays[6] = 31;
+        monthDays[7] = 31;
+        monthDays[8] = 30;
+        monthDays[9] = 31;
+        monthDays[10] = 30;
+        monthDays[11] = 31;
+        for (var i = 0; i < _con.month - 1; i++) {
+            totalDays = totalDays + monthDays[i];
+        }
+
+        //计算对应年份月份起始截止周次
+        _BeginWeekNum = Math.ceil((totalDays - 8 + date.getDay()) / 7) + 1;
+        _EndWeekNum = Math.ceil((totalDays - 8 + date.getDay() + thisMonth.getDate()) / 7);
+
+
+        //计算起始截止日期
+        beginDay = (_con.weekNum == "" ? _BeginWeekNum : _con.weekNum) * 7 - totalDays + 8 - date.getDay() - 6;
+        _BeginDate = _con.year + "-" + (_con.month.toString().length == 1 ? ("0" + _con.month) : _con.month) + "-" + (beginDay.toString().length == 1 ? ("0" + beginDay) : beginDay);
+
+        endDay = (_con.weekNum == "" ? _BeginWeekNum : _con.weekNum) * 7 - totalDays + 8 - date.getDay();
+        if (endDay > monthDays[_con.month - 1]) {
+            endDay = endDay - monthDays[_con.month - 1];
+            if (_con.month == 12) {
+                _con.year++
+                _con.month = 1;
+            }
+            else {
+                _con.month++;
+            }
+        }
+        _EndDate = _con.year + "-" + (_con.month.toString().length == 1 ? ("0" + _con.month) : _con.month) + "-" + (endDay.toString().length == 1 ? ("0" + endDay) : endDay);
+
+        $("#txtDate").val(_BeginDate + "～" + _EndDate);
+
+        $("#ddlWeekNum").html("");
+        for (var i = _BeginWeekNum; i < _EndWeekNum + 1; i++) {
+            content += "<option value='" + i + "'>" + i + "</option>";
+        }
+        $("#ddlWeekNum").html(content);
+
+        if (_con.weekNum != "") {
+            $("#ddlWeekNum").val(_con.weekNum);
+        }
+
+    }
+
+</script>
+</html>

@@ -1,0 +1,267 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>零售经理报数</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .sale-header {
+            background: url('../../../image/mybg.png') no-repeat;
+            background-size: cover;
+            min-height: 150px;
+            position: relative;
+        }
+
+        .sale-info {
+            position: relative;
+            padding: 20px 0;
+            width: 100%;
+            bottom: 0;
+            text-align: center;
+        }
+
+            .sale-info p.ratename {
+                margin-top: 15px;
+                color: #ffffff;
+                font-size: 16px;
+            }
+
+            .sale-info p.ratevalue {
+                margin-top: 5px;
+                color: #ffffff;
+                font-size: 30px;
+            }
+
+        .aui-grid-nine li p:first-child {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="aui-content sale-header" style="margin-bottom: 0px;">
+        <div class="sale-info" id="divForm">
+            <p class="ratevalue" id="pRegionalName"></p>
+            <p class="ratename" id="pDate"></p>
+        </div>
+    </div>
+    <ul class="aui-grid-nine">
+        <li class="aui-col-xs-4 aui-text-center" data-role="block" data-url="Sale/RetailSale/TodaySummary" data-name="Sale_RetailSale_TodaySummary">
+            <span class="aui-iconfont aui-icon-settings aui-text-blue"></span>
+            <p>今日总结</p>
+            <span id="spActualSummary"></span>
+        </li>
+        <li class="aui-col-xs-4 aui-text-center" data-role="block" data-url="Sale/RetailSale/TomorrowTarget" data-name="Sale_RetailSale_TomorrowTarget">
+            <span class="aui-iconfont aui-icon-sponsor aui-text-danger"></span>
+            <p>明日目标</p>
+            <span id="spTomorrowTarget"></span>
+        </li>
+        <li class="aui-col-xs-4 aui-text-center" data-role="block" data-url="Sale/RetailSale/TomorrowJob" data-name="Sale_RetailSale_TomorrowJob">
+            <span class="aui-iconfont aui-icon-favor aui-text-info"></span>
+            <p>明日工作</p>
+            <span id="spTomorrowJob"></span>
+        </li>
+        <li class="aui-col-xs-4 aui-text-center" data-role="block" data-url="Sale/RetailSale/TomorrowSchedule" data-name="Sale_RetailSale_TomorrowSchedule">
+            <span class="aui-iconfont aui-icon-taxi aui-text-warning"></span>
+            <p>明日行程</p>
+            <span id="spTomorrowSchedule"></span>
+        </li>
+        <li class="aui-col-xs-4 aui-text-center" id="liCreate">
+            <span class="aui-iconfont aui-icon-down aui-text-default"></span>
+            <p>重新报数</p>
+        </li>
+        <li class="aui-col-xs-4 aui-text-center" id="liShare">
+            <span class="aui-iconfont aui-icon-share aui-text-success"></span>
+            <p>分享</p>
+        </li>
+
+    </ul>
+</body>
+</html>
+
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script src="../../../script/honesty.flow.js"></script>
+<script type="text/javascript">
+    var _RetailID, _OrganizeID, _OrganizeName, _TodayDate;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _RetailID = api.pageParam.RetailID;
+            _OrganizeID = api.pageParam.OrganizeID;
+            _OrganizeName = api.pageParam.OrganizeName;
+            _TodayDate = api.pageParam.TodayDate;
+
+            $("#pRegionalName").html("部门:" + _OrganizeName);
+            $("#pDate").html("报数日期:" + _TodayDate);
+            LoadData();
+
+
+            //模块点击
+            $("[data-role='block']").tap(function () {
+                $honesty.OpenWin({
+                    name: $(this).attr("data-name"),
+                    url: $(this).attr("data-url") + ".html",
+                    title: "零售经理报数",
+                    LevelNum: 2,
+                    pageParam: {
+                        RetailID: _RetailID
+                    }
+                });
+            });
+
+            //报表点击
+            $("#divForm").tap(function () {
+                $honesty.OpenWin({
+                    name: "Sale_RetailSale_RetailSaleForm",
+                    url: "Sale/RetailSale/RetailSaleForm.html",
+                    title: "零售经理报数报表",
+                    LevelNum: 2,
+                    pageParam: {
+                        RetailID: _RetailID,
+                        OrganizeID: _OrganizeID,
+                        TodayDate: _TodayDate
+                    }
+                });
+            });
+
+            //分享数据
+            $("#liShare").tap(function () {
+                var wx = api.require('wx');
+                wx.shareWebpage({
+                    scene: 'session',
+                    title: _OrganizeName + "零售经理报数",
+                    description: _OrganizeName + " " + _TodayDate + "零售经理报数",
+                    thumb: "widget://res/img/weixin.png",
+                    contentUrl: $honesty.GetSite() + "/SOM/SharePage/RetailSale?RetailID=" + _RetailID + "&ReportDate=" + _TodayDate + "&OrganizeID=" + _OrganizeID,
+                }, function (ret, err) {
+                    if (ret.status) {
+                        $honesty.ShowToast({ msg: '分享成功' });
+                    }
+                });
+            });
+
+            //生成实际数据点击
+            $("#liCreate").tap(function () {
+                CreateSale();
+            });
+
+
+
+
+
+            //今日总结保存监听事件
+            api.addEventListener({
+                name: 'Sale_RetailSale_TodaySummary'
+            }, function (ret) {
+                if (ret && ret.value) {
+                    if ($("#spActualSummary").hasClass("aui-superscript-danger")) {
+                        $("#spActualSummary").removeClass("aui-superscript-danger");
+                        $("#spActualSummary").addClass("aui-superscript-success");
+                    }
+                }
+            });
+            //明日目标保存监听事件
+            api.addEventListener({
+                name: 'Sale_RetailSale_TomorrowTarget'
+            }, function (ret) {
+                if (ret && ret.value) {
+                    if ($("#spTomorrowTarget").hasClass("aui-superscript-danger")) {
+                        $("#spTomorrowTarget").removeClass("aui-superscript-danger");
+                        $("#spTomorrowTarget").addClass("aui-superscript-success");
+                    }
+                }
+            });
+            //明日工作保存监听事件
+            api.addEventListener({
+                name: 'Sale_RetailSale_TomorrowJob'
+            }, function (ret) {
+                if (ret && ret.value) {
+                    if ($("#spTomorrowJob").hasClass("aui-superscript-danger")) {
+                        $("#spTomorrowJob").removeClass("aui-superscript-danger");
+                        $("#spTomorrowJob").addClass("aui-superscript-success");
+                    }
+                }
+            });
+            //明日行程保存监听事件
+            api.addEventListener({
+                name: 'Sale_RetailSale_TomorrowSchedule'
+            }, function (ret) {
+                if (ret && ret.value) {
+                    if ($("#spTomorrowSchedule").hasClass("aui-superscript-danger")) {
+                        $("#spTomorrowSchedule").removeClass("aui-superscript-danger");
+                        $("#spTomorrowSchedule").addClass("aui-superscript-success");
+                    }
+                }
+            });
+
+        });
+    }
+
+    //初始化数据函数
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "GetTitle",
+                    RetailID: _RetailID
+                },
+                ProcName: "proc_SOM_ISR_RetailSale",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        $("#spActualSummary").addClass((item.ActualSummary == "" ? "aui-superscript-danger" : "aui-superscript-success"));
+                        $("#spTomorrowTarget").addClass((item.TomorrowTarget == "" ? "aui-superscript-danger" : "aui-superscript-success"));
+                        $("#spTomorrowJob").addClass((item.TomorrowJob == "" ? "aui-superscript-danger" : "aui-superscript-success"));
+                        $("#spTomorrowSchedule").addClass((item.TomorrowSchedule == "" ? "aui-superscript-danger" : "aui-superscript-success"));
+                    });
+                }
+            }
+        });
+    }
+
+
+    function CreateSale() {
+        $honesty.ConfirmWin({
+            msg: "是否重新生成零售经理报数？",
+            callback: function (ret, err) {
+                if (ret.buttonIndex == "1") {
+                    var _options = {
+                        PostData: {
+                            Params: {
+                                Result: "ReCreate",
+                                RetailID: _RetailID,
+                                ReportDate: _TodayDate,
+                                OrganizeID:_OrganizeID
+                            },
+                            ProcName: "proc_SOM_ISR_RetailSale",
+                            DataType: "Bool",
+                            ExecType: "PROC",
+                            Mode: "MSSQL"
+                        }
+                    };
+                    $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                        if (_result.Code == "1")
+                        {
+                            if (_result.Data == "True") {
+                                $honesty.ShowMsg({ title: "提示", msg: "生成成功" });
+                            }
+                            else {
+                                $honesty.ShowMsg({ title: "错误", msg: "保存失败" });
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    }
+</script>

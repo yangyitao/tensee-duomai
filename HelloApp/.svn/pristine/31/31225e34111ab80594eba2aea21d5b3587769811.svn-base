@@ -1,0 +1,99 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>店铺排班详情</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div id="divTab">
+        <div class="aui-tab">
+            <ul class="aui-tab-nav" id="title1">
+                <li class="active" data-role='title' data-index="0">店铺排班</li>
+                <li data-role='title' data-index="1">班次详情</li>
+                <li data-role='title' data-index="2">班次统计</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            var y = $honesty.RangeTop(45);
+            api.openFrameGroup({
+                name: 'Scheduling_Tab',
+                scrollEnabled: false,
+                rect: { x: 0, y: $("#divTab").height() + y, w: 'auto', h: 'auto' },
+                index: 0,
+                preload: 0,
+                frames:
+                [{
+                    name: 'Scheduling_Info',
+                    url: 'Info.html',
+                    bounces: false,
+                    pageParam: {
+                        OrganizeID: api.pageParam.OrganizeID,
+                        Year: api.pageParam.Year,
+                        Month: api.pageParam.Month,
+                        Week: api.pageParam.Week,
+                        Pause: api.pageParam.Pause
+                    }
+                }, {
+                    name: 'Scheduling_ScheduInfo',
+                    url: 'ScheduInfo.html',
+                    bounces: false,
+                    pageParam: {
+                        OrganizeID: api.pageParam.OrganizeID
+                    }
+                }, {
+                    name: 'Scheduling_Statistics',
+                    url: 'Statistics.html',
+                    bounces: false,
+                    pageParam: {
+                        OrganizeID: api.pageParam.OrganizeID,
+                        Year: api.pageParam.Year,
+                        Month: api.pageParam.Month,
+                        Week: api.pageParam.Week
+                    }
+                }]
+
+            });
+        });
+
+    }
+
+    $("[data-role='title']").tap(function () {
+        if (!$(this).hasClass("active")) {
+            $("[data-role='title']").removeClass("active");
+            $(this).addClass("active");
+            if ($(this).attr("data-index") != "2") {
+                api.setFrameGroupIndex({
+                    name: 'Scheduling_Tab',
+                    index: $(this).attr("data-index"),
+                    scroll: true
+                });
+                api.closeFrameGroup({
+                    name: 'Scheduling_Statistics'
+                });
+            }
+            else {
+                api.setFrameGroupIndex({
+                    name: 'Scheduling_Tab',
+                    index: $(this).attr("data-index"),
+                    scroll: true,
+                    reload: true
+                });
+            }
+        }
+    });
+
+
+</script>

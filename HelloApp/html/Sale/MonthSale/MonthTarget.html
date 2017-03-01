@@ -1,0 +1,373 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>本月目标（月计划）</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-input-row .aui-input-addon {
+            width: 90px;
+        }
+    </style>
+</head>
+<body>
+    <div class="aui-content">
+        <p class="aui-padded-5 aui-text-center">本月目标</p>
+        <div class="aui-form aui-input-form" id="divMonthTarget">
+            <div class="aui-input-row">
+                <div id="divIssued" class="aui-arrow-right" data-linkrole="LinkPage" style="padding:5px;padding-left:15px;font-size:14px">
+                    点击查看下发详情
+                </div>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">下发目标</span>
+                <input id="IssTargetSale" type="text" class="aui-input aui-text-info" disabled="disabled" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">本月目标</span>
+                <input id="TargetSale" type="text" class="aui-input aui-important" placeholder="请输入正整数/单位为（元）" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">客单价</span>
+                <input id="CustomerUnitPrice" type="text" class="aui-input" placeholder="请输入正整数" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">客单件</span>
+                <input id="CustomerSingle" type="text" class="aui-input" placeholder="请输入正整数或一位小数" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">VIP占比</span>
+                <input id="VIPProportion" type="text" class="aui-input" placeholder="请输入正整数/单位为（%）" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">折扣</span>
+                <input id="DiscountPercent" type="text" class="aui-input" placeholder="请输入正整数/单位为（%）" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">正价占比</span>
+                <input id="PriceProportion" type="text" class="aui-input" placeholder="请输入正整数/单位为（%）" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">活动占比</span>
+                <input id="ActivityProportion" type="text" class="aui-input" placeholder="请输入正整数/单位为（%）" />
+            </div>
+        </div>
+    </div>
+    <div id="divFooter" style="height: 40px; display: none"></div>
+    <footer class="aui-nav" id="footer" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7; display: none">
+        <div id="btnSave" class="aui-btn aui-btn-block aui-btn-info" style="height: 45px; width: 100%; line-height: 0.9;">
+            保存
+        </div>
+    </footer>
+</body>
+</html>
+
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script src="../../../script/honesty.valid.js"></script>
+<script type="text/javascript">
+    var _MonthID, _IsSend, _Year, _Month;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _MonthID = api.pageParam.MonthID;
+            _IsSend = api.pageParam.IsSend;
+            _Year = api.pageParam.Year;
+            _Month = api.pageParam.Month;
+
+            if (_IsSend == "True") {
+                $("#divMonthTarget").addClass("aui-input-disabled");
+                $(".aui-input").attr("readonly", "readonly");
+            }
+            else {
+                $("#footer").css("display", "");
+                $("#divFooter").css("display", "");
+            }
+
+            LoadData();
+
+            $("#btnSave").tap(function () {
+
+                if (CheckInfo()) {
+                    var _options = {
+                        PostData: {
+                            Params: {
+                                Result: "ModifyInfo",
+                                MonthID: _MonthID,
+                                ZYear: _Year,
+                                ZMonth: _Month,
+                                TargetSale: $("#TargetSale").val().trim(),
+                                CustomerUnitPrice: $("#CustomerUnitPrice").val().trim(),
+                                CustomerSingle: $("#CustomerSingle").val().trim(),
+                                VIPProportion: $("#VIPProportion").val().trim(),
+                                DiscountPercent: $("#DiscountPercent").val().trim(),
+                                PriceProportion: $("#PriceProportion").val().trim(),
+                                ActivityProportion: $("#ActivityProportion").val().trim(),
+                                CreateUserID: GetSession("UserID"),
+                                CreateName: GetSession("UserName")
+                            },
+                            ProcName: "proc_SOM_ISR_MS_MonthTarget",
+                            DataType: "Bool",
+                            ExecType: "PROC",
+                            Mode: "MSSQL"
+                        }
+                    };
+
+                    $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                        if (_result.Code == "1") {
+                            if (_result.Data == "True") {
+                                $honesty.ShowMsg({
+                                    title: "提示",
+                                    msg: "保存成功",
+                                    callback: function () {
+                                        api.sendEvent({
+                                            name: 'Sale_MonthSale_MonthTarget',
+                                            extra: {
+                                                TargetSale: $("#TargetSale").val().trim()
+                                            }
+                                        });
+                                        api.closeWin();
+                                    }
+                                });
+                            }
+                            else {
+                                $honesty.ShowMsg({ title: "错误", msg: "保存失败" });
+                            }
+                        }
+                    });
+                }
+            });
+
+            $("#divIssued").tap(function () {
+                $honesty.OpenWin({
+                    title: "下发销售详情",
+                    name: "Sale_MonthSale_IssuedInfo",
+                    url: "Sale/MonthSale/IssuedInfo.html",
+                    LevelNum: 2,
+                    pageParam: {
+                        MonthID: _MonthID
+                    }
+                });
+            });
+
+        });
+
+    }
+
+    //数据加载函数
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "GetInfo",
+                    MonthID: _MonthID
+                },
+                ProcName: "proc_SOM_ISR_MS_MonthTarget",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length) {
+                    $.each(_result.Data, function (i, item) {
+                        $("#IssTargetSale").val(item.IssTargetSale);
+                        $("#TargetSale").val(item.TargetSale);
+                        $("#CustomerUnitPrice").val(item.CustomerUnitPrice);
+                        $("#CustomerSingle").val(item.CustomerSingle);
+                        $("#VIPProportion").val(item.VIPProportion);
+                        $("#DiscountPercent").val(item.DiscountPercent);
+                        $("#PriceProportion").val(item.PriceProportion);
+                        $("#ActivityProportion").val(item.ActivityProportion);
+                    });
+                }
+            }
+            else {
+                $("#footer").css("display", "none");
+            }
+        });
+    }
+
+    //验证函数
+    function CheckInfo() {
+        if ($("#TargetSale").val().trim() == "") {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "本月目标不能为空",
+                callback: function () {
+                    $("#TargetSale").focus();
+                }
+            });
+            return false;
+        }
+        else if (valid_int($("#TargetSale").val().trim())) {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "输入的本月目标不为正整数",
+                callback: function () {
+                    $("#TargetSale").focus();
+                }
+            });
+            return false;
+        }
+        else if ($("#CustomerUnitPrice").val().trim() == "") {
+            $honesty.ShowMsg({
+                title:
+                    "警告",
+                msg: "客单价不能为空",
+                callback: function () {
+                    $("#CustomerUnitPrice").focus();
+                }
+            });
+            return false;
+        }
+        else if (valid_int($("#CustomerUnitPrice").val().trim())) {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "输入的客单价不为正整数",
+                callback: function () {
+                    $("#CustomerUnitPrice").focus();
+                }
+            });
+            return false;
+        }
+        else if ($("#CustomerSingle").val().trim() == "") {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "客单件不能为空",
+                callback: function () {
+                    $("#CustomerSingle").focus();
+                }
+            });
+            return false;
+        }
+        else if (valid_onepoint($("#CustomerSingle").val().trim())) {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "输入的客单件不为正整数或一位小数数字",
+                callback: function () {
+                    $("#CustomerSingle").focus();
+                }
+            });
+            return false;
+        }
+        else if ($("#VIPProportion").val().trim() == "") {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "VIP占比不能为空",
+                callback: function () {
+                    $("#VIPProportion").focus();
+                }
+            });
+            return false;
+        }
+        else if (valid_int($("#VIPProportion").val().trim())) {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "输入的VIP占比不为正整数",
+                callback: function () {
+                    $("#VIPProportion").focus();
+                }
+            });
+            return false;
+        }
+        else if (Number($("#VIPProportion").val().trim()) > 100) {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "VIP占比不能大于100",
+                callback: function () {
+                    $("#VIPProportion").focus();
+                }
+            });
+            return false;
+        }
+        else if ($("#DiscountPercent").val().trim() == "") {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "折扣不能为空",
+                callback: function () {
+                    $("#DiscountPercent").focus();
+                }
+            });
+            return false;
+        }
+        else if (valid_int($("#DiscountPercent").val().trim())) {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "输入的折扣不为正整数",
+                callback: function () {
+                    $("#DiscountPercent").focus();
+                }
+            });
+            return false;
+        }
+        else if ($("#PriceProportion").val().trim() == "") {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "正价占比不能为空",
+                callback: function () {
+                    $("#PriceProportion").focus();
+                }
+            });
+            return false;
+        }
+        else if (valid_int($("#PriceProportion").val().trim())) {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "输入的正价占比不为正整数",
+                callback: function () {
+                    $("#PriceProportion").focus();
+                }
+            });
+            return false;
+        }
+        else if (Number($("#PriceProportion").val().trim()) > 100) {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "正价占比不能大于100",
+                callback: function () {
+                    $("#PriceProportion").focus();
+                }
+            });
+            return false;
+        }
+        else if ($("#ActivityProportion").val().trim() == "") {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "活动占比",
+                callback: function () {
+                    $("#ActivityProportion").focus();
+                }
+            });
+            return false;
+        }
+        else if (valid_int($("#ActivityProportion").val().trim())) {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "输入的活动占比不为正整数",
+                callback: function () {
+                    $("#ActivityProportion").focus();
+                }
+            });
+            return false;
+        }
+        else if (Number($("#ActivityProportion").val().trim()) > 100) {
+            $honesty.ShowMsg({
+                title: "警告",
+                msg: "活动占比不能大于100",
+                callback: function () {
+                    $("#ActivityProportion").focus();
+                }
+            });
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+</script>

@@ -1,0 +1,111 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>销售模块首页</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-grid-nine {
+            padding: 2.3px;
+        }
+
+            .aui-grid-nine li {
+                padding: 3px;
+                color: #fff;
+            }
+
+                .aui-grid-nine li div {
+                    padding: 2px 0;
+                }
+
+                .aui-grid-nine li:after {
+                    border-left: 0;
+                    border-bottom: 0;
+                }
+
+        p {
+            color: #fff;
+            font-size: 25px;
+        }
+
+        .aui-grid-nine li .aui-iconfont {
+            font-size: 45px;
+        }
+    </style>
+</head>
+<body>
+    <div style="height: 5px;"></div>
+    <div class="aui-card" style="margin-bottom: 0;" id="ulInfo">
+        <ul class="aui-grid-nine" style="margin-bottom: 0;">
+            <li class="aui-col-xs-12 aui-text-center" data-role="block" data-url="Home/SaleForm/SaleAll" data-power="All" data-name="Home_SaleForm_SaleAll" data-title="整体销售">
+                <div style="background: #f89424">
+                    <span class="aui-iconfont aui-icon-refund"></span>
+                    <p>整体</p>
+                </div>
+            </li>
+            <!--<li class="aui-col-xs-6 aui-text-center" data-role="block" data-url="Home/SaleForm/SaleByRegional" data-name="Home_SaleForm_SaleByRegional" data-title="大区销售">
+                <div style="background: #27398f">
+                    <span class="aui-iconfont aui-icon-location"></span>
+                    <p>大区</p>
+                </div>
+            </li>-->
+            <li class="aui-col-xs-6 aui-text-center" data-role="block" data-url="Home/SaleForm/SaleByProvince" data-power="Province" data-name="Home_SaleForm_SaleByProvince" data-title="省份销售">
+                <div style="background: #ec1c27">
+                    <span class="aui-iconfont aui-icon-rank"></span>
+                    <p>省份</p>
+                </div>
+            </li>
+            <li class="aui-col-xs-6 aui-text-center" data-role="block" data-url="Home/SaleForm/SaleByShop" data-power="Shop" data-name="Home_SaleForm_SaleByShop" data-title="店铺销售">
+                <div style="background: #923494">
+                    <span class="aui-iconfont aui-icon-shop"></span>
+                    <p>店铺</p>
+                </div>
+            </li>
+            <li class="aui-col-xs-6 aui-text-center" data-role="block" data-url="Home/SaleForm/SaleByBrand" data-power="Brand" data-name="Home_SaleForm_SaleByBrand" data-title="品牌销售">
+                <div style="background: #1997d4">
+                    <span class="aui-iconfont aui-icon-tag"></span>
+                    <p>品牌</p>
+                </div>
+            </li>
+            <li class="aui-col-xs-6 aui-text-center" data-role="block" data-url="Home/SaleForm/SaleByDealer" data-power="Dealer" data-name="Home_SaleForm_SaleByDealer" data-title="客户销售">
+                <div style="background: #44b84b">
+                    <span class="aui-iconfont aui-icon-emoji"></span>
+                    <p>客户</p>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <div style="height: 5px; width: 100%"></div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script src="../../../script/echarts.min.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            $("[data-role='block']").tap(function () {
+                if (GetSession("Form_SaleRole").indexOf($(this).data("power")) >= 0) {
+                    $honesty.OpenWin({
+                        title: $(this).data("title"),
+                        name: $(this).data("name"),
+                        url: $(this).data("url") + ".html",
+                        LevelNum: 2
+                    });
+                }
+                else {
+                    $honesty.ShowToast({ msg: "对不起，您没有改模块的权限" });
+                }
+            });
+
+            $("[data-role='UnDevelopment']").tap(function () {
+                $honesty.ShowToast({ msg: "功能未开发，尽情期待" })
+            });
+
+        });
+    };
+</script>
+</html>

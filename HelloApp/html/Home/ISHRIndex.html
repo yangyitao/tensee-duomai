@@ -1,0 +1,228 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>销售模块(业务模块)</title>
+    
+    <link href="../../css/aui.css" rel="stylesheet" type="text/css" />
+    
+</head>
+
+<style>
+/*方的背景图标记*/
+/*#ulSale li:nth-child(1){
+background:url(../../image/jpgl.png);
+background-size:100% 100%;
+}
+#ulSale li:nth-child(2){
+background:url(../../image/xsgl.png);
+background-size:100% 100%;
+}
+#ulSale li:nth-child(3){
+background:url(../../image/yygl.png);
+background-size:100% 100%;
+}
+#ulSale li:nth-child(4){
+background:url(../../image/xdgl.png);
+background-size:100% 100%;
+}
+#ulSale li:nth-child(5){
+background:url(../../image/gkgl.png);
+background-size:100% 100%;
+}
+
+
+#ulHR li:nth-child(1){
+background:url(../../image/rsgl.png);
+background-size:100% 100%;
+}
+#ulHR li:nth-child(2){
+background:url(../../image/xzgl.png);
+background-size:100% 100%;
+}
+#ulHR li:nth-child(3){
+background:url(../../image/kqgl.png);
+background-size:100% 100%;
+}
+#ulHR li:nth-child(4){
+background:url(../../image/zzgl.png);
+background-size:100% 100%;
+}*/
+
+/*圆的背景图标记*/
+
+#ulSale li:nth-child(1){
+background:url(../../launch/jpgl.png) no-repeat center 0.9rem;
+background-size:58% 58%;
+}
+#ulSale li:nth-child(2){
+background:url(../../launch/xsgl.png) no-repeat center 1rem;
+background-size:55% 55%;
+}
+#ulSale li:nth-child(3){
+background:url(../../launch/yygl.png)no-repeat center 1.1rem;
+background-size:51% 51%;
+}
+#ulSale li:nth-child(4){
+background:url(../../launch/xdgl.png)no-repeat center 1.2rem;
+background-size:48% 48%;
+}
+#ulSale li:nth-child(5){
+background:url(../../launch/gkgl.png)no-repeat center 1.2rem;
+background-size:50% 50%;
+}
+
+
+#ulHR li:nth-child(1){
+background:url(../../launch/rsgl.png)no-repeat center 1.1rem;
+background-size:52% 52%;
+}
+#ulHR li:nth-child(2){
+background:url(../../launch/xzgl.png)no-repeat center 1rem;
+background-size:62% 62%;
+}
+#ulHR li:nth-child(3){
+background:url(../../launch/kqgl.png)no-repeat center 1rem;
+background-size:55% 55%;
+}
+#ulHR li:nth-child(4){
+background:url(../../launch/zzgl.png)no-repeat center 1rem;
+background-size:52% 52%;
+}
+#pSale,#pHR,#ulSale p,#ulHR p{
+color:#757575;
+}
+#ulSale li,#ulHR li{
+position:relative ;
+height:6rem;
+
+border-radius: 2px 2px 2px 2px;
+}
+#ulSale li p,#ulHR li p{
+position:absolute;
+
+margin: 0.01rem 0.5rem;
+bottom:0rem;
+}
+
+
+
+span img{
+display:none;
+background:url(../../image/zzgl.png);
+}
+</style>
+<body>
+    <div class="aui-content">
+        <p id="pSale" class="aui-padded-10 aui-text-center" style="display: none">销售模块</p>
+        <ul class="aui-grid-sixteen" id="ulSale">
+        </ul>
+        <p id="pHR" class="aui-padded-10 aui-text-center" style="display: none">人力资源模块</p>
+        <ul class="aui-grid-sixteen" id="ulHR">
+        </ul>
+    </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            LoadData();
+
+            //下拉刷新
+            api.setRefreshHeaderInfo({
+                visible: true,
+                loadingImg: 'widget://image/refresh.png',
+                bgColor: '#fff',
+                textColor: '#000',
+                textDown: '下拉刷新...',
+                textUp: '松开刷新...',
+                showTime: true
+            }, function (ret, err) {
+                LoadData();
+                api.refreshHeaderLoadDone();
+            });
+        });
+
+    }
+    //数据加载函数
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: { "Result": "GetBusinessFirstMenu", "UserID": GetSession("UserID") },
+                ProcName: "proc_SOM_Others_APPMenu",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    var saleMenu = "", hrMenu = "";
+                    var saleNum = 0, hrNum = 0;
+                    $.each(_result.Data, function (i, item) {
+                        if (item.AppRole == "1") {
+                            saleMenu += "<li  class='aui-col-xs-3 aui-text-center' tapmode onclick=\"OpenMenu(\'" + item.ModuleName + "\')\">" +
+                                        "<p>" + item.Title + "</p></li>";
+                            saleNum++;
+                        }
+                        else {
+                            hrMenu += "<li  class='aui-col-xs-3 aui-text-center' tapmode onclick=\"OpenMenu(\'" + item.ModuleName + "\')\">" +
+                                      "<p>" + item.Title + "</p></li>";
+                            hrNum++;
+                        }
+                    });
+                    var emptyNum = 4 - saleNum % 4;
+                    if (emptyNum != 4) {
+                        for (var i = 0; i < emptyNum; i++) {
+                            saleMenu += "<li class='aui-col-xs-3 aui-text-center'><span class='aui-iconfont'>&nbsp;</span><p>&nbsp;</p></li>";
+                        }
+                    }
+                    emptyNum = 4 - hrNum % 4;
+                    if (emptyNum != 4) {
+                        for (var i = 0; i < emptyNum; i++) {
+                            hrMenu += "<li class='aui-col-xs-3 aui-text-center'><span class='aui-iconfont'>&nbsp;</span><p>&nbsp;</p></li>";
+                        }
+                    }
+                    if (saleMenu != "") {
+                        $("#pSale").css("display", "");
+                    }
+                    if (hrMenu != "") {
+                        $("#pHR").css("display", "");
+                    }
+                    $("#ulSale").html(saleMenu);
+                    $("#ulHR").html(hrMenu);
+                    api.parseTapmode();
+                }
+            }
+
+        });
+    }
+
+    //打开二级菜单
+    function OpenMenu(moduleName) {
+        api.openFrame({
+            name: 'Menu',
+            url: 'Menu.html',
+            bounces: false,
+            pageParam: {
+                DataRole: moduleName
+            },
+            rect: {
+                x: 0,
+                y: 0,
+                w: 'auto',
+                h: 'auto'
+            }
+        });
+        api.bringFrameToFront({
+            from: 'Menu'
+        });
+    }
+</script>
+</html>

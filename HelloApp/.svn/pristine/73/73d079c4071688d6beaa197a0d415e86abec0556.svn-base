@@ -1,0 +1,126 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>店铺人员</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .div-height {
+            height: 10px;
+        }
+
+        .aui-list-view-cell {
+            padding: 5px;
+        }
+
+            .aui-list-view-cell table {
+                width: 100%;
+                font-size: 13px;
+                color: gray;
+                table-layout: fixed;
+                border-collapse: collapse;
+            }
+
+                .aui-list-view-cell table .value {
+                    word-break: keep-all;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    text-align: left;
+                    padding-right: 5px;
+                }
+    </style>
+</head>
+<body>
+    <div class="div-height"></div>
+    <div class="aui-content" id="UserInfo"></div>
+    <div class="div-height"></div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _Key, _OrganizeID, _Status, _Day;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _Key = api.pageParam.Key || "";
+            _OrganizeID = api.pageParam.OrganizeID || "";
+            _Status = api.pageParam.Status || "";
+            _Day = api.pageParam.Day || "";
+
+            //下拉刷新
+            api.setRefreshHeaderInfo({
+                visible: true,
+                loadingImg: 'widget://image/refresh.png',
+                bgColor: '#fff',
+                textColor: '#000',
+                textDown: '下拉刷新...',
+                textUp: '松开刷新...',
+                showTime: true
+            }, function (ret, err) {
+                LoadData();
+                api.refreshHeaderLoadDone();
+            });
+
+            LoadData();
+        });
+    }
+
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    result: "GetFaultData",
+                    StartDate: _Day,
+                    EndDate: _Day,
+                    SortColumn: "FaultDate asc",
+                    Key: _Key,
+                    Status: _Status,
+                    OrganizeID: _OrganizeID
+                },
+                ProcName: "proc_SOM_HR_EmpDayAttend_F",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    var _Content = "";
+                    $.each(_result.Data, function (i, item) {
+                        _Content += "<div class='aui-content aui-card'><ul class='aui-list-view'><li class='aui-list-view-cell'>" +
+                                        "<p style='color:#000'>" + item.Account + "&nbsp;" + item.Name + "</p></li><li class='aui-list-view-cell'>" +
+                                        "<table><tr><td style='width: 95px;'>异常描述:</td><td class='value' style='color:#3175af'>" + item.FaultMsg + "</td></tr>" +
+                                        "<tr><td>部门:</td><td class='value'>" + item.DeptName + "</td></tr>" +
+                                        "<tr data-Account=\'" + item.Account + "\' style='display: none'><td>大区:</td><td class='value'>" + item.Regional + "</td></tr>" +
+                                        "<tr data-Account=\'" + item.Account + "\' style='display: none'><td>省份:</td><td class='value'>" + item.Province + "</td></tr>" +
+                                        "<tr data-Account=\'" + item.Account + "\' style='display: none'><td>城市:</td><td class='value'>" + item.City + "</td></tr>" +
+                                        "<tr data-Account=\'" + item.Account + "\' style='display: none'><td>零售部:</td><td class='value'>" + item.CenterName + "</td></tr>" +
+                                        "<tr data-Account=\'" + item.Account + "\' style='display: none'><td>区域:</td><td class='value'>" + item.DeptAreaName + "</td></tr></table></li>" +
+                                        "<li data-role='colspan' data-show='hide' class='aui-list-view-cell'>" +
+                                        "<p style='text-align: left' tapmode onclick=\"ShowAdress(\'" + item.Account + "\',this)\" readonly='true;'>点击显示详情</p></li></ul></div>"
+                    });
+                    $("#UserInfo").html(_Content);
+                    api.parseTapmode();
+                }
+            }
+        });
+    }
+
+    function ShowAdress(Account, control) {
+        $("[data-Account='" + Account + "']").fadeToggle(200);
+        if ($(control).attr("data-show") == "hide") {
+            $(control).html("点击显示详情");
+            $(control).attr("data-show", "show");
+        }
+        else {
+            $(control).html("点击收起");
+            $(control).attr("data-show", "hide");
+        }
+    }
+</script>
+</html>

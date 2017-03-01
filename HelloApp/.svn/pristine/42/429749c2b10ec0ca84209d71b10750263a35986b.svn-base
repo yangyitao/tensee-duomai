@@ -1,0 +1,82 @@
+﻿<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title id="PageTitle">入职申请</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <link href="../../../css/aui-win.css" rel="stylesheet" />
+</head>
+<body>
+    <header id="hHeader" class="aui-bar aui-bar-nav aui-bar-warning">
+        <a id="btnClose" class="aui-btn aui-btn-warning aui-pull-left">
+            <span class="aui-iconfont aui-icon-close"></span>
+        </a>
+        <div id="hTitle" class="aui-title">入职申请</div>
+        <!--<a id="btnInfo" class="aui-btn aui-btn-warning aui-pull-right active">
+            <span class="aui-iconfont aui-icon-edit"></span>
+        </a>-->
+    </header>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var EmpID = "";
+    apiready = function () {
+        $(function () {
+            api.parseTapmode();
+            var header = $api.byId("hHeader");
+            $api.fixStatusBar(header);
+            var headerPos = $api.offset(header);
+            var body_h = $api.offset($api.dom("body")).h;
+            var PageParam = api.pageParam;
+            if (PageParam != null) {
+                EmpID = PageParam.instanceid;
+                PageParam["name"] = "HRFlow_EmpEntry";
+                api.openFrame({
+                    name: "HRFlow_EmpEntry",
+                    url: "widget://html/HRFlow/EmpEntry.html",
+                    pageParam: PageParam,
+                    rect: {
+                        x: 0,
+                        y: headerPos.h,
+                        w: headerPos.w,
+                        h: "auto"
+                    }
+                });
+            }
+            $("#btnClose").tap(function () {
+                $honesty.ConfirmWin({
+                    title: "提示",
+                    msg: "您的资料未填写完毕，确认退出?",
+                    buttons: ["确认", "取消"],
+                    callback: function (ret, err) {
+                        if (ret.buttonIndex == 1) {
+                            api.closeWin({
+                                animation: {
+                                    type: "flip",
+                                    subType: "from_bottom",
+                                    duration: 200
+                                }
+                            });
+                        }
+                    }
+                });
+            });
+            //$("#btnInfo").tap(function () {
+            //    $honesty.OpenWin({
+            //        title: "基础资料完善",
+            //        name: "HRFlow_EmpEntry_Info",
+            //        url: "HRFlow/EmpEntry/Info.html",
+            //        LevelNum: 2,
+            //        pageParam: {
+            //            ID: EmpID,
+            //            StepName: "提交资料"
+            //        }
+            //    });
+            //});
+        });
+    };
+</script>
+</html>

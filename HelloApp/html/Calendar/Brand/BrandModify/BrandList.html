@@ -1,0 +1,241 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>竞品品牌</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <p id="pTitle" class="aui-padded-5 aui-text-center">竞品品牌列表</p>
+    <footer class="aui-nav" id="footer" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7; display: none">
+        <div id="btnAdd" class="aui-btn aui-btn-block aui-btn-info" style="height: 45px; width: 100%; line-height: 0.9;">
+            新增
+        </div>
+    </footer>
+</body>
+</html>
+
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+
+<script type="text/javascript">
+    var UIListView;
+    var _OrganizeID, _IsLeader = false;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _OrganizeID = api.pageParam.OrganizeID;
+            if ( _OrganizeID.toUpperCase() == GetSession("OrganizeID").toUpperCase() && GetSession("IsLeader") != "0") {
+                $("#footer").show();
+                _IsLeader = true;
+            }
+
+            //列表控件打开
+            UIListView = api.require('UIListView');
+            UIListView.open({
+                rect: {
+                    x: 0,
+                    y: $("#pTitle").height(),
+                    "w": api.frameWidth,
+                    "h": api.frameHeight - (_IsLeader == false ? 0 : $("#footer").height()) - $("#pTitle").height(),
+                },
+                data: [{}],
+                styles: {
+                    borderColor: '#dce1e7',
+                    item: {
+                        bgColor: '#fff',
+                        activeBgColor: '#F5F5F5',
+                        height: 55,
+                        titleSize: 16.0,
+                        titleColor: '#000',
+                        subTitleSize: 12.0,
+                        subTitleColor: '#8f8f94',
+                        remarkColor: '#000',
+                        remarkSize: 16,
+                        remarkIconWidth: 30
+                    }
+                },
+                fixedOn: api.frameName
+            }, function (ret, err) {
+                if (ret) {
+                    var clickBtn = "";
+                    //点击按钮判断
+                    switch (ret.eventType) {
+                        case "clickRightBtn":       //右侧按钮点击
+                            switch (ret.btnIndex) {
+                                case 0:             //删除按钮点击
+                                    clickBtn = "deleteInfo";
+                                    break
+                            }
+                            break;
+                        case "clickContent":        //内容点击
+                            clickBtn = "clickContent";
+                            break;
+                    }
+                    if (clickBtn != "") {
+                        //获取点击列数据
+                        UIListView.getDataByIndex({
+                            index: ret.index
+                        }, function (info, err) {
+                            if (info) {
+                                if (clickBtn == "deleteInfo") {
+                                    $honesty.ConfirmWin({
+                                        msg: "是否删除该行数据？", callback: function (value, error) {
+                                            if (value.buttonIndex == "1") {
+                                                var _options = {
+                                                    PostData: {
+                                                        Params: {
+                                                            Result: "DeleteInfo",
+                                                            ID: info["data"].ID
+                                                        },
+                                                        ProcName: "proc_SOM_ISR_Brand",
+                                                        DataType: "Bool",
+                                                        ExecType: "PROC",
+                                                        Mode: "MSSQL"
+                                                    }
+                                                };
+                                                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                                                    if (_result.Code == "1") {
+                                                        if (_result.Data == "True") {
+                                                            UIListView.deleteItem({
+                                                                index: ret.index
+                                                            }, function (ret, err) {
+                                                                if (ret) {
+                                                                    $honesty.ShowMsg({ tite: "提示", msg: "删除成功!" });
+                                                                } else {
+                                                                    $honesty.ShowToast({ msg: JSON.stringify(err) });
+                                                                }
+                                                            });
+                                                        }
+                                                        else {
+                                                            $honesty.ShowMsg({ title: "错误", msg: "删除失败" });
+                                                        }
+                                                    }
+                                                });
+
+
+                                            }
+                                        }
+                                    });
+                                }
+                                else if (clickBtn == "clickContent") {
+                                    $honesty.OpenWin({
+                                        name: "Brand_BrandModify_BrandInfo",
+                                        url: "Brand/BrandModify/BrandInfo.html",
+                                        title: "竞品品牌",
+                                        LevelNum: 2,
+                                        pageParam: {
+                                            ID: info["data"].ID,
+                                            IsLeader: _IsLeader,
+                                            Index: ret.index,
+                                            OrganizeID: _OrganizeID
+                                        }
+                                    });
+                                }
+
+                            } else {
+                                $honesty.ShowToast({ msg: JSON.stringify(err) });
+                            }
+                        });
+
+                    }
+
+                } else {
+                    $honesty.ShowToast({ msg: JSON.stringify(err) });
+                }
+            });
+            LoadData();
+
+            //新增按钮点击
+            $("#btnAdd").tap(function () {
+                $honesty.OpenWin({
+                    name: "Brand_BrandModify_BrandInfo",
+                    url: "Brand/BrandModify/BrandInfo.html",
+                    title: "竞品品牌",
+                    LevelNum: 2,
+                    pageParam: {
+                        IsLeader: _IsLeader,
+                        OrganizeID: _OrganizeID
+                    }
+                });
+            });
+
+            //货品目标维护事件监听
+            api.addEventListener({
+                name: 'Brand_BrandModify_BrandInfo'
+            }, function (ret) {
+                if (ret && ret.value) {
+                    UIListView.reloadData({
+                        data: []
+                    }, function (ret) {
+                        if (ret) {
+                            LoadData();
+                        }
+                    });
+                }
+            });
+
+
+        });
+
+    }
+
+    //数据加载函数
+    function LoadData() {
+        UIListView.deleteItem({
+            index: 0
+        });
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "SelectInfo",
+                    OrganizeID: _OrganizeID
+                },
+                ProcName: "proc_SOM_ISR_Brand",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Data.length > 0) {
+                $.each(_result.Data, function (i, item) {
+                    if (!_IsLeader) {
+                        UIListView.insertItem({
+                            data: {
+                                ID: item.ID,    //开发者自定义的唯一标识
+                                title: item.Brand,
+                                subTitle: "员工数:" + item.EmployeeNum + "  店铺面积:" + item.Area,
+                                icon: ''
+                            }
+                        });
+                    }
+                    else {
+                        UIListView.insertItem({
+                            data: {
+                                ID: item.ID,    //开发者自定义的唯一标识
+                                title: item.Brand,
+                                subTitle: "员工数:" + item.EmployeeNum + "  店铺面积:" + item.Area,
+                                icon: '',
+                                rightBtns: [{
+                                    bgColor: '#e74c3c',
+                                    activeBgColor: '#c0392b',
+                                    width: 70,
+                                    title: '删除',
+                                    titleSize: 12,
+                                    titleColor: '#fff',
+                                    icon: '',
+                                    iconWidth: 20
+                                }],
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
+</script>

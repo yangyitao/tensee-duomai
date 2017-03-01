@@ -1,0 +1,502 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>月销售计划</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .sale-header {
+            background: url('../../../image/Sale.jpg') no-repeat;
+            background-size: cover;
+            min-height: 200px;
+            position: relative;
+        }
+
+        .sale-info {
+            position: relative;
+            padding: 20px 0;
+            width: 100%;
+            bottom: 0;
+            text-align: center;
+        }
+
+            .sale-info p.ratename {
+                margin-top: 15px;
+                color: #ffffff;
+                font-size: 16px;
+            }
+
+            .sale-info p.ratevalue {
+                margin-top: 5px;
+                color: #ffffff;
+                font-size: 30px;
+            }
+
+        .aui-grid-nine li {
+            padding: 5px 10px;
+        }
+
+            .aui-grid-nine li p:first-child {
+                font-weight: bold;
+            }
+    </style>
+</head>
+<body>
+    <div class="aui-content sale-header" style="margin-bottom: 0px;">
+        <div class="sale-info" id="divForm">
+            <p class="ratename" id="pShopName"></p>
+            <p class="ratename" id="pShopCode"></p>
+            <p class="ratename" id="pTitle"></p>
+            <p class="ratevalue" id="pRate"></p>
+        </div>
+    </div>
+    <ul class="aui-grid-nine">
+        <li class="aui-col-xs-6 aui-text-center">
+            <p>本月计划</p>
+            <p id="pTargetSale"></p>
+        </li>
+        <li class="aui-col-xs-6 aui-text-center">
+            <p>本月销售</p>
+            <p id="pActualSale"></p>
+        </li>
+        <li class="aui-col-xs-3 aui-text-center">
+            <p>客单件</p>
+            <p id="pCustomerSingle"></p>
+        </li>
+        <li class="aui-col-xs-3 aui-text-center">
+            <p>客单价</p>
+            <p id="pCustomerUnitPrice"></p>
+        </li>
+        <li class="aui-col-xs-3 aui-text-center">
+            <p>件数</p>
+            <p id="pClothesNum"></p>
+        </li>
+        <li class="aui-col-xs-3 aui-text-center">
+            <p>单数</p>
+            <p id="pOrderNum"></p>
+        </li>
+        <li class="aui-col-xs-3 aui-text-center" data-role="block" data-url="Sale/MonthSale/MonthTarget" data-name="Sale_MonthSale_MonthTarget">
+            <span class="aui-iconfont aui-icon-sponsor aui-text-default"></span>
+            <p>本月目标</p>
+            <span id="spMonthTarget" data-role="check" data-name="本月目标"></span>
+        </li>
+        <li class="aui-col-xs-3 aui-text-center" data-role="block" data-url="Sale/MonthSale/GoodsTarget" data-name="Sale_MonthSale_GoodsTarget">
+            <span class="aui-iconfont aui-icon-clothes aui-text-danger"></span>
+            <p>货品目标</p>
+            <span id="spGoodsTarget" data-role="check" data-name="货品目标"></span>
+        </li>
+        <li class="aui-col-xs-3 aui-text-center" data-role="block" data-url="Sale/MonthSale/VipTarget" data-name="Sale_MonthSale_VipTarget">
+            <span class="aui-iconfont aui-icon-vip aui-text-success"></span>
+            <p>VIP信息</p>
+            <span id="spVIPTarget" data-role="check" data-name="VIP信息"></span>
+        </li>
+        <li class="aui-col-xs-3 aui-text-center" data-role="block" data-url="Sale/MonthSale/EmpTarget" data-name="Sale_MonthSale_EmpTarget">
+            <span class="aui-iconfont aui-icon-friend aui-text-blue"></span>
+            <p>员工目标</p>
+            <span id="spEmpTarget" data-role="check" data-name="员工目标"></span>
+        </li>
+        <li class="aui-col-xs-3 aui-text-center" data-role="block" data-url="Sale/MonthSale/SalePlan" data-name="Sale_MonthSale_SalePlan">
+            <span class="aui-iconfont aui-icon-cart aui-text-primary"></span>
+            <p>销售计划</p>
+            <span id="spSalePlan" data-role="check" data-name="销售计划"></span>
+        </li>
+        <li class="aui-col-xs-3 aui-text-center" data-role="block" data-url="Sale/MonthSale/WorkPlan" data-name="Sale_MonthSale_WorkPlan">
+            <span class="aui-iconfont aui-icon-read aui-text-pink"></span>
+            <p>工作计划</p>
+            <span id="spWorkPlan"></span>
+        </li>
+        <li class="aui-col-xs-3 aui-text-center" data-role="block" data-url="Sale/MonthSale/SaleSummary" data-name="Sale_MonthSale_SaleSummary" data-send="show" style="display: none">
+            <span class="aui-iconfont aui-icon-list aui-text-danger"></span>
+            <p>销售总结</p>
+            <span id="spSaleSummary"></span>
+        </li>
+        <li class="aui-col-xs-3 aui-text-center" data-role="block" data-url="Sale/MonthSale/MonthSummary" data-name="Sale_MonthSale_MonthSummary" data-send="show" style="display: none">
+            <span class="aui-iconfont aui-icon-settings aui-text-info"></span>
+            <p>月度总结</p>
+            <span id="spMonthSummary"></span>
+        </li>
+        <li class="aui-col-xs-3 aui-text-center" data-send="hide" style="display: none">
+            <span class="aui-iconfont">&nbsp;</span>
+            <p>&nbsp;</p>
+        </li>
+        <li class="aui-col-xs-3 aui-text-center" data-send="hide" style="display: none">
+            <span class="aui-iconfont">&nbsp;</span>
+            <p>&nbsp;</p>
+        </li>
+        <li class="aui-col-xs-3 aui-text-center" data-role="block" data-url="Sale/MonthSale/SaleAssignList" data-name="Sale_MonthSale_SaleAssignList" data-share="show" style="display: none">
+            <span class="aui-iconfont aui-icon-share aui-text-danger"></span>
+            <p>销售分配</p>
+            <span id="spSaleAssign"></span>
+        </li>
+        <li class="aui-col-xs-3 aui-text-center" data-share="show" style="display: none">
+            <span class="aui-iconfont">&nbsp;</span>
+            <p>&nbsp;</p>
+        </li>
+        <li class="aui-col-xs-3 aui-text-center" data-share="show" style="display: none">
+            <span class="aui-iconfont">&nbsp;</span>
+            <p>&nbsp;</p>
+        </li>
+        <li class="aui-col-xs-3 aui-text-center" data-share="show" style="display: none">
+            <span class="aui-iconfont">&nbsp;</span>
+            <p>&nbsp;</p>
+        </li>
+    </ul>
+    <div id="divFooter" style="height: 100px; display: none"></div>
+</body>
+</html>
+
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script src="../../../script/honesty.flow.js"></script>
+<script type="text/javascript">
+    var _Year, _Month, _MonthID, _IsSend,
+        _IsSubmit, _OrganizeID, _IsLeader;
+    apiready = function () {
+        api.parseTapmode();
+
+        $(function () {
+            //获取全局变量值
+            _MonthID = api.pageParam.MonthID || api.pageParam.instanceid;
+            LoadData();
+
+
+
+
+            //模块点击
+            $("[data-role='block']").tap(function () {
+                $honesty.OpenWin({
+                    name: $(this).attr("data-name"),
+                    url: $(this).attr("data-url") + ".html",
+                    title: "月计划",
+                    LevelNum: 2,
+                    pageParam: {
+                        MonthID: _MonthID,
+                        IsSend: (_IsLeader == "False" ? "True" : _IsSend),
+                        IsSubmit: _IsSubmit,
+                        Year: _Year,
+                        Month: _Month,
+                        IsLeader: _IsLeader,
+                        OrganizeID:_OrganizeID
+                    }
+                });
+            });
+            //报表点击
+            $("#divForm").tap(function () {
+                $honesty.OpenWin({
+                    name: "Sale_MonthSale_MonthSaleForm_Index",
+                    url: "Sale/MonthSale/MonthSaleForm/Index.html",
+                    title: "月计划报表",
+                    LevelNum: 2,
+                    pageParam: {
+                        MonthID: _MonthID,
+                    }
+                });
+            });
+            //业绩提交监听事件
+            api.addEventListener({
+                name: 'Sale_MonthSale_SaleAssignList'
+            }, function (ret) {
+                if (ret && ret.value) {
+                    if (ret.value.IsTrue) {
+                        if ($("#spSaleAssign").hasClass("aui-superscript-danger")) {
+                            $("#spSaleAssign").removeClass("aui-superscript-danger");
+                            $("#spSaleAssign").addClass("aui-superscript-success");
+                            _IsSubmit = "True";
+                        }
+                    }
+                }
+            });
+
+            //本月目标保存监听事件
+            api.addEventListener({
+                name: 'Sale_MonthSale_MonthTarget'
+            }, function (ret) {
+                if (ret && ret.value) {
+                    $("#pTargetSale").html(ret.value.TargetSale);
+                    $("#pRate").html((ret.value.TargetSale == "0" ? "0" : (Number($("#pActualSale").html()) / Number(ret.value.TargetSale) * 100).toFixed(0)) + "%");
+                    if ($("#spMonthTarget").hasClass("aui-superscript-danger")) {
+                        $("#spMonthTarget").removeClass("aui-superscript-danger");
+                        $("#spMonthTarget").addClass("aui-superscript-success");
+                    }
+                }
+            });
+            //货品目标监听事件
+            api.addEventListener({
+                name: 'Sale_MonthSale_GoodsTarget'
+            }, function (ret) {
+                if (ret && ret.value) {
+                    if (ret.value.Count == "0") {
+                        if (!$("#spGoodsTarget").hasClass("aui-superscript-danger")) {
+                            $("#spGoodsTarget").addClass("aui-superscript-danger");
+                            $("#spGoodsTarget").removeClass("aui-superscript-success");
+                        }
+                    }
+                    else {
+                        if (!$("#spGoodsTarget").hasClass("aui-superscript-success")) {
+                            $("#spGoodsTarget").removeClass("aui-superscript-danger");
+                            $("#spGoodsTarget").addClass("aui-superscript-success");
+                        }
+                    }
+                }
+            });
+            //VIP目标监听事件
+            api.addEventListener({
+                name: 'Sale_MonthSale_VipTargetInfo'
+            }, function (ret) {
+                if (ret && ret.value) {
+                    if ($("#spVIPTarget").hasClass("aui-superscript-danger")) {
+                        $("#spVIPTarget").removeClass("aui-superscript-danger");
+                        $("#spVIPTarget").addClass("aui-superscript-success");
+                    }
+                }
+            });
+            //员工目标监听事件
+            api.addEventListener({
+                name: 'Sale_MonthSale_EmpTargetInfo'
+            }, function (ret) {
+                if (ret && ret.value) {
+                    if ($("#spEmpTarget").hasClass("aui-superscript-danger")) {
+                        $("#spEmpTarget").removeClass("aui-superscript-danger");
+                        $("#spEmpTarget").addClass("aui-superscript-success");
+                    }
+                }
+            });
+            //销售计划监听事件
+            api.addEventListener({
+                name: 'Sale_MonthSale_SalePlan'
+            }, function (ret) {
+                if (ret && ret.value) {
+                    if ($("#spSalePlan").hasClass("aui-superscript-danger")) {
+                        $("#spSalePlan").removeClass("aui-superscript-danger");
+                        $("#spSalePlan").addClass("aui-superscript-success");
+                    }
+                }
+            });
+            //工作计划监听事件
+            api.addEventListener({
+                name: 'Sale_MonthSale_WorkPlan'
+            }, function (ret) {
+                if (ret && ret.value) {
+                    if (ret.value.Count == "0") {
+                        if (!$("#spWorkPlan").hasClass("aui-superscript-danger")) {
+                            $("#spWorkPlan").addClass("aui-superscript-danger");
+                            $("#spWorkPlan").removeClass("aui-superscript-success");
+                        }
+                    }
+                    else {
+                        if (!$("#spWorkPlan").hasClass("aui-superscript-success")) {
+                            $("#spWorkPlan").removeClass("aui-superscript-danger");
+                            $("#spWorkPlan").addClass("aui-superscript-success");
+                        }
+                    }
+                }
+            });
+            //销售总结监听事件
+            api.addEventListener({
+                name: 'Sale_MonthSale_SaleSummary'
+            }, function (ret) {
+                if (ret && ret.value) {
+                    if ($("#spSaleSummary").hasClass("aui-superscript-danger")) {
+                        $("#spSaleSummary").removeClass("aui-superscript-danger");
+                        $("#spSaleSummary").addClass("aui-superscript-success");
+                    }
+                }
+            });
+            //月度总结监听事件
+            api.addEventListener({
+                name: 'Sale_MonthSale_MonthSummary'
+            }, function (ret) {
+                if (ret && ret.value) {
+                    if (ret.value.IsTrue) {
+                        if ($("#spMonthSummary").hasClass("aui-superscript-danger")) {
+                            $("#spMonthSummary").removeClass("aui-superscript-danger");
+                            $("#spMonthSummary").addClass("aui-superscript-success");
+                        }
+                    }
+                    else {
+                        if ($("#spMonthSummary").hasClass("aui-superscript-success")) {
+                            $("#spMonthSummary").removeClass("aui-superscript-success");
+                            $("#spMonthSummary").addClass("aui-superscript-danger");
+                        }
+                    }
+                }
+            });
+
+
+        });
+    }
+
+    //初始化数据函数
+    function LoadData() {
+
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "GetMainInfo",
+                    MonthID: _MonthID
+                },
+                ProcName: "proc_SOM_ISR_MonthSale",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        _Year = item.ZYear;
+                        _Month = item.ZMonth;
+                        _IsSend = item.IsSend;
+                        _IsSubmit = item.IsSubmit;
+                        _OrganizeID = item.OrganizeID;
+                        if ( _OrganizeID.toUpperCase() == GetSession("OrganizeID").toUpperCase() && GetSession("IsLeader") != "0") {
+                            _IsLeader = "True";
+                        }
+                        else {
+                            _IsLeader = "False";
+                        }
+                        $("#pShopCode").html(item.ShopCode);
+                        $("#pShopName").html(item.ShopName);
+                        $("#pRate").html(item.Rate + "%");
+                        $("#pTargetSale").html(item.TargetSale);
+                        $("#pActualSale").html(item.ActualSale);
+                        $("#pCustomerUnitPrice").html(item.CustomerUnitPrice);
+                        $("#pCustomerSingle").html(item.CustomerSingle);
+                        $("#pClothesNum").html(item.ClothesNum);
+                        $("#pOrderNum").html(item.OrderNum);
+
+                        $("#spMonthTarget").addClass((item.MonthTarget == "0" ? "aui-superscript-danger" : "aui-superscript-success"));
+                        $("#spGoodsTarget").addClass((item.GoodsTarget == "0" ? "aui-superscript-danger" : "aui-superscript-success"));
+                        $("#spVIPTarget").addClass((item.VIPTarget == "0" ? "aui-superscript-danger" : "aui-superscript-success"));
+                        $("#spEmpTarget").addClass((item.EmpTarget == "0" ? "aui-superscript-danger" : "aui-superscript-success"));
+                        $("#spSalePlan").addClass((item.SalePlan == "0" ? "aui-superscript-danger" : "aui-superscript-success"));
+                        $("#spWorkPlan").addClass((item.WorkPlan == "0" ? "aui-superscript-danger" : "aui-superscript-success"));
+                        $("#spSaleSummary").addClass((item.SaleSummary == "0" ? "aui-superscript-danger" : "aui-superscript-success"));
+                        $("#spMonthSummary").addClass((item.MonthSummary == "0" ? "aui-superscript-danger" : "aui-superscript-success"));
+                        $("#spSaleAssign").addClass((item.SaleAssign == "0" ? "aui-superscript-danger" : "aui-superscript-success"));
+
+                        if (_IsSend == "True" && _IsLeader == "True") {
+                            $("[data-share='show']").css("display", "");
+                        }
+                        if (api.pageParam.MonthID != null || api.pageParam.MonthID != undefined) {
+                            if (_IsLeader == "True" && _IsSend == "False") {
+                                $honestyFlow.InitFlow({ Async: false, instanceid: _MonthID, wapflowpage: "Sale/MonthSale/Index" });
+                                $("#divFooter").show()
+                            }
+                        }
+                        else {
+                            $honestyFlow.InitFlow({ Async: false, instanceid: _MonthID, wapflowpage: "Sale/MonthSale/Index" });
+                            $("#divFooter").show()
+                        }
+                        $("#pTitle").html(_Year + "年" + _Month + "月达成率");
+                        //流程发送按钮点击
+                        $("#btnSend").unbind("tap").tap(function () {
+                            if ($honestyFlow.GetFlowInfo("stepname") == "销售计划定制" || $honestyFlow.GetFlowInfo("stepname") == "店长审核") {
+                                var _CheckMsg = "";
+                                $("[data-role='check']").each(function () {
+                                    if ($(this).hasClass("aui-superscript-danger")) {
+                                        _CheckMsg = $(this).data("name");
+                                        return false;
+                                    }
+                                });
+                                if (_CheckMsg != "") {
+                                    $honesty.ShowMsg({ title: "警告", msg: _CheckMsg + "未维护，请先维护" });
+                                }
+                                else {
+                                    $("#flow_button").attr("title", $("#pShopCode").html() + "-" + $("#pShopName").html() + _Year + "年" + _Month + "月月销售计划");
+                                    $honestyFlow.SendFlow({
+                                        Callback: function () {
+                                            SetState(1);
+                                        }
+                                    });
+
+                                }
+                            }
+                            else {
+                                $honestyFlow.SendFlow({
+                                    Callback: function () {
+                                        var _options = {
+                                            PostData: {
+                                                Params: {
+                                                    Result: "SetFlowApprove",
+                                                    MonthID: _MonthID,
+                                                    ApprovalOpinion: $("#txtNote").val(),
+                                                },
+                                                ProcName: "proc_SOM_ISR_MonthSale",
+                                                DataType: "Bool",
+                                                ExecType: "PROC",
+                                                Mode: "MSSQL"
+                                            },
+                                            async: false
+                                        };
+                                        var _result = $honesty.AjaxChannel(_options);
+                                        if (_result.Code == "1") {
+                                            if (_result.Data == "True") { }
+                                            else {
+                                                $honesty.ShowMsg({ title: "错误", msg: "评语保存失败" });
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                        //流程撤回按钮点击
+                        $("#btnBack").unbind("tap").tap(function () {
+                            $honestyFlow.BackFlow({
+                                Callback: function () {
+                                    SetState(0);
+                                }
+                            });
+                        });
+                    });
+                }
+                ControlShow();
+            }
+            else {
+                $honesty.CloseWin();
+            }
+        });
+
+    }
+
+    //控制是否显示函数
+    function ControlShow() {
+        if (_IsSend == "True") {
+            $("[data-send='show']").css("display", "");
+            $("[data-send='hide']").css("display", "none");
+        }
+        else {
+            $("[data-send='show']").css("display", "none");
+            $("[data-send='hide']").css("display", "");
+        }
+    }
+
+    //设置流程发送状态
+    function SetState(state) {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "SendFlow",
+                    MonthID: _MonthID,
+                    IsSend: state
+                },
+                ProcName: "proc_SOM_ISR_MonthSale",
+                DataType: "Bool",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            },
+            async: false
+        };
+        var _result = $honesty.AjaxChannel(_options);
+        if (_result.Code == "1") {
+            if (_result.Data == "True") { }
+            else {
+                $honesty.ShowMsg({ title: "错误", msg: "流程状态设置不成功" });
+            }
+        }
+    }
+</script>

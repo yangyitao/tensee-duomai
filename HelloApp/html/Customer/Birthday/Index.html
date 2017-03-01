@@ -1,0 +1,111 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>生日管理</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="aui-tab" id="divTab">
+        <ul id="TopBar" class="aui-tab-nav">
+        </ul>
+    </div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var Leader = "";
+    var _Content = "";
+    var _OrganizeID;
+    var h;
+    var _index;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _OrganizeID = api.pageParam.OrganizeID;
+            if ( _OrganizeID.toUpperCase() == GetSession("OrganizeID").toUpperCase() && GetSession("IsLeader") != "0") {
+                Leader = "1";
+            }
+            else {
+                Leader = "0";
+            }
+            if (Leader != "0") {
+                _Content += "<li data-value='NotAssigned' data-index='0' class='active'>未分配</li>" +
+                "<li data-value='Untreated' data-index='1'>未处理</li>" +
+                        "<li data-value='Processed' data-index='2'>已处理</li>" +
+                        "<li data-value='All' data-index='3'>全部</li>"
+            }
+            else {
+                _Content += "<li data-value='Untreated' data-index='1' class='active'>未处理</li>" +
+                            "<li data-value='Processed' data-index='2'>已处理</li>" +
+                            "<li data-value='All' data-index='3'>全部</li>"
+            }
+            $("#TopBar").html(_Content);
+            $("#TopBar").children("li").tap(function () {
+                $("#TopBar").find(".active").removeClass("active");
+                $(this).addClass("active");
+
+                api.setFrameGroupIndex({
+                    name: 'Birthday_tab',
+                    index: $(this).data("index"),
+                    scroll: true
+                });
+            });
+
+            h = $honesty.RangeTop(50);
+            _index = 0;
+            if (Leader == 0) {
+                _index = 1
+            }
+            var params = {
+                name: 'Birthday_tab',
+                scrollEnabled: false,
+                rect: { x: 0, y: $("#divTab").height() + h, w: 'auto', h: 'auto' },
+                index: _index,
+                preload: 1,
+                frames: [{
+                    name: 'NotAssigned',
+                    url: 'NotAssigned.html',
+                    bounces: false,
+                    pageParam: {
+                        OrganizeID: api.pageParam.OrganizeID,
+                        ShopCode: api.pageParam.ShopCode,
+                        Leader: Leader
+                    }
+                }, {
+                    name: 'Untreated',
+                    url: 'Untreated.html',
+                    bounces: false,
+                    pageParam: {
+                        OrganizeID: api.pageParam.OrganizeID,
+                        ShopCode: api.pageParam.ShopCode,
+                        Leader: Leader
+                    }
+                }, {
+                    name: 'Processed',
+                    url: 'Processed.html',
+                    bounces: false,
+                    pageParam: {
+                        OrganizeID: api.pageParam.OrganizeID,
+                        ShopCode: api.pageParam.ShopCode,
+                        Leader: Leader
+                    }
+                }, {
+                    name: 'All',
+                    url: 'All.html',
+                    bounces: false,
+                    pageParam: {
+                        OrganizeID: api.pageParam.OrganizeID,
+                        ShopCode: api.pageParam.ShopCode,
+                        Leader: Leader
+                    }
+                }]
+            }
+            api.openFrameGroup(params);
+        })
+    }
+</script>
+</html>

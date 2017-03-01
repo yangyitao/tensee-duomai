@@ -1,0 +1,77 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>措施总结页面（周计划报表）</title>
+    <link href="../../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="aui-content">
+        <p class="aui-padded-10 aui-text-center">销售措施</p>
+        <div class="aui-form aui-input-form">
+            <div class="aui-input-row" style="padding: 2px; min-height: 150px; font-size: 14px;" id="SaleMeasure">
+            </div>
+        </div>
+        <p class="aui-padded-10 aui-text-center">销售总结</p>
+        <div class="aui-form aui-input-form">
+            <div class="aui-input-row" style="padding: 2px; min-height: 150px; font-size: 14px;" id="SaleSummary">
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+<script src="../../../../script/zepto.js"></script>
+<script src="../../../../script/api.js"></script>
+<script src="../../../../script/honesty.base.js"></script>
+
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            LoadData();
+
+            //下拉刷新
+            api.setRefreshHeaderInfo({
+                visible: true,
+                loadingImg: 'widget://image/refresh.png',
+                bgColor: '#fff',
+                textColor: '#000',
+                textDown: '下拉刷新...',
+                textUp: '松开刷新...',
+                showTime: true
+            }, function (ret, err) {
+                LoadData();
+                api.refreshHeaderLoadDone();
+            });
+        });
+    }
+
+    function LoadData()
+    {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "SelectSalePlan",
+                    WeekID: api.pageParam.WeekID
+                },
+                ProcName: "proc_SOM_ISR_WeekSale",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        $("#SaleMeasure").html(item.SaleMeasure);
+                        $("#SaleSummary").html(item.SaleSummary);
+                    });
+                }
+            }
+        });
+    }
+</script>

@@ -1,0 +1,328 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>加班申请流程行项目维护</title>
+    <link href="../../css/aui.css" rel="stylesheet" /> 
+</head>
+<body>
+    <div class="aui-content">
+        <p class="aui-padded-5 aui-text-center">加班详情</p>
+        <div data-role="80" class="aui-form aui-input-form aui-input-flow">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">加班类型</span>
+                <select id="OverType" class="aui-input">
+                    <option value="">请选择...</option>
+                    <option value="休息日加班">休息日加班</option>
+                    <option value="延时加班">延时加班</option>
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">开始时间</span>
+                <input id="OverBegin" type="text" class="aui-input" placeholder="请选择加班开始时间!" readonly="readonly" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">结束时间</span>
+                <input id="OverEnd" type="text" class="aui-input" placeholder="请选择加班结束时间!" readonly="readonly" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">合计</span>
+                <input id="OverTime" type="text" class="aui-input" placeholder="小计时数" readonly="readonly" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">加班班次</span>
+                <input id="ShiftName" type="text" class="aui-input" placeholder="班次自动获取!" readonly="readonly" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">加班原因</span>
+                <select id="Reason" class="aui-input">
+                    <option value="">请选择...</option>
+                    <option value="临时特卖">临时特卖</option>
+                    <option value="商场活动">商场活动</option>
+                    <option value="陈列">陈列</option>
+                    <option value="盘点">盘点</option>
+                    <option value="新开店">新开店</option>
+                    <option value="闭店">闭店</option>
+                    <option value="其他">其他</option>
+                </select>
+            </div>
+            <div id="divOtherReason" class="aui-input-row">
+                <span class="aui-input-addon">原因说明</span>
+                <input id="OtherReason" type="text" class="aui-input" maxlength="50" placeholder="请填写原因说明" />
+            </div>
+        </div>
+    </div>
+    <div id="divFooter" style="height: 40px; display: none"></div>
+    <footer class="aui-nav" id="footer" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7; display: none">
+        <div id="btnSave" class="aui-btn aui-btn-block aui-btn-warning" style="height: 45px; width: 100%; line-height: 0.9;">
+            保存
+        </div>
+    </footer>
+</body>
+</html>
+<script src="../../script/api.js"></script>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script src="../../script/honesty.flow.js"></script>
+<script type="text/javascript">
+    var InstanceID = "", ListID = "";
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            LoadData();
+            $("#OverBegin,#OverEnd").tap(function () {
+                if (api.pageParam.StepName == "提交加班申请") {
+                    $honesty.DateTimeSelect({
+                        Type: "DateTime",
+                        ControlID: $(this).attr("id"),
+                        ControlValue: $(this).val(),
+                        onchange: function (ret) {
+                            if (ret) {
+                                if ($("#OverBegin").val() != "" && $("#OverEnd").val() != "" && $("#OverType").find("option:selected").val() != "") {
+                                    if (new Date($("#OverBegin").val().replace(/-/g, "/")).Format("yyyyMMdd") != new Date($("#OverEnd").val().replace(/-/g, "/")).Format("yyyyMMdd")) {
+                                        $honesty.ShowMsg({ title: "警告", msg: "加班日期请选择在同一天内!" });
+                                        $("#OverEnd,#OverTime,#ShiftName").val("");
+                                        return false;
+                                    }
+                                    if (Date.parse($("#OverBegin").val().replace(/-/g, "/")) > Date.parse($("#OverEnd").val().replace(/-/g, "/"))) {
+                                        $honesty.ShowMsg({ title: "警告", msg: "结束时间小于开始时间!" });
+                                        $("#OverEnd,#OverTime,#ShiftName").val("");
+                                        return;
+                                    }
+                                    else {
+                                        if (GetSession("LastShiftDate") != "" && GetSession("LastShiftDate") != undefined) {
+                                            if (Date.parse($("#OverEnd").val().replace(/-/g, "/")) > Date.parse(GetSession("LastShiftDate").replace(/-/g, "/"))) {
+                                                $honesty.ShowMsg({ title: "警告", msg: "您加班的那天未进行排班，您当前的最后排班日期：" + GetSession("LastShiftDate") });
+                                                $("#OverEnd,#OverTime,#ShiftName").val("");
+                                                return;
+                                            }
+                                        }
+                                        else {
+                                            $honesty.ShowMsg({ title: "警告", msg: "您的领导未进行排班操作!" });
+                                            $("#OverEnd,#OverTime,#ShiftName").val("");
+                                        }
+                                    }
+                                    if ($("#OverType").val() != "") {
+                                        var _options = {
+                                            PostData: {
+                                                result: "CheckShiftByDate",
+                                                UserCode: GetSession("UserID"),
+                                                StartDate: $("#OverBegin").val().replace(/-/g, "/"),
+                                                EndDate: $("#OverEnd").val().replace(/-/g, "/")
+                                            },
+                                            MathType: "Over" + ($("#OverType").val() == "休息日加班" ? "1" : "2"),
+                                            Loading: {
+                                                Title: "班次获取中...",
+                                                Show: true
+                                            }
+                                        };
+                                        $.when($honesty.AjaxAttend(_options)).done(function (_result) {
+                                            try {
+                                                if (!isNaN(_result.OverCount)) {
+                                                    $("#OverTime").val(_result.OverCount);
+                                                    $("#ShiftName").val(_result.ShiftName);
+                                                }
+                                                else {
+                                                    $honesty.ShowMsg({ title: "警告", msg: _result.OverCount });
+                                                    $("#OverEnd,#OverTime,#ShiftName").val("");
+                                                }
+                                            }
+                                            catch (e) {
+                                                $honesty.ShowMsg({ title: "警告", msg: "您的领导未进行排班操作!" });
+                                                $("#OverEnd,#OverTime,#ShiftName").val("");
+                                            }
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+            $("#OverType").change(function () {
+                if ($("#OverBegin").val() != "" && $("#OverEnd").val() != "" && $("#OverType").find("option:selected").val() != "") {
+                    if (new Date($("#OverBegin").val().replace(/-/g, "/")).Format("yyyyMMdd") != new Date($("#OverEnd").val().replace(/-/g, "/")).Format("yyyyMMdd")) {
+                        $honesty.ShowMsg({ title: "警告", msg: "加班日期请选择在同一天内!" });
+                        $("#OverEnd,#OverTime,#ShiftName").val("");
+                        return false;
+                    }
+                    if (Date.parse($("#OverBegin").val().replace(/-/g, "/")) > Date.parse($("#OverEnd").val().replace(/-/g, "/"))) {
+                        $honesty.ShowMsg({ title: "警告", msg: "结束时间小于开始时间!" });
+                        $("#OverEnd,#OverTime,#ShiftName").val("");
+                        return;
+                    }
+                    else {
+                        if (GetSession("LastShiftDate") != "" && GetSession("LastShiftDate") != undefined) {
+                            if (Date.parse($("#OverEnd").val().replace(/-/g, "/")) > Date.parse(GetSession("LastShiftDate").replace(/-/g, "/"))) {
+                                $honesty.ShowMsg({ title: "警告", msg: "您加班的那天未进行排班，您当前的最后排班日期：" + GetSession("LastShiftDate") });
+                                $("#OverEnd,#OverTime,#ShiftName").val("");
+                                return;
+                            }
+                        }
+                        else {
+                            $honesty.ShowMsg({ title: "警告", msg: "您的领导未进行排班操作!" });
+                            $("#OverEnd,#OverTime,#ShiftName").val("");
+                        }
+                    }
+                    if ($("#OverType").val() != "") {
+                        var _options = {
+                            PostData: {
+                                result: "CheckShiftByDate",
+                                UserCode: GetSession("UserID"),
+                                StartDate: $("#OverBegin").val().replace(/-/g, "/"),
+                                EndDate: $("#OverEnd").val().replace(/-/g, "/")
+                            },
+                            MathType: "Over" + ($("#OverType").val() == "休息日加班" ? "1" : "2"),
+                            Loading: {
+                                Title: "班次获取中...",
+                                Show: true
+                            }
+                        };
+                        $.when($honesty.AjaxAttend(_options)).done(function (_result) {
+                            try {
+                                if (!isNaN(_result.OverCount)) {
+                                    $("#OverTime").val(_result.OverCount);
+                                    $("#ShiftName").val(_result.ShiftName);
+                                }
+                                else {
+                                    $honesty.ShowMsg({ title: "警告", msg: _result.OverCount });
+                                    $("#OverEnd,#OverTime,#ShiftName").val("");
+                                }
+                            }
+                            catch (e) {
+                                $honesty.ShowMsg({ title: "警告", msg: "您的领导未进行排班操作!" });
+                                $("#OverEnd,#OverTime,#ShiftName").val("");
+                            }
+                        });
+                    }
+                }
+            });
+            $("#Reason").change(function () {
+                if ($("#Reason").val() == "其他") {
+                    $("#divOtherReason").show();
+                }
+                else {
+                    $("#divOtherReason").hide();
+                }
+            });
+            $("#btnSave").click(function () {
+                if ($("#OverType").find("option:selected").val() == "") {
+                    $honesty.ShowMsg({ title: "警告", msg: "请选择加班类型!" });
+                    return false;
+                }
+                if ($("#OverBegin").val() == "") {
+                    $honesty.ShowMsg({ title: "警告", msg: "请选择开始时间!" });
+                    return false;
+                }
+                if ($("#OverEnd").val() == "") {
+                    $honesty.ShowMsg({ title: "警告", msg: "请选择结束时间!" });
+                    return false;
+                }
+                if (Date.parse($("#OverBegin").val().replace(/-/g, "/")) > Date.parse($("#OverEnd").val().replace(/-/g, "/"))) {
+                    $honesty.ShowMsg({ title: "警告", msg: "结束时间小于开始时间!" });
+                    return false;
+                }
+                if ($("#OverTime").val() == "") {
+                    $honesty.ShowMsg({ title: "警告", msg: "请填写加班合计时间!" });
+                    return false;
+                }
+                else {
+                    if ($("#OverTime").val() == "0") {
+                        $honesty.ShowMsg({ title: "警告", msg: "选择的时间段计算的加班时间为0!" });
+                        return false;
+                    }
+                }
+                if ($("#Reason").val() == "") {
+                    $honesty.ShowMsg({ title: "警告", msg: "请选择加班原因!" });
+                    return false;
+                }
+                else {
+                    if ($("#Reason").val() == "其他") {
+                        if ($("#OtherReason").val() == "") {
+                            $honesty.ShowMsg({ title: "警告", msg: "该原因需填写额外详细说明" });
+                            return false;
+                        }
+                    }
+                    else {
+                        $("#OtherReason").val("");
+                    }
+                }
+                var _options = {
+                    PostData: {
+                        Params: {
+                            result: "ModifyEmpOverList",
+                            ID: ListID,
+                            OverID: InstanceID,
+                            OverType: $("#OverType").val(),
+                            OverBegin: $("#OverBegin").val(),
+                            OverEnd: $("#OverEnd").val(),
+                            OverTime: $("#OverTime").val(),
+                            Reason: $("#Reason").val(),
+                            OtherReason: $("#OtherReason").val(),
+                            ShiftName: $("#ShiftName").val()
+                        },
+                        ProcName: "proc_SOM_HR_EmpOverList",
+                        DataType: "Bool",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    }
+                };
+                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                    if (_result.Code == "1") {
+                        if (_result.Data == "True") {
+                            api.sendEvent({
+                                name: "HRFlow_EmpOver_EmpOverInfo",
+                                extra: {
+                                    ID: ListID,
+                                    OverType: $("#OverType").val(),
+                                    OverBegin: $("#OverBegin").val(),
+                                    OverEnd: $("#OverEnd").val(),
+                                    OverTime: $("#OverTime").val(),
+                                    Reason: $("#Reason").val(),
+                                    OtherReason: $("#OtherReason").val(),
+                                    ShiftName: $("#ShiftName").val(),
+                                    IsNew: (api.pageParam.ListInfo == undefined ? true : false)
+                                }
+                            });
+                            api.closeWin();
+                        }
+                        else {
+                            $honesty.ShowMsg({ title: "错误", msg: "保存失败" });
+                        }
+                    }
+                });
+            });
+        });
+    };
+    function LoadData() {
+        InstanceID = api.pageParam.ID;
+        if (api.pageParam.ListInfo) {
+            var ListInfo = api.pageParam.ListInfo;
+            ListID = api.pageParam.ListInfo.ID;
+            $("#OverBegin").val(new Date(ListInfo.OverBegin).Format("yyyy-MM-dd hh:mm"));
+            $("#OverEnd").val(new Date(ListInfo.OverEnd).Format("yyyy-MM-dd hh:mm"));
+            $("#OverType").val(ListInfo.OverType);
+            $("#OverTime").val(ListInfo.OverTime);
+            $("#Reason").val(ListInfo.Reason);
+            $("#ShiftName").val(ListInfo.ShiftName);
+            $("#OtherReason").val(ListInfo.OtherReason);
+        }
+        else {
+            ListID = new $honesty.GUID().NewGUID();
+        }
+        if ($("#Reason").val() == "其他") {
+            $("#divOtherReason").show();
+        }
+        else {
+            $("#divOtherReason").hide();
+        }
+        if (api.pageParam.StepName != "提交加班申请") {
+            $("#footer,#divFooter").hide();
+        }
+        else {
+            $("#footer,#divFooter").show();
+        }
+    }
+</script>

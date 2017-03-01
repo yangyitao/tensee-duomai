@@ -1,0 +1,142 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>店铺员工排名</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-list-view-cell {
+            padding: 5px;
+        }
+
+        .form {
+            width: 100%;
+            text-align: center;
+            font-size: 13px;
+            border-collapse: collapse;
+        }
+
+            .form td, .form th {
+                border-bottom: 1px solid rgba(216, 216, 216, 0.1);
+                height: 35px;
+                letter-spacing: 0.4px;
+            }
+
+            .form th {
+                font-weight: 400;
+            }
+
+            .form tbody td {
+                color: #8f8f94;
+            }
+
+                .form tbody td:first-child {
+                    color: #000;
+                }
+    </style>
+</head>
+<body>
+    <div class="aui-content">
+        <ul class="aui-list-view" style="margin-bottom: 0px;">
+            <li class="aui-list-view-cell" id="liTitle">
+                <label id="ShopName"></label>
+            </li>
+            <li class="aui-list-view-cell" style="padding: 3px;">
+                <table class="form" style="min-width:350px;">
+                    <thead>
+                        <tr>
+                            <td style="width: 60px;">姓名</td>
+                            <td style="min-width: 60px;">目标</td>
+                            <td style="min-width: 60px;">实际</td>
+                            <td style="min-width: 60px;">达成</td>
+                            <td style="width: 40px;">排名</td>
+                            <td style="width: 70px;">激励津贴档级</td>
+                        </tr>
+                    </thead>
+                    <tbody id="tbInfo">
+                    </tbody>
+                </table>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>
+
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _OrganizeID, _Year, _Month, _ShopCode;
+
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _OrganizeID = api.pageParam.OrganizeID;
+            _Year = api.pageParam.Year;
+            _Month = api.pageParam.Month;
+            _ShopCode = api.pageParam.ShopCode;
+
+            //下拉刷新
+            api.setRefreshHeaderInfo({
+                visible: true,
+                loadingImg: 'widget://image/refresh.png',
+                bgColor: '#fff',
+                textColor: '#000',
+                textDown: '下拉刷新...',
+                textUp: '松开刷新...',
+                showTime: true
+            }, function (ret, err) {
+                LoadData();
+                api.refreshHeaderLoadDone();
+            });
+
+            LoadData();
+
+        });
+
+    }
+
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "GetEmpRank",
+                    Year: _Year,
+                    Month: _Month,
+                    OrganizeID: _OrganizeID,
+                    ShopCode: _ShopCode
+                },
+                ProcName: "proc_SaleForm",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                var _Content = "";
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        if ($("#ShopName").html() == "") {
+                            $("#ShopName").html(item.ShopName);
+                        }
+                        _Content += "<tr><td>" + item.EmpName + "</td>" +
+                                    "<td>" + item.TargetSale + "</td>" +
+                                    "<td>" + item.ActualSale + "</td>" +
+                                    "<td style='color:#3175af'>" + item.SaleRate + "%</td>" +
+                                    "<td>" + item.RankID + "</td>" +
+                                    "<td>" + item.WageLevelTxt + "</td>" +
+                                    "</tr>"
+                    });
+                    $("#tbInfo").html(_Content);
+                }
+                else {
+                    $("#tbInfo").html("<tr><td colspan='5'>尊敬的用户，您好，无排名数据</td></tr>");
+                    $("#liTitle").hide();
+                }
+            }
+        });
+    }
+</script>

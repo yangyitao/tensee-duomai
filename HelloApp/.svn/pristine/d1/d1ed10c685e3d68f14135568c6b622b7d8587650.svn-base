@@ -1,0 +1,464 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>首页</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+    <style>
+        body {
+            background: #e9e9e9;
+        }
+
+        .aui-input-row:after {
+            border: 0px !important;
+        }
+
+        .aui-label-text {
+            padding-left: 5px;
+            color: black !important;
+            font-size: 12px;
+        }
+
+        .aui-label-value {
+            font-size: 14px;
+            text-align: left;
+            height: 14px;
+            color: #808080;
+        }
+    </style>
+</head>
+<body>
+    <img id="imgBack" style="display: none" src="../../res/img/background.png" />
+    <div id="divType">
+        <p class="aui-text-center" id="navTitle">待办事项列表</p>
+        <div class="aui-card" id="divWorkList">
+            <ul class="aui-list-view">
+                <li class="aui-list-view-cell" data-win="list_thumb" id="divWeChatCount" style="display: none">
+                    <a class="aui-arrow-right">您有未阅顾客消息
+                    <span id="lblWeChatCount" class="aui-badge aui-badge-primary">0</span></a>
+                </li>
+                <li class="aui-list-view-cell" data-win="list_arrow" id="divMsgCount" style="display: none">
+                    <a class="aui-arrow-right">您有未阅消息
+                    <span id="lblMsgCount" class="aui-badge aui-badge-warning">0</span>
+                    </a>
+                </li>
+                <li class="aui-list-view-cell" data-win="list_thumb" id="divFlowCount" style="display: none">
+                    <a class="aui-arrow-right">您有待办流程
+                    <span id="lblFlowCount" class="aui-badge aui-badge-primary">0</span></a>
+                </li>
+                <li class="aui-list-view-cell" data-win="list_thumb" id="divPositive" style="display: none">
+                    <a class="aui-arrow-right">距离转正天数
+                    <span id="lblPositiveDay" class="aui-badge aui-badge-primary">0天</span></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div id="main" style="display: none">
+        <div class="aui-card aui-noborder" style="margin-top: 15px;">
+            <div class="aui-form">
+                <div class="aui-input-row" style="width: 100%; border: 0px;">
+                    <span class="aui-iconfont aui-icon-upstagefill aui-text-danger aui-label-title"></span>
+                    <span class="aui-text-danger aui-label-title" style="padding-left: 0px;">本月目标</span>
+                </div>
+                <table style="width: 100%">
+                    <tr style="height: 230px">
+                        <td style="width: 90px; padding-left: 15px;">
+                            <div class="aui-input-row" style="padding-bottom: 0px">
+                                <span class="aui-iconfont aui-icon-favorfill aui-text-primary" style="zoom: 0.8"></span>
+                                <span class="aui-text-danger aui-label-title aui-label-text">目标</span>
+                                <div id="txtTargetSale" class="aui-label-value">0</div>
+                            </div>
+                            <div class="aui-input-row" style="padding-bottom: 0px; padding-top: 0px">
+                                <span class="aui-iconfont aui-icon-favorfill aui-text-success" style="zoom: 0.8"></span>
+                                <span class="aui-text-danger aui-label-title aui-label-text">实际</span>
+                                <div id="txtActualSale" class="aui-label-value">0</div>
+                            </div>
+                            <div class="aui-input-row" style="padding-bottom: 0px; padding-top: 0px">
+                                <span class="aui-iconfont aui-icon-favorfill aui-text-info" style="zoom: 0.8"></span>
+                                <span class="aui-text-danger aui-label-title aui-label-text">达成率</span>
+                                <div id="txtAchieveRate" class="aui-label-value">0%</div>
+                            </div>
+                            <div class="aui-input-row" style="padding-bottom: 0px; padding-top: 0px">
+                                <span class="aui-iconfont aui-icon-favorfill aui-text-warning" style="zoom: 0.8"></span>
+                                <span class="aui-text-danger aui-label-title aui-label-text">客单件</span>
+                                <div id="txtUnitSingle" class="aui-label-value">0</div>
+                            </div>
+                            <div class="aui-input-row" style="padding-top: 0px">
+                                <span class="aui-iconfont aui-icon-favorfill aui-text-danger" style="zoom: 0.8"></span>
+                                <span class="aui-text-danger aui-label-title aui-label-text">客单价</span>
+                                <div id="txtUnitPrice" class="aui-label-value">0</div>
+                            </div>
+                        </td>
+                        <td style="vertical-align: top">
+                            <div class="aui-input-row" style="width: 100%; height: 40px;">
+                                <span id="txtDate" class="aui-input-addon aui-label-title" style="text-align: right; width: 100%; color: #808080 !important; font-size: 13px  !important"></span>
+                            </div>
+                            <canvas id="myChart" class="aui-input-row" height="230" style="width: 100%"></canvas>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="aui-card aui-noborder" style="margin-top: 15px; padding-bottom: 15px; display: none" id="divShift">
+            <div class="aui-form">
+                <div class="aui-input-row" style="width: 100%; border: 0px;">
+                    <span class="aui-iconfont aui-icon-calendar aui-text-danger aui-label-title"></span>
+                    <span class="aui-text-danger aui-label-title" style="padding-left: 0px;">个人排班</span>
+                </div>
+                <div class="aui-input-row" style="padding-bottom: 0px; padding-left: 15px;">
+                    <span class="aui-iconfont aui-icon-timefill aui-text-warning" style="zoom: 1.2;"></span>
+                    <span class="aui-text-danger aui-label-title aui-label-text" style="zoom: 1.2;">今日班次</span>
+                    <div id="txtShift1" class="aui-label-value" style="margin-top: 5px; margin-bottom: 10px;">未排班</div>
+                </div>
+                <div class="aui-input-row" style="padding-bottom: 0px; padding-top: 0px; padding-left: 15px;">
+                    <span class="aui-iconfont aui-icon-timefill aui-text-success" style="zoom: 1.2;"></span>
+                    <span class="aui-text-danger aui-label-title aui-label-text" style="zoom: 1.2;">明日班次</span>
+                    <div id="txtShift2" class="aui-label-value" style="margin-top: 5px; margin-bottom: 5px;">未排班</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div style="height: 25px; width: 100%"></div>
+</body>
+<script src="../../script/api.js"></script>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var ChartArr = [
+        {
+            Text: "目标",
+            Value: 0,
+            Max: 1500000,
+            Color: "#1abc9c"
+        },
+        {
+            Text: "实际",
+            Value: 0,
+            Max: 550000,
+            Color: "#2ecc71"
+        },
+        {
+            Text: "达成率",
+            Value: 0,
+            Max: 100,
+            Color: "#3498db"
+        },
+        {
+            Text: "客单件",
+            Value: 0,
+            Max: 15,
+            Color: "#f1c40f"
+        },
+        {
+            Text: "客单价",
+            Value: 0,
+            Max: 2000,
+            Color: "#e74c3c"
+        }
+    ];
+    var canvas;
+    var context;
+    var cWidth, cHeight, cMargin, cSpace;
+    var cMarginSpace, cMarginHeight;
+    var bWidth, bMargin, vCount, maxDataValue;
+    var bWidthMargin;
+    var ctr, numctr, speed;
+    var totLabelsOnYAxis;
+    var imgBack = document.getElementById("imgBack");
+    function barChart() {
+        canvas = document.getElementById("myChart");
+        if (canvas && canvas.getContext) {
+            context = canvas.getContext("2d");
+        }
+        chartSettings();
+        drawChartWithAnimation();
+        drawMarkers();
+    }
+    function chartSettings() {
+        cMargin = 20;
+        cSpace = 5;
+        cHeight = canvas.height - 2 * cMargin - cSpace;
+        cWidth = canvas.width - 2 * cMargin - cSpace;
+        cMarginSpace = cMargin + cSpace;
+        cMarginHeight = cMargin + cHeight;
+        bMargin = 15;
+        vCount = ChartArr.length;
+        bWidth = (cWidth / vCount) - bMargin;
+        totLabelsOnYAxis = 10;
+        ctr = 0;
+        numctr = 100;
+        speed = 10;
+    }
+    function drawMarkers() {
+        context.textAlign = "center";
+        context.font = "13px Arial";
+        for (var i = 0; i < vCount; i++) {
+            markerXPos = cMarginSpace + bMargin + (i * (bWidth + bMargin)) + (bWidth / 2);
+            markerYPos = cMarginHeight + 12;
+            context.fillStyle = "black";
+            context.fillText(ChartArr[i].Text, markerXPos, markerYPos, bWidth);
+            context.fillText(ChartArr[i].Value, markerXPos, 10, bWidth);
+        }
+        context.save();
+        context.translate(cMargin + 10, cHeight / 2);
+        context.rotate(Math.PI * -90 / 180);
+        context.restore();
+    }
+    function drawChartWithAnimation() {
+        for (var i = 0; i < vCount; i++) {
+            bVal = parseInt(ChartArr[i].Value) / parseInt(ChartArr[i].Max);
+            bHt = (bVal * cHeight) / numctr * ctr;
+            bX = cMarginSpace + (i * (bWidth + bMargin)) + bMargin;
+            bY = cMarginHeight - bHt - 2;
+            context.fillStyle = ChartArr[i].Color;
+            drawBack(bX, bY, bWidth, bHt, true);
+            drawRectangle(bX, bY, bWidth, bHt, true);
+        }
+        if (ctr < numctr) {
+            ctr = ctr + 1;
+            setTimeout(arguments.callee, speed);
+        }
+    }
+    function drawRectangle(x, y, w, h, fill) {
+        context.beginPath();
+        context.fillRect(x, y, w, h);
+        context.closePath();
+        context.stroke();
+    }
+    function drawBack(x, y, w, h, fill) {
+        context.beginPath();
+        context.drawImage(imgBack, x, 18, w, cHeight);
+        context.closePath();
+        context.stroke();
+    }
+    var _DateTime = $honesty.NowDate();
+    apiready = function () {
+        $(function () {
+            if (GetSession("EmpLevel") == "E" || GetSession("EmpLevel") == "F" || GetSession("EmpLevel") == "G" || GetSession("EmpLevel") == "H" || GetSession("EmpLevel") == "I") {
+                $("#divShift").show();
+                $("#main").show();
+            }
+
+            IniData();
+
+            //下拉刷新
+            api.setRefreshHeaderInfo({
+                visible: true,
+                loadingImg: 'widget://image/refresh.png',
+                bgColor: '#fff',
+                textColor: '#000',
+                textDown: '下拉刷新...',
+                textUp: '松开刷新...',
+                showTime: true
+            }, function (ret, err) {
+                IniData();
+                api.refreshHeaderLoadDone();
+            });
+            api.addEventListener({
+                name: "ReadMessage",
+            }, function (ret, err) {
+                if (ret) {
+                    if (ret.value.UnReadCount > 0) {
+                        $("#lblMsgCount").html(ret.value.UnReadCount);
+                        $("#divMsgCount").show();
+                    }
+                    else {
+                        $("#divMsgCount").hide();
+                    }
+                }
+            });
+            api.addEventListener({
+                name: "ReadWeChatMessage",
+            }, function (ret, err) {
+                if (ret) {
+                    if (ret.value.UnReadCount > 0) {
+                        $("#lblWeChatCount").html(ret.value.UnReadCount);
+                        $("#divWeChatCount").show();
+                    }
+                    else {
+                        $("#divWeChatCount").hide();
+                    }
+                }
+            });
+            //待办点击
+            $("#divFlowCount").tap(function () {
+                $honesty.OpenWin({
+                    name: "Info_NoWorkFlow_NoWorkFlow",
+                    url: "Info/NoWorkFlow/NoWorkFlow.html",
+                    title: "待办流程",
+                    pageParam: {
+                        StartDate: "2014-12-30",
+                        EndDate: $honesty.NowDate().Format("yyyy-MM-dd")
+                    }
+                });
+            });
+            //未阅寻呼点击
+            $("#divMsgCount").tap(function () {
+                $honesty.MessageBox();
+            });
+            //未阅顾客寻呼点击
+            $("#divWeChatCount").tap(function () {
+                $honesty.OpenWin({
+                    title: "顾客信息",
+                    name: "Customer_WeChat_WeChatBox",
+                    url: "Customer/WeChat/WeChatBox.html"
+                });
+            });
+        });
+    };
+
+    function IniData() {
+
+        //判断代办事项、不同岗位显示格式、店长店员排班
+        var _options = {
+            PostData: {
+                Params: { "result": "InitIndexInfo", "UserID": GetSession("UserID") },
+                ProcName: "proc_HC_GetUserInfo",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        if (item.MsgCount < 1) {
+                            $("#divMsgCount").hide();
+                        }
+                        else {
+                            $("#lblMsgCount").html(item.MsgCount);
+                            $("#divMsgCount").show();
+                        }
+                        if (item.WeChatCount < 1) {
+                            $("#divWeChatCount").hide();
+                        }
+                        else {
+                            $("#lblWeChatCount").html(item.WeChatCount);
+                            $("#divWeChatCount").show();
+                        }
+                        if (item.WorkCount < 1) {
+                            $("#divFlowCount").hide();
+                        }
+                        else {
+                            $("#lblFlowCount").html(item.WorkCount);
+                            $("#divFlowCount").show();
+                        }
+                        if (item.MsgCount < 1 && item.WorkCount < 1 && item.WeChatCount < 1) {
+                            $("#divType").hide();
+                        }
+                        else {
+                            $("#divType").show();
+                        }
+                        if (GetSession("EmpLevel") == "E" || GetSession("EmpLevel") == "F" || GetSession("EmpLevel") == "G" || GetSession("EmpLevel") == "H" || GetSession("EmpLevel") == "I") {
+
+                            if (i == 0) {
+                                $("#txtShift1").html(item.Title);
+                            }
+                            else if (i == 1) {
+                                $("#txtShift2").html(item.Title);
+                                return false;
+                            }
+                        }
+                        else {
+                            var obj = api.require('UIScrollPicture');
+                            obj.open({
+                                rect: {
+                                    x: 0,
+                                    y: 0,
+                                    w: api.frameWidth,
+                                    h: 250,
+                                },
+                                data: {
+                                    paths:
+                                        [
+                                            "widget://res/img/21.jpg",
+                                            "widget://res/img/22.jpg",
+                                            "widget://res/img/23.jpg",
+                                            "widget://res/img/24.jpg"
+                                        ]
+                                },
+                                styles: {
+                                    indicator: {
+                                        align: 'center',
+                                        color: '#FFFFFF',
+                                        activeColor: '#F1C40F'
+                                    }
+                                },
+                                contentMode: 'scaleToFill',
+                                interval: 5,
+                                loop: true,
+                                fixedOn: api.frameName,
+                                fixed: false
+                            });
+                            $("#divType").css("padding-top", "250px");
+                        }
+
+                    });
+                }
+                else {
+                    $("#divType").hide();
+                }
+            }
+        });
+
+        if (GetSession("EmpLevel") == "E" || GetSession("EmpLevel") == "F" || GetSession("EmpLevel") == "G" || GetSession("EmpLevel") == "H" || GetSession("EmpLevel") == "I") {
+            //获取店铺员工店长销售数据
+            _options = {
+                PostData: {
+                    Params: { "result": "LoadMonthsale", "UserID": GetSession("UserID") },
+                    ProcName: "proc_SOM_Other_Index",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                var unitSingle = "15";
+                var unitPrice = "2000";
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        $.each(_result.Data, function (i, item) {
+                            ChartArr[0].Value = parseFloat(item.TargetSale);
+                            ChartArr[0].Max = parseFloat(item.TargetSale);
+                            ChartArr[1].Value = parseFloat((item.ActualSale || 0));
+                            ChartArr[1].Max = (Number(item.TargetSale) - Number(item.ActualSale) > 0 ? Number(item.TargetSale) : Number(item.ActualSale));
+                            ChartArr[2].Value = parseFloat((item.AchieveRate || 0));
+                            ChartArr[2].Max = parseFloat((item.AchieveRate || 0)) > 100 ? parseFloat((item.AchieveRate || 0)) : 100;
+                            ChartArr[3].Value = parseFloat((item.UnitSingle || 0));
+                            ChartArr[4].Value = parseFloat((item.UnitPrice || 0));
+                            if (item.CustomerUnitPrice) {
+                                unitSingle = item.CustomerSingle;
+                                unitPrice = item.CustomerUnitPrice;
+                                ChartArr[3].Max = parseFloat(item.CustomerSingle) > parseFloat(ChartArr[3].Value) ? parseFloat(item.CustomerSingle) : parseFloat(ChartArr[3].Value);
+                                ChartArr[4].Max = parseFloat(item.CustomerUnitPrice) > parseFloat(ChartArr[4].Value) ? parseFloat(item.CustomerUnitPrice) : parseFloat(ChartArr[4].Value);
+                            }
+                            return false;
+                        });
+                    }
+                    else {
+                        ChartArr[0].Value = 0;
+                        ChartArr[1].Value = 0;
+                        ChartArr[1].Max = 1;
+                        ChartArr[2].Value = 0;
+                        ChartArr[3].Value = 0;
+                        ChartArr[4].Value = 0;
+                    }
+                }
+                $("#txtTargetSale").html(ChartArr[0].Value);
+                $("#txtActualSale").html(ChartArr[1].Value);
+                $("#txtAchieveRate").html(ChartArr[2].Value + "%");
+                $("#txtUnitSingle").html(ChartArr[3].Value + "/" + unitSingle);
+                $("#txtUnitPrice").html(ChartArr[4].Value + "/" + unitPrice);
+                var _Date = new Date();
+                $("#txtDate").html((_DateTime.getMonth() + 1) + "月01日-" + (_DateTime.getMonth() + 1) + "月" + (_DateTime.getDate() > 10 ? _DateTime.getDate() : "0" + _DateTime.getDate()) + "日");
+                barChart();
+            });
+        }
+
+
+    }
+</script>
+</html>

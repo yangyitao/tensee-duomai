@@ -1,0 +1,434 @@
+﻿<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>业务二级菜单</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+    <link href="../../css/api.css" rel="stylesheet" type="text/css" />
+    <link href="../../css/common.css" rel="stylesheet" type="text/css" />
+    <style>
+        body, html {
+            background: transparent;
+        }
+
+        #main {
+            padding: 0;
+            padding-top: 1em;
+            position: relative;
+        }
+
+        .share-box {
+            position: absolute;
+            width: 85%;
+           /* background-color: rgba(0,0,0,0.6);*/
+          background-color: gray;
+          opacity:0.9 ;
+            border-radius: 13px;
+            top: 40%;
+            left: 50%;
+            -webkit-transform: translate(-50%,-50%);
+            transform: translate(-50%,-50%);
+            padding: 1em;
+            z-index: 2;
+        }
+        table {
+            margin: 0 auto;
+        }
+        .share-inner {
+        }
+            .share-inner .aui-iconfont {
+                margin-left: 0.2em;
+                margin-right: 0.2em;
+                margin-bottom: 0em;
+                display: block;
+                zoom: 3.7;
+            }
+
+            .share-inner span {
+                color: #FFF;
+                display: block;
+                text-align: center;
+                font-size: 0.8em;
+                margin-left: 0.4em;
+                margin-right: 0.4em;
+            }
+
+            .share-inner p {
+                color: #FFF;
+            }
+
+        .shadow {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+        }
+        /*桃桃修改的图片样式-竞管理*/
+       .aui-iconfont,.aui-text-info,.aui-icon-evaluate,.aui-icon-upstagefill{
+       		width: 20px !important;
+       		height: 20px !important;
+       		font-size: 0 !important;
+       		color: gray !important;
+       }
+/*竞品报数*/
+       .aui-icon-selection{
+       background:url(../../service-images/jpbs.png) no-repeat 1rem 0.9rem;
+background-size:72% 65%;
+
+       }
+      /* 京品品牌*/
+.aui-icon-evaluate{
+background:url(../../service-images/jppp.png) no-repeat 0.8rem 0.5rem;
+background-size:85% 85%;
+
+}
+ .aui-icon-upstagefill{
+ background:url(../../service-images/jpdt.png) no-repeat 1.2rem 0.9rem;
+background-size:65% 63%;
+ }       
+   /*桃桃修改的图片样式-销售管理*/
+ /* 月计划！！！！！！1*/
+  .aui-icon-calendar{
+  background:url(../../service-images/yjh.png) no-repeat 1.2rem 0.9rem;
+background-size:80% 71%;
+  }      
+ /* 周计划*/
+        .aui-icon-form  {
+  background:url(../../service-images/zjh.png) no-repeat 1.2rem 0.9rem;
+background-size:72% 63%;
+  }    
+ /* 日计划*/
+   .aui-icon-time {
+  background:url(../../service-images/rjh.png) no-repeat 1.2rem 0.9rem;
+background-size:70% 61%;
+  }    
+  /*区经报数找不到!!!!!!!!!*/
+  .aui-icon-write  {
+  background:url(../../service-images/qjbs.png) no-repeat 3.0rem 0.9rem;
+background-size:72% 63%;
+  }     
+ /* 店铺员工排名*/
+  .aui-icon-friendadd {
+  background:url(../../service-images/dpygpm.png) no-repeat 1.0rem 0.9rem;
+background-size:80% 71%;
+  }    
+  /*区域员工排名*/
+  .aui-icon-activity {
+  background:url(../../service-images/qyygpm.png) no-repeat 1.2rem 0.9rem;
+background-size:61% 57%;
+  }     
+  /*周报表 */
+  .aui-icon-copy  {
+  background:url(../../service-images/zbb.png) no-repeat 1.2rem 0.9rem;
+background-size:72% 63%;
+  }     
+ /* 区域汇总表*/
+  .aui-icon-sort  {
+  background:url(../../service-images/qyhzb.png) no-repeat 1.2rem 0.9rem;
+background-size:70% 61%;
+  }    
+  /*时段报数报表*/
+  .aui-icon-countdown {
+  background:url(../../service-images/sdbsbb.png) no-repeat 1.2rem 0.9rem;
+background-size:75% 66%;
+  }    
+  
+  
+  
+  /*运营管理*/
+/* 店铺排班找不到、！！！*/
+ .aui-icon-profilefill{
+  background:url(../../service-images/dppb.png) no-repeat 1.2rem 0.9rem;
+background-size:72% 63%;
+  }  
+ /* 月度日程表*/
+  .aui-icon-calendar{
+  background:url(../../service-images/ydrcb.png) no-repeat 1.2rem 0.9rem;
+background-size:72% 63%;
+  } 
+  /*店长自检*/
+  .aui-icon-refresh{
+  background:url(../../service-images/dzzj.png) no-repeat 1.2rem 0.9rem;
+background-size:72% 63%;
+  }  
+  /*个人考勤*/
+  .aui-icon-shop  {
+  background:url(../../service-images/grkq.png) no-repeat 1.2rem 0.9rem;
+background-size:72% 63%;
+  } 
+ /* 异常区域统计*/
+  .aui-icon-same{
+  background:url(../../service-images/ycqytj.png) no-repeat 1.2rem 0.9rem;
+background-size:72% 65%;
+  } 
+  /*异常类型统计*/
+  .aui-icon-ticket{
+  background:url(../../service-images/yclxtj.png) no-repeat 1.5rem 0.9rem;
+background-size:80% 70%;
+  } 
+  /*流程办理统计*/
+  .aui-icon-cascades{
+  background:url(../../service-images/lcbltj.png) no-repeat 1.2rem 0.9rem;
+background-size:77% 66%;
+  } 
+ /* 日考勤异常表*/
+  .aui-icon-warn{
+  background:url(../../service-images/rkqycb.png) no-repeat 1.4rem 0.9rem;
+background-size:65% 56%;
+  } 
+ /* 可调休时数*/
+  .aui-icon-time  {
+  background:url(../../service-images/ktxss.png) no-repeat 1.2rem 0.9rem;
+background-size:70% 60%;
+  } 
+ /* 后台权限申请*/
+  .aui-icon-friendfavor{
+  background:url(../../service-images/htqxsq.png) no-repeat 1.2rem 0.9rem;
+background-size:78% 70%;
+  } 
+ /* 签到报表*/
+  .aui-icon-location  {
+  background:url(../../service-images/qdbb.png) no-repeat 1.0rem 0.9rem;
+background-size:85% 72%;
+  } 
+  
+  
+ /* 巡店管理已经完整*/
+  /*日常巡店*/
+ .aui-icon-explore  {
+  background:url(../../service-images/rcxd.png) no-repeat 1.0rem 0.9rem;
+background-size:68% 60%;
+  } 
+ 
+ /*销售分析表*/
+.aui-icon-redpacket  {
+  background:url(../../service-images/xsfxb.png) no-repeat 1.3rem 0.9rem;
+background-size:65% 63%;
+  } 
+/*商品分析表*/
+.aui-icon-present  {
+  background:url(../../service-images/spfxb1.png) no-repeat 1.5rem 0.9rem;
+background-size:68% 60%;
+  } 
+/*问题跟进*/
+  .aui-icon-pic  {
+  background:url(../../service-images/wtgj.png) no-repeat 1.2rem 0.9rem;
+background-size:72% 68%;
+  } 
+  
+ /* 顾客管理已完整*/
+ /* 补卡申请*/
+.aui-icon-vipcard   {
+  background:url(../../service-images/bksq.png) no-repeat 1.2rem 0.9rem;
+background-size:65% 63%;
+  } 
+ /* 生日管理*/
+.aui-icon-present   {
+  background:url(../../service-images/srgl.png) no-repeat 1.0rem 0.9rem;
+background-size:68% 63%;
+  } 
+  /*升级管理*/
+  .aui-icon-upload   {
+  background:url(../../service-images/sjgl.png) no-repeat 1.0rem 0.9rem;
+background-size:67% 65%;
+  } 
+  
+  
+  
+  
+  
+  /*人事管理*/
+  /*合同续签*/
+ 
+ .aui-icon-addressbook     {
+  background:url(../../service-images/htxq.png) no-repeat 1.0rem 0.9rem;
+background-size:77% 67%;
+  } 
+ 
+ /* 转正申请*/
+.aui-icon-friendfavor    {
+  background:url(../../service-images/zzsq.png) no-repeat 1.0rem 0.9rem;
+background-size:72% 63%;
+  } 
+ /* 调动申请*/
+.aui-icon-friend    {
+  background:url(../../service-images/ddsq.png) no-repeat 1.4rem 0.9rem;
+background-size:57% 53%;
+  } 
+  /*晋升申请*/
+ .aui-icon-friendfamous{
+  background:url(../../service-images/szsq.png) no-repeat 1.3rem 0.9rem;
+background-size:67% 57%;
+  } 
+ /* 降至申请*/
+.aui-icon-down    {
+  background:url(../../service-images/jzsq.png) no-repeat 1.2rem 0.9rem;
+background-size:67% 57%;
+  } 
+  /*离职申请*/
+ .aui-icon-bad{
+  background:url(../../service-images/lzsq.png) no-repeat 1.4rem 0.9rem;
+background-size:63% 53%;
+  } 
+ /* 工作交接*/
+.aui-icon-link{
+  background:url(../../service-images/gzjj.png) no-repeat 0.6rem 0.9rem;
+background-size:95% 74%;
+  } 
+ /* 薪资管理*/
+  /*工资异常*/
+ .aui-icon-repair    {
+  background:url(../../service-images/gzyc.png) no-repeat 1.3rem 0.9rem;
+background-size:72% 63%;
+  } 
+  
+  
+ /* 考勤管理*/
+/*  请假申请ticket */
+.aui-icon-ticket    {
+  background:url(../../service-images/qjsq.png) no-repeat 1.1rem 0.9rem;
+background-size:72% 63%;
+  } 
+  /*出差申请找不到！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！*/
+ .aui-icon-taxi   {
+  background:url(../../service-images/ccsq.png) no-repeat 1.2rem 0.9rem;
+background-size:66% 63%;
+  } 
+/*  外勤申请forward */
+.aui-icon-forward    {
+  background:url(../../service-images/wqsq.png) no-repeat 1.3rem 0.9rem;
+background-size:67% 64%;
+  } 
+/*  签卡申请write */
+.aui-icon-write    {
+  background:url(../../service-images/qksq.png) no-repeat 1.0rem 0.9rem;
+background-size:65% 48%;
+  } 
+/*  加班申请？？？？？？？？？？？？？/没有东西也有图片*/
+
+/*组织管理*/
+/*店铺编制调整*/
+.aui-icon-taoxiaopu{
+  background:url(../../service-images/dpbztz.png) no-repeat 1.0rem 0.9rem;
+background-size:72% 63%;
+  } 
+  
+  
+  /*用于覆盖生日管理和商品分析的样式*/
+ .aui-icon-present  {
+  background:url(../../service-images/spfxb1.png) no-repeat 1.0rem 0.9rem;
+background-size:72% 63%;
+  } 
+  .srgl{
+  background:url(../../service-images/srgl4.png) no-repeat 1.0rem 0.9rem !important;
+background-size:72% 63%  !important;
+  } 
+  /*区经报数覆盖样式*/
+  .aui-icon-write  {
+  background:url(../../service-images/qjbs.png) no-repeat 1.4rem 0.9rem;
+background-size:65% 65%;
+  }   
+    </style>
+</head>
+<body>
+    <div id="wrap">
+        <div id="main">
+            <div class="shadow" tapmode onclick="api.closeFrame({name: 'Menu'});"></div>
+            <div class="share-box ">
+                <ul class='share-inner' id="ulMenu">
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="../../script/api.js" type="text/javascript"></script>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            if (GetSession("Menu")) {
+                IniMenu();
+            }
+            else {
+                //获取菜单信息
+                var _options = {
+                    PostData: {
+                        Params: { "Result": "GetBusinessSecondMenu", "UserID": GetSession("UserID") },
+                        ProcName: "proc_SOM_Others_APPMenu",
+                        DataType: "DataTable",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    }
+                };
+                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                    if (_result.Code == "1") {
+                    	alert($api.jsonToStr(_result.Data));
+                        SetSession("Menu", $api.jsonToStr(_result.Data));
+                        IniMenu()
+                    }
+                });
+
+            }
+        });
+    };
+
+    function IniMenu() {
+        var _Role = "";
+        var _Content = "";
+        var _Num = 0;
+        $.each($api.strToJson(GetSession("Menu")), function (i, item) {
+            if (api.pageParam.DataRole != null) {
+                if (item.ModuleName == api.pageParam.DataRole) {
+                    _Content += "<li tapmode class='aui-col-xs-4 aui-text-center' data-role='" +
+                                item.ModuleName + "'  data-id='" + item.ID + "' data-title='" + item.Title + "' data-appfunction='" + item.AppFunction + "' onclick='ClickMenu(this)'>" +
+                                "<span class='aui-iconfont " + item.AppIcoClass + "'></span><p>" + item.Title + "</p></li>";
+                }
+            }
+        });
+        $("#ulMenu").html(_Content);
+        api.parseTapmode();
+    }
+    function ClickMenu(_Menu) {
+        var Menu = $(_Menu);
+        try {
+            var _options = {
+                PostData: {
+                    Params: {
+                        result: "ModifyVisitLog",
+                        EmpID: GetSession("UserID"),
+                        ModuleID: Menu.attr("data-id"),
+                        ModuleName: Menu.attr("data-title"),
+                        AppVersion: api.appVersion,
+                        SystemType: api.systemType,
+                        SystemVersion: api.systemVersion,
+                        DeviceID: api.deviceId,
+                        DeviceModel: api.deviceModel,
+                        DeviceName: api.deviceName,
+                        Operator: api.operator,
+                        ConnectionType: api.connectionType,
+                        ScreenWidth: api.screenWidth,
+                        ScreenHeight: api.screenHeight
+                    },
+                    ProcName: "proc_SOM_Sys_ModuleVisitLog",
+                    DataType: "Bool",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                Loading: {
+                    Show: false
+                },
+                ShowError: false
+            };
+            $honesty.AjaxChannel(_options);
+        }
+        catch (e) {
+
+        }
+        eval(Menu.attr("data-appfunction"));
+    }
+</script>
+</html>

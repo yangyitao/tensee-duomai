@@ -1,0 +1,350 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>零售经理报数报表</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .taForm {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+            .taForm td {
+                word-break: break-all;
+                font-size: 13px;
+            }
+    </style>
+</head>
+<body>
+    <div class="aui-content">
+        <table class="taForm">
+            <tbody>
+                <tr>
+                    <td id="tdTitle" colspan="3" style="font-size: 17px; font-weight: bold;"></td>
+                </tr>
+                <tr>
+                    <td id="tdDate" colspan="3" style="font-size: 16px; font-weight: bold;"></td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="font-size: 15px; font-weight: bold;">【一】本日</td>
+                </tr>
+                <tr>
+                    <td id="tdTargetSale1" style="width: 105px;"></td>
+                    <td id="tdActualSale1" style="width: 105px;"></td>
+                    <td id="tdTotalRate1"></td>
+                </tr>
+                <tr>
+                    <td id="tdRtb" style="width: 105px;"></td>
+
+                </tr>
+                <tr>
+                    <td style="font-size: 15px; font-weight: bold;" colspan="3">【二】本周</td>
+                </tr>
+                <tr>
+                    <td id="tdTargetSale2"></td>
+                    <td id="tdActualSale2"></td>
+                    <td id="tdTotalRate2"></td>
+                </tr>
+                <tr>
+                    <td id="tdTimeRate2"></td>
+                    <td id="tdTimeDiffererce2"></td>
+                    <td id="tdVIPSaleRate2"></td>
+                </tr>
+                <tr>
+                    <td id="tdUnitNum2"></td>
+                    <td id="tdUnitPrice2"></td>
+                </tr>
+                <tr>
+                    <td style="font-size: 15px; font-weight: bold;" colspan="3">【三】本月</td>
+                </tr>
+                <tr>
+                    <td id="tdTargetSale3"></td>
+                    <td id="tdActualSale3"></td>
+                    <td id="tdTotalRate3"></td>
+                </tr>
+                <tr>
+                    <td id="tdTimeRate3"></td>
+                    <td id="tdTimeDiffererce3"></td>
+                    <td id="tdVIPSaleRate3"></td>
+                </tr>
+                <tr>
+
+                    <td id="tdDiscountRare3"></td>
+                    <td id="tdYearOnYear3"></td>
+                    <td id="tdMonthOnMonth3"></td>
+                </tr>
+                <tr>
+                    <td id="tdUnitNum3"></td>
+                    <td id="tdUnitPrice3"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table class="taForm">
+            <thead>
+                <tr>
+                    <td colspan="3" style="font-size: 15px; font-weight: bold;">【四】当日达成率排名</td>
+                </tr>
+            </thead>
+            <tbody id="tbShopList"></tbody>
+        </table>
+        <table class="taForm">
+            <tbody>
+                <tr>
+                    <td colspan="3" style="font-size: 15px; font-weight: bold;">【五】今日总结</td>
+                </tr>
+                <tr>
+                    <td id="tdTodayMeasure"></td>
+                </tr>
+                <tr>
+                    <td id="tdActualSummary"></td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="font-size: 15px; font-weight: bold;">【六】明日目标</td>
+                </tr>
+                <tr>
+                    <td id="tdTomorrowTarget"></td>
+                </tr>
+                <tr>
+                    <td id="tdTomorrowMeasure"></td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="font-size: 15px; font-weight: bold;">【七】明天工作重点</td>
+                </tr>
+                <tr>
+                    <td id="tdTomorrowJob"></td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="font-size: 15px; font-weight: bold;">【八】明天行程安排</td>
+                </tr>
+                <tr>
+                    <td id="tdTomorrowSchedule"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _RetailID, _OrganizeID, _TodayDate;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _RetailID = api.pageParam.RetailID;
+            _OrganizeID = api.pageParam.OrganizeID;
+            _TodayDate = api.pageParam.TodayDate;
+
+            LoadData();
+
+
+        });
+
+    }
+
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "SelectTitleForm",
+                    RetailID: _RetailID,
+                    ReportDate: _TodayDate,
+                    OrganizeID: _OrganizeID
+                },
+                ProcName: "proc_SOM_ISR_RetailSale",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        $("#tdTitle").html(item.Name + "  店数" + item.ShopNum + "家");
+                        var date = new Date(item.ReportDate);
+                        var lastDate = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+                        var lastDay = lastDate.getDate();
+                        var week = date.getDay() == 0 ? 7 : date.getDay();
+                        var totalRate = 0;
+                        var timeRate = 0;
+                        var unitNum = 0;
+                        var unitPrice = 0;
+                        var weekNum = "";
+                        switch (date.getDay()) {
+                            case 0:
+                                weekNum = "日";
+                                break;
+                            case 1:
+                                weekNum = "一";
+                                break;
+                            case 2:
+                                weekNum = "二";
+                                break;
+                            case 3:
+                                weekNum = "三";
+                                break;
+                            case 4:
+                                weekNum = "四";
+                                break;
+                            case 5:
+                                weekNum = "五";
+                                break;
+                            case 6:
+                                weekNum = "六";
+                                break;
+                            default:
+
+                        }
+                        $("#tdDate").html(item.ReportDate + " 星期" + weekNum);
+                        //日
+                        $("#tdTargetSale1").html("目标:" + item.DayTarget);
+                        $("#tdActualSale1").html("完成:" + item.DayAcutal);
+                        $("#tdTotalRate1").html("达成率:" + (item.DayTarget == "0" ? "0" : (Number(item.DayAcutal) / Number(item.DayTarget) * 100).toFixed(0)) + "%");
+
+                        //周
+                        $("#tdTargetSale2").html("目标:" + item.WeekTarget);
+                        $("#tdActualSale2").html("完成:" + item.WeekAcutal);
+                        totalRate = item.WeekTarget == "0" ? "0" : (Number(item.WeekAcutal) / Number(item.WeekTarget) * 100).toFixed(0);
+                        timeRate = (week / 7 * 100).toFixed(0);
+                        $("#tdTotalRate2").html("达成率:" + totalRate + "%");
+                        $("#tdTimeRate2").html("时间进度:" + timeRate + "%");
+                        $("#tdTimeDiffererce2").html("时间差:" + (Number(totalRate) - Number(timeRate)) + "%");
+                        $("#tdVIPSaleRate2").html("VIP占比:" + (item.WeekAcutal == "0" ? "0" : (Number(item.WeekVipSale) / Number(item.WeekAcutal) * 100).toFixed(0)) + "%");
+                        $("#tdUnitNum2").html("客单量:" + (item.WeekOrderNum == "0" ? "0" : (Number(item.WeekClothesNum) / Number(item.WeekOrderNum)).toFixed(1)));
+                        $("#tdUnitPrice2").html("客单价:" + (item.WeekOrderNum == "0" ? "0" : (Number(item.WeekAcutal) / Number(item.WeekOrderNum)).toFixed(0)));
+
+                        //月
+                        $("#tdTargetSale3").html("目标:" + item.MonthTarget);
+                        $("#tdActualSale3").html("完成:" + item.MonthAcutal);
+                        totalRate = item.MonthTarget == "0" ? "0" : (Number(item.MonthAcutal) / Number(item.MonthTarget) * 100).toFixed(0);
+                        timeRate = (date.getDate() / lastDay * 100).toFixed(0);
+                        $("#tdTotalRate3").html("达成率:" + totalRate + "%");
+                        $("#tdTimeRate3").html("时间进度:" + timeRate + "%");
+                        $("#tdTimeDiffererce3").html("时间差:" + (Number(totalRate) - Number(timeRate)) + "%");
+                        $("#tdVIPSaleRate3").html("VIP占比:" + (item.MonthAcutal == "0" ? "0" : (Number(item.MonthVipSale) / Number(item.MonthAcutal) * 100).toFixed(0)) + "%");
+                        $("#tdDiscountRare3").html("折扣:" + (item.MonthTagsale == "0" ? "0" : (Number(item.MonthAcutal) / Number(item.MonthTagsale) * 100).toFixed(0)) + "%");
+                        $("#tdYearOnYear3").html("同比:" + (item.MonthLastYear == "0" ? "0" : (Number(item.MonthAcutal1) / Number(item.MonthLastYear) * 100 - 100).toFixed(0)) + "%");
+                        $("#tdMonthOnMonth3").html("环比:" + (item.MonthLastMonth == "0" ? "0" : (Number(item.MonthAcutal) / Number(item.MonthLastMonth) * 100 - 100).toFixed(0)) + "%");
+                        $("#tdUnitNum3").html("客单量:" + (item.MonthOrderNum == "0" ? "0" : (Number(item.MonthClothesNum) / Number(item.MonthOrderNum)).toFixed(1)));
+                        $("#tdUnitPrice3").html("客单价:" + (item.MonthOrderNum == "0" ? "0" : (Number(item.MonthAcutal) / Number(item.MonthOrderNum)).toFixed(0)));
+
+                        //今日总结
+                        $("#tdTodayMeasure").html("1、今日措施:" + item.TodayMeasure);
+                        $("#tdActualSummary").html("2、今日总结:" + item.ActualSummary);
+
+                        //明日目标
+                        $("#tdTomorrowTarget").html("1、目标:" + item.TomorrowTarget + ",客单量:" + item.UnitNum + ",客单价:" + item.UnitPrice);
+                        $("#tdTomorrowMeasure").html("2、销售措施:" + item.TomorrowMeasure);
+
+                        //明天工作重点
+                        $("#tdTomorrowJob").html(item.TomorrowJob);
+
+                        //明天行程安排
+                        $("#tdTomorrowSchedule").html(item.TomorrowSchedule);
+
+
+                        var shopMonthInfo = new Array();
+                        _options = {
+                            PostData: {
+                                Params: {
+                                    Result: "SelectMonthDetail",
+                                    RetailID: _RetailID,
+                                    ReportDate: _TodayDate
+                                },
+                                ProcName: "proc_SOM_ISR_RetailSale",
+                                DataType: "DataTable",
+                                ExecType: "PROC",
+                                Mode: "MSSQL"
+                            }
+                        };
+                        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                            if (_result.Code == "1") {
+                                if (_result.Data.length > 0) {
+                                    $.each(_result.Data, function (i, item) {
+                                        shopMonthInfo.push({
+                                            "ShopName": item.ShopName,
+                                            "TargetSale": item.TargetSale,
+                                            "ActualSale": item.ActualSale,
+                                            "Complete": (item.TargetSale == "0" ? "0" : (Number(item.ActualSale) / Number(item.TargetSale) * 100).toFixed(0)),
+                                            "LastYear": (item.LastYear == "0" ? "0" : (Number(item.ActualSale) / Number(item.LastYear) * 100 - 100).toFixed(0)),
+                                            "LastMonth": (item.LastMonth == "0" ? "0" : (Number(item.ActualSale) / Number(item.LastMonth) * 100 - 100).toFixed(0))
+                                        });
+                                    });
+                                }
+                                _options = {
+                                    PostData: {
+                                        Params: {
+                                            Result: "SelectDetailForm",
+                                            RetailID: _RetailID,
+                                            ReportDate: _TodayDate
+                                        },
+                                        ProcName: "proc_SOM_ISR_RetailSale",
+                                        DataType: "DataTable",
+                                        ExecType: "PROC",
+                                        Mode: "MSSQL"
+                                    }
+                                };
+                                var content = "";
+                                var LastYear = 0;
+                                var ActualSale = 0;
+                                var arrArea = new Array(),
+                                    arrNum = new Array();
+                                var Num = 1, areaName = "";
+                                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                                    if (_result.Code == "1") {
+                                        if (_result.Data.length > 0) {
+                                            $.each(_result.Data, function (i, item) {
+                                                if ($.inArray(item.Name, arrArea) < 0) {
+                                                    arrArea.push(item.Name);
+                                                    arrNum.push(1);
+                                                }
+                                                else {
+                                                    var _index = $.inArray(item.Name, arrArea);
+                                                    arrNum[_index]++;
+                                                }
+                                            });
+                                            $.each(_result.Data, function (i, item) {
+                                                if (areaName == "" || areaName != item.Name) {
+                                                    content += '<tr><td style="font-size:14px;font-weight:bold" colspan="3">' + item.Name + '&nbsp;店铺数:' + arrNum[$.inArray(item.Name, arrArea)] + '</td></tr>';
+                                                    areaName = item.Name;
+                                                    Num = 1;
+                                                }
+                                                content += "<tr><td colspan='3' style='font-weight:bold'>" + (i + 1) + "、" + item.ShopName + "</td></tr><tr><td style='width:105px;'>日目标:" + item.TargetSale + "</td><td style='width:105px;'>完成:" +
+                                                     item.ActualSale + "</td><td>达成率:" +
+                                                    (item.TargetSale == "0" ? "0" : (Number(item.ActualSale) / Number(item.TargetSale) * 100).toFixed(0)) + "%</td></tr>";
+                                                $.each(shopMonthInfo, function (j, temp) {
+                                                    if (item.ShopName == temp.ShopName) {
+                                                        content += "<tr><td style='width:105px;'>月目标:" + temp.TargetSale + "</td><td style='width:105px;'>完成:" +
+                                                                    temp.ActualSale + "</td><td>达成率:" + temp.Complete + "%</td></tr>" +
+                                                                    "<tr><td>月同比:" + temp.LastYear + "%</td><td>月环比:" + temp.LastMonth + "%</td>";
+                                                        return false;
+                                                    }
+                                                });
+
+                                                content += "<td>日同比:" + (item.LastYear == "0" ? "0" : (Number(item.ActualSale) / Number(item.LastYear) * 100 - 100).toFixed(0)) +
+                                                  "%</td></tr>";
+                                                LastYear = LastYear + (item.LastYear == "0" ? 0 : Number(item.LastYear));
+                                                ActualSale = ActualSale + (item.ActualSale == "0" ? 0 : Number(item.ActualSale));
+                                            });
+                                            $("#tbShopList").html(content);
+                                            $("#tdRtb").html("日同比:" + (LastYear == 0 ? 0 : (Number(ActualSale) / Number(LastYear) * 100 - 100).toFixed(0)) + "%");
+                                        }
+                                    }
+                                });
+                            }
+                        })
+
+                    });
+                }
+
+            }
+        });
+    }
+</script>
+</html>

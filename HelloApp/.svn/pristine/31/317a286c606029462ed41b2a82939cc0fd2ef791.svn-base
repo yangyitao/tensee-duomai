@@ -1,0 +1,249 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>日期选择</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <link href="../../../css/common.css" rel="stylesheet" />
+    <style>
+        body, html {
+            background: transparent;
+        }
+
+        .share-box {
+            margin: 0 auto;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+        }
+
+        table {
+            margin: 0 auto;
+            width: 100%;
+            text-align: center;
+            color: #fff;
+            font-size: 18px;
+        }
+
+        #tbTitle {
+            /*border-bottom: 1px solid #e6e6e6;*/
+            height: 50px;
+            color: #1abc9c;
+        }
+
+        #aui-iconfont {
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <div class="share-box">
+        <table id="tbTitle" class="aui-border-b">
+            <tr>
+                <td class="aui-iconfont aui-icon-left" style="width: 40px;" id="tdPrev"></td>
+                <td id="tdTitle">&nbsp;</td>
+                <td class="aui-iconfont aui-icon-right" style="width: 40px;" id="tdNext"></td>
+            </tr>
+        </table>
+    </div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var UICalendar;
+    var _Date, today;
+    var _OrganizeID;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _Date = $honesty.NowDate();
+            today = new Date(_Date.Format("yyyy/MM/dd"));
+            _OrganizeID = api.pageParam.OrganizeID;
+            //日期控件         
+            UICalendar = api.require('UICalendar');
+            UICalendar.open({
+                rect: {
+                    x: 5,
+                    y: $honesty.RangeTop($(".share-box").offset().top + $("#tdTitle").height()),
+                    w: $(".share-box").width() - 10,
+                    h: $(".share-box").width()
+                },
+                styles: {
+                    bg: 'rgba(0,0,0,0)',
+                    week: {
+                        weekdayColor: '#1abc9c',
+                        weekendColor: '#e74c3c',
+                        size: 15
+                    },
+                    date: {
+                        color: '#999999',
+                        selectedColor: '#3b3b3b',
+                        selectedBg: 'widget://image/selectDate.png',
+                        size: 15
+                    },
+                    today: {
+                        color: '#999999',
+                        bg: ''
+                    },
+                    specialDate: {
+                        color: '#3b3b3b',
+                        bg: 'widget://image/ZDate.png'
+                    }
+                },
+                fixedOn: api.frameName,
+                fixed: true
+            }, function (ret, err) {
+                if (ret) {
+                    y = ret.year;
+                    m = ret.month;
+                    d = ret.day;
+                    if (ret.eventType == "switch") {
+                        _Date = new Date(ret.year + "/" + ret.month + "/01");
+                        $("#tdTitle").html(ret.year + "年" + ret.month + "月");
+                        LoadData();
+                    }
+                    if (ret.eventType == "show") {
+                        $("#tdTitle").html(_Date.getFullYear() + "年" + (_Date.getMonth() + 1) + "月");
+                        LoadData();
+                    }
+                    if (ret.eventType == "special") {
+                        ClickSpecial(y, m, d);
+                    }
+                    if (ret.eventType == "normal") {
+                        ClickNormal(y, m, d);
+                    }
+                }
+            });
+
+            //日期往前一个月点击
+            $("#tdPrev").tap(function () {
+                UICalendar.prevMonth(function (ret) {
+                    if (ret) {
+                        y = ret.year;
+                        m = ret.month;
+                        d = ret.day;
+                        _Date = new Date(ret.year + "/" + ret.month + "/01");
+                        $("#tdTitle").html(ret.year + "年" + ret.month + "月");
+                        if (ret.eventType == undefined) {
+                            LoadData();
+                        }
+                        if (ret.eventType == "special") {
+                            ClickSpecial(y, m, d);
+                        }
+                        if (ret.eventType == "normal") {
+                            ClickNormal(y, m, d);
+                        }
+                    }
+                });
+            });
+
+            //日期往后一个月点击
+            $("#tdNext").tap(function () {
+                UICalendar.nextMonth(function (ret) {
+                    if (ret) {
+                        y = ret.year;
+                        m = ret.month;
+                        d = ret.day;
+                        _Date = new Date(ret.year + "/" + ret.month + "/01");
+                        $("#tdTitle").html(ret.year + "年" + ret.month + "月");
+                        if (ret.eventType == undefined) {
+                            LoadData();
+                        }
+                        if (ret.eventType == "special") {
+                            ClickSpecial(y, m, d);
+                        }
+                        if (ret.eventType == "normal") {
+                            ClickNormal(y, m, d);
+                        }
+                    };
+                });
+            });
+            //日程列表监听事件
+            api.addEventListener({
+                name: 'Operate_Calendar_ScheduleList'
+            }, function (ret, err) {
+                var arrDate = [];
+                if (ret && ret.value) {
+                    if (ret.value.Count == "0") {
+                        arrDate.push(new Date(y + "/" + (m.toString().length == 1 ? "0" + m : m) + "/" + (d.toString.length == 1 ? "0" + d : d)).Format("yyyy-MM-dd"))
+                        UICalendar.cancelSpecialDates({
+                            specialDates: arrDate
+                        });
+                    }
+                    else {
+                        arrDate.push({ date: new Date(y + "/" + (m.toString().length == 1 ? "0" + m : m) + "/" + (d.toString.length == 1 ? "0" + d : d)).Format("yyyy-MM-dd") });
+                        UICalendar.setSpecialDates({
+                            specialDates: arrDate
+                        })
+                    }
+                };
+            });
+        });
+        function LoadData() {
+            var _options = {
+                PostData: {
+                    Params: {
+                        Result: "SelectExist",
+                        OrganizeID: api.pageParam.OrganizeID,
+                        ZYear: _Date.getFullYear(),
+                        ZMonth: (_Date.getMonth() + 1)
+                    },
+                    ProcName: "proc_SOM_ISR_Calendar",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        var arrDate = [];
+                        $.each(_result.Data, function (i, item) {
+                            arrDate.push({ date: new Date(_Date.getFullYear() + "/" + ((_Date.getMonth() + 1).toString().length == 1 ? "0" + (_Date.getMonth() + 1) : (_Date.getMonth() + 1)) + "/" + ((item.ZDate).toString.length == 1 ? "0" + (item.ZDate) : (item.ZDate))).Format("yyyy-MM-dd") });
+                        })
+                        UICalendar.setSpecialDates({
+                            specialDates: arrDate
+                        });
+                    }
+                }
+            })
+        }
+        function ClickSpecial(y, m, d) {
+            var date = new Date(y + "/" + (m.toString().length == 1 ? "0" + m : m) + "/" + (d.toString.length == 1 ? "0" + d : d));
+            $honesty.OpenWin({
+                name: "Operate_Calendar_ScheduleList",
+                url: "Operate/Calendar/ScheduleList.html",
+                title: y + "年" + m + "月" + d + "日",
+                LevelNum: 2,
+                pageParam: {
+                    Year: y,
+                    Month: m,
+                    Day: d,
+                    OrganizeID: api.pageParam.OrganizeID
+                }
+            });
+        }
+        function ClickNormal(y, m, d) {
+            var date = new Date(y + "/" + (m.toString().length == 1 ? "0" + m : m) + "/" + (d.toString.length == 1 ? "0" + d : d));
+            if (( _OrganizeID.toUpperCase() == GetSession("OrganizeID").toUpperCase() && GetSession("IsLeader") != "0") && ((today - date < 0) || (today - date == 0))) {
+                $honesty.OpenWin({
+                    name: "Operate_Calendar_ScheduleList",
+                    url: "Operate/Calendar/ScheduleList.html",
+                    title: y + "年" + m + "月" + d + "日",
+                    LevelNum: 2,
+                    pageParam: {
+                        Year: y,
+                        Month: m,
+                        Day: d,
+                        OrganizeID: api.pageParam.OrganizeID
+                    }
+                });
+            }
+            else $honesty.ShowToast({ msg: "不存在日程！" });
+        }
+    }
+</script>
+</html>

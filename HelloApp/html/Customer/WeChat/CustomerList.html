@@ -1,0 +1,236 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>组织架构选择</title>
+    <link rel="stylesheet" type="text/css" href="../../../css/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/aui-indexed-list.css" />
+</head>
+<body>
+    <div class="aui-searchbar-wrap fixed" id="group-search">
+        <div class="aui-searchbar aui-border-radius">
+            <i class="aui-iconfont aui-icon-search"></i>
+            <div class="aui-searchbar-text">输入关键字查询</div>
+            <div class="aui-searchbar-input">
+                <form action="javascript:search();">
+                    <input type="text" placeholder="输入关键字查询" id="aui-searchbar-input">
+                </form>
+            </div>
+            <i class="aui-iconfont aui-icon-roundclosefill" id="aui-searchbar-clear"></i>
+        </div>
+        <div class="aui-searchbar-cancel aui-text-info" id="aui-searchbar-cancel">取消</div>
+    </div>
+    <div class="aui-indexed-list">
+        <ul class="aui-list-view aui-indexed-list-view aui-in" id="group-*" data-group="*">
+            <group id="CustomerList">
+            </group>
+        </ul>
+    </div>
+    <div class="aui-indexed-list-toast"></div>
+    <div class="aui-indexed-list-bar">
+        <a>
+            <i class="aui-iconfont aui-icon-search" data-value="search"></i>
+        </a>
+        <a>
+            <i class="aui-iconfont aui-icon-favorfill" data-value="*"></i>
+        </a>
+        <a data-value="A">A</a>
+        <a data-value="B">B</a>
+        <a data-value="C">C</a>
+        <a data-value="D">D</a>
+        <a data-value="E">E</a>
+        <a data-value="F">F</a>
+        <a data-value="G">G</a>
+        <a data-value="H">H</a>
+        <a data-value="I">I</a>
+        <a data-value="J">J</a>
+        <a data-value="K">K</a>
+        <a data-value="L">L</a>
+        <a data-value="M">M</a>
+        <a data-value="N">N</a>
+        <a data-value="O">O</a>
+        <a data-value="P">P</a>
+        <a data-value="Q">Q</a>
+        <a data-value="R">R</a>
+        <a data-value="S">S</a>
+        <a data-value="T">T</a>
+        <a data-value="U">U</a>
+        <a data-value="V">V</a>
+        <a data-value="W">W</a>
+        <a data-value="X">X</a>
+        <a data-value="Y">Y</a>
+        <a data-value="Z">Z</a>
+        <a data-value="#">#</a>
+    </div>
+    <script type="text/javascript" src="../../../script/api.js"></script>
+    <script type="text/javascript" src="../../../script/zepto.js"></script>
+    <script type="text/javascript" src="../../../script/honesty.base.js"></script>
+    <script type="text/javascript">
+        (function (window) {
+            var aui = {};
+            var listArr = document.querySelectorAll(".aui-indexed-list li");
+            var indexedWrap = document.querySelector(".aui-indexed-list");
+            // 搜索类
+            var searchWrap = document.querySelector(".aui-searchbar-wrap");
+            var searchBar = document.querySelector(".aui-searchbar");
+            var clearBtn = document.getElementById("aui-searchbar-clear");
+            var searchInput = document.getElementById("aui-searchbar-input");
+            var searchCancel = document.getElementById("aui-searchbar-cancel");
+            // 右侧bar
+            var bar = document.querySelector(".aui-indexed-list-bar");
+            // 重置bar高度
+            var barList = document.querySelectorAll(".aui-indexed-list-bar a");
+            var barH = bar.offsetHeight;
+            var newBarH = barList.length * 15;
+            var _init = function () {
+                indexedWrap.style.height = (window.innerHeight - searchWrap.offsetHeight) + "px";
+                searchBar.addEventListener("tap", function () {
+                    searchWrap.classList.add("focus");
+                    searchInput.focus();
+                }, false)
+                clearBtn.addEventListener("tap", function () {
+                    searchInput.value = '';
+                }, false)
+                searchCancel.addEventListener("tap", function () {
+                    searchWrap.classList.remove("focus");
+                    searchInput.value = '';
+                    searchInput.blur();
+                }, false)
+                searchInput.addEventListener("input", function () {
+                    var keyword = searchInput.value;
+                    keyword = (keyword || '').toUpperCase();
+                    setTimeout(function () {
+                        var groupElement = indexedWrap.querySelector('[data-group="' + keyword + '"]');
+                        if (groupElement) {
+                            console.log(groupElement.offsetTop);
+                            indexedWrap.scrollTop = groupElement.offsetTop;
+                        }
+                    }, 100)
+                }, false)
+                bar.style.height = newBarH + "px";
+                bar.style.top = "50%";
+                bar.style.marginTop = "-" + ((newBarH - searchWrap.offsetHeight) / 2) + "px";
+
+                bar.addEventListener('touchstart', function (event) {
+                    bar.style.opacity = "1";
+                    scrollTop(event);
+                }, false);
+                // 监听bar滑动
+                bar.addEventListener('touchmove', function (event) {
+                    scrollTop(event);
+                }, false);
+                document.body.addEventListener('touchend', function (event) {
+                    removeToast(event);
+                }, false);
+                document.body.addEventListener('touchcancel', function (event) {
+                    removeToast(event);
+                }, false);
+            }
+            var scrollTop = function (event) {
+                event.preventDefault();
+                var clientX = event.changedTouches[0].clientX;
+                var clientY = event.changedTouches[0].clientY;
+                var _thisBar = document.elementFromPoint(clientX, clientY);
+                if (clientX < window.innerWidth & clientY < window.innerHeight & clientY > 0) {
+                    var thisValue = _thisBar.getAttribute("data-value");
+                    if (thisValue) {
+                        var groupElement = indexedWrap.querySelector('[data-group="' + thisValue + '"]');
+                        if (thisValue != 'search' & thisValue != '*') {
+                            document.querySelector(".aui-indexed-list-toast").textContent = thisValue;
+                            document.querySelector(".aui-indexed-list-toast").classList.add("active");
+                            document.querySelector(".aui-indexed-list-toast").style.top = clientY + 'px';
+                        }
+                        if (groupElement) {
+                            indexedWrap.scrollTop = groupElement.offsetTop;
+                        }
+                    } else {
+                        document.querySelector(".aui-indexed-list-toast").textContent = '';
+                        document.querySelector(".aui-indexed-list-toast").classList.remove("active");
+                    }
+                }
+            }
+            var removeToast = function (event) {
+                bar.style.opacity = "0.6";
+                document.querySelector(".aui-indexed-list-toast").classList.remove("active");
+                bar.classList.remove('active');
+            }
+            _init();
+            window.$aui = aui;
+        })(window);
+        apiready = function () {
+            $(function () {
+                InitData();
+                api.setRefreshHeaderInfo({
+                    visible: true,
+                    loadingImg: 'widget://image/refresh.png',
+                    bgColor: '#fff',
+                    textColor: '#000',
+                    textDown: '下拉刷新...',
+                    textUp: '松开刷新...',
+                    showTime: true
+                }, function (ret, err) {
+                    InitData();
+                    api.refreshHeaderLoadDone();
+                });
+            });
+        };
+        function InitData() {
+            var _options = {
+                PostData: {
+                    Params: {
+                        result: "MyCustomer",
+                        EmpID: GetSession("UserID")
+                    },
+                    ProcName: "proc_SOM_Chat_UserInfo",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $("#CustomerList").html("");
+            $.when($honesty.AjaxChannel(_options).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        LoadData(_result.Data);
+                    }
+                    else {
+                        $("#CustomerList").html('<li class="aui-list-view-cell aui-indexed-list-view-group" style="text-align:center;font-size:15px"><span class="aui-iconfont aui-icon-favorfill aui-text-danger" data-value="*"></span>无数据，请尝试下拉刷新组织架构!</li>');
+                    }
+                }
+            }));
+        }
+        function LoadData(CustomerData) {
+            var _EmpHtml = {};
+            $.each(CustomerData, function (i, item) {
+                if (_EmpHtml[item.SpellCode.substring(0, 1)] == "" || _EmpHtml[item.SpellCode.substring(0, 1)] == undefined) {
+                    _EmpHtml[item.SpellCode.substring(0, 1)] = '<li class="aui-list-view-cell aui-indexed-list-view-group" id="group-' + item.SpellCode.substring(0, 1) + '" data-group="' + item.SpellCode.substring(0, 1) + '" data-role="group">' + item.SpellCode.substring(0, 1) + '</li>';
+                }
+                _EmpHtml[item.SpellCode.substring(0, 1)] += '<li class="aui-list-view-cell">' +
+                           '<div style="display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;height:28px;line-height:28px;vertical-align:middle" tapmode data-id="' + item.OpenID + '" data-name="' + item.NickName + '" data-role="ShowInfo"><img style="width:28px;height:28px;float:left;margin-right:10px" src="' + item.Headimg + '" />' + item.NickName + '</div></li>';
+            });
+            for (var i = 64; i < 91; i++) {
+                $("#CustomerList").append(_EmpHtml[String.fromCharCode(i)]);
+            }
+            api.parseTapmode();
+            $("#CustomerList div[data-role='ShowInfo']").tap(function () {
+                var _OpenID = $(this).attr("data-id");
+                var _NickName = $(this).attr("data-name");
+                api.openWin({
+                    name: "Customer_WeChat_Customer_Win",
+                    url: "widget://html/Customer/WeChat/Customer_Win.html",
+                    title: "详细资料",
+                    delay: 100,
+                    pageParam: {
+                        OpenID: _OpenID,
+                        NickName: _NickName
+                    },
+                    bounces: false,
+                    slidBackEnabled: true,
+                });
+            });
+        }
+    </script>
+</body>
+</html>

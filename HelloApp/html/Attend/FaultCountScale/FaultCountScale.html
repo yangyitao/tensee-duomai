@@ -1,0 +1,266 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>异常类型统计</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-nav {
+            height: 40px;
+        }
+
+            .aui-nav .aui-bar-tab {
+                height: 40px;
+            }
+
+        .aui-bar-tab li {
+            height: 40px;
+            line-height: 40px;
+        }
+
+        .aui-nav .aui-bar-tab li.active {
+            color: #fff;
+            background: #16a085;
+        }
+    </style>
+</head>
+<body>
+    <div class="aui-tab" id="divTab">
+        <ul id="TopBar" class="aui-tab-nav">
+            <li data-type="1" class="active">含未排班</li>
+            <li data-type="0">不含未排班</li>
+        </ul>
+    </div>
+    <div id="main" style="width: 100%; height: 100%;"></div>
+    <footer class="aui-nav" id="footer">
+        <ul class="aui-bar-tab" id="ulBottom">
+            <li data-type="Shop" class="active">店铺平均</li>
+            <li data-type="Person">人数平均</li>
+        </ul>
+    </footer>
+</body>
+</html>
+
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script src="../../../script/echarts.min.js"></script>
+<script type="text/javascript">
+    var _StartDate, _EndDate, Status;
+    var _Data, _DateProvince, myChart;
+
+    var arrColor = ["#cccc33", "#ffcc33", "#cc9933"];
+    var arrPrColor = ["#cc9966", "#cccc66", "#669999", "#ff9966", "#996600", "#cccc00", "#cc6600", "#666600", "#ccccff", "#cc9933",
+                      "#009999", "#ffcc33", "#999966", "#cccc99", "#99cc99", "#669933", "#336633", "#666633", "#999933", "#660000",
+                      "#cc9900"];
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _StartDate = api.pageParam.StartDate;
+            _EndDate = api.pageParam.EndDate;
+            _Status = api.pageParam.Status;
+
+            $("#main").height(api.frameHeight - $("#divTab").height() - $("#footer").height());
+
+
+
+
+            // 基于准备好的dom，初始化echarts实例
+            myChart = echarts.init(document.getElementById('main'));
+            LoadData();
+
+            $("#TopBar").children("li").tap(function () {
+                $("#TopBar").children("li").removeClass("active");
+                $(this).addClass("active");
+                ShowType();
+            });
+
+            $("#ulBottom").children("li").tap(function () {
+                $("#ulBottom").children("li").removeClass("active");
+                $(this).addClass("active");
+                ShowType();
+            });
+        });
+
+    }
+
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    result: "InitFaultCountScale",
+                    BeginDate: _StartDate,
+                    EndDate: _EndDate,
+                    SortColumn: "Regional",
+                    SortType: "desc",
+                    Status: _Status
+                },
+                ProcName: "proc_SOM_HR_Attend_InitFaultScaleByProvince",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            },
+            //async: false
+        };
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    _DateProvince = _result.Data;
+
+                    var _options = {
+                        PostData: {
+                            Params: {
+                                result: "InitFaultCountScale",
+                                BeginDate: _StartDate,
+                                EndDate: _EndDate,
+                                SortColumn: "Regional",
+                                SortType: "desc",
+                                Status: _Status
+                            },
+                            ProcName: "proc_SOM_HR_Attend_InitFaultCountScale",
+                            DataType: "DataTable",
+                            ExecType: "PROC",
+                            Mode: "MSSQL"
+                        },
+                        async: false
+                    };
+
+                    _result = $honesty.AjaxChannel(_options)
+                    if (_result.Code == "1") {
+                        if (_result.Data.length > 0) {
+                            _Data = _result.Data;
+                            ShowType();
+
+                        }
+                        else {
+                            $honesty.ShowMsg({
+                                title: "提示", msg: "查询的数据不存在", callback: function () {
+                                    $honesty.CloseWin();
+                                }
+                            })
+                        }
+                    }
+                    else {
+                        $honesty.ConfirmWin();
+                    }
+                }
+            }
+            else {
+                $honesty.ConfirmWin();
+            }
+        });
+
+
+
+    }
+
+
+    function ShowType() {
+        var type = $("#TopBar").find(".active").data("type");
+        var _Class = $("#ulBottom").find(".active").data("type");
+        var arrData = new Array();
+        var arrProvince = new Array();
+        switch (type) {
+            case 1:
+                switch (_Class) {
+                    case "Shop":
+                        $.each(_Data, function (i, item) {
+                            arrData.push({ value: Number(item.CountScale1), name: item.Regional, ShowInfo: "异常量:" + item.FaultCount1 + "<br/>店铺数:" + item.ShopCount + "<br/>人数:" + item.EmpCount + "<br/>店铺平均:" + item.CountScale1, itemStyle: { normal: { color: arrPrColor[i] } } });
+                        });
+                        $.each(_DateProvince, function (i, item) {
+                            arrProvince.push({ value: Number(item.CountScale1), name: item.Regional, ShowInfo: "异常量:" + item.FaultCount1 + "<br/>店铺数:" + item.ShopCount + "<br/>人数:" + item.EmpCount + "<br/>店铺平均:" + item.CountScale1, itemStyle: { normal: { color: arrPrColor[i] } } });
+                        });
+                        break;
+                    case "Person":
+                        $.each(_Data, function (i, item) {
+                            arrData.push({ value: Number(item.EmpCountScale1), name: item.Regional, ShowInfo: "异常量:" + item.FaultCount1 + "<br/>店铺数:" + item.ShopCount + "<br/>人数:" + item.EmpCount + "<br/>人数平均:" + item.EmpCountScale1, itemStyle: { normal: { color: arrPrColor[i] } } });
+                        });
+                        $.each(_DateProvince, function (i, item) {
+                            arrProvince.push({ value: Number(item.EmpCountScale1), name: item.Regional, ShowInfo: "异常量:" + item.FaultCount1 + "<br/>店铺数:" + item.ShopCount + "<br/>人数:" + item.EmpCount + "<br/>人数平均:" + item.EmpCountScale1, itemStyle: { normal: { color: arrPrColor[i] } } });
+                        });
+                        break;
+                    default:
+                }
+                break;
+            case 0:
+                switch (_Class) {
+                    case "Shop":
+                        $.each(_Data, function (i, item) {
+                            arrData.push({ value: Number(item.CountScale2), name: item.Regional, ShowInfo: "异常量:" + item.FaultCount1 + "<br/>店铺数:" + item.ShopCount + "<br/>人数:" + item.EmpCount + "<br/>                                           店铺平均:" + item.CountScale2, itemStyle: { normal: { color: arrPrColor[i] } } });
+                        });
+                        $.each(_DateProvince, function (i, item) {
+                            arrProvince.push({ value: Number(item.CountScale2), name: item.Regional, ShowInfo: "异常量:" + item.FaultCount1 + "<br/>店铺数:" + item.ShopCount + "<br/>人数:" + item.EmpCount +                                                  "<br/>店铺平均:" + item.CountScale2, itemStyle: { normal: { color: arrPrColor[i] } } });
+                        });
+                        break;
+                    case "Person":
+                        $.each(_Data, function (i, item) {
+                            arrData.push({ value: Number(item.EmpCountScale2), name: item.Regional, ShowInfo: "异常量:" + item.FaultCount1 + "<br/>店铺数:" + item.ShopCount + "<br/>人数:" + item.EmpCount +                                               "<br/>人数平均:" + item.EmpCountScale2, itemStyle: { normal: { color: arrPrColor[i] } } });
+                        });
+                        $.each(_DateProvince, function (i, item) {
+                            arrProvince.push({ value: Number(item.EmpCountScale2), name: item.Regional, ShowInfo: "异常量:" + item.FaultCount1 + "<br/>店铺数:" + item.ShopCount + "<br/>人数:" + item.EmpCount +                                               "<br/>人数平均:" + item.EmpCountScale2, itemStyle: { normal: { color: arrPrColor[i] } } });
+                        });
+                        break;
+                    default:
+                }
+                break;
+
+        }
+        var _Option = {
+            tooltip: {
+                trigger: 'item',
+                formatter: function (params, ticket, callback) {
+                    var res = params.name + '<br/>';
+                    res += params.data.ShowInfo + '<br/>';
+                    res += '占比' + params.percent + '%<br/>';
+                    setTimeout(function () { callback(ticket, res); }, 10);
+                    return 'loading';
+                },
+                textStyle: {
+                    fontSize: 12,
+                },
+            },
+            series: [
+            {
+                name: '大区',
+                type: 'pie',
+                selectedMode: 'single',
+                radius: [0, '30%'],
+                label: {
+                    normal: {
+                        position: 'inner'
+                    }
+                },
+                labelLine: {
+                    normal: {
+                        show: false
+                    }
+                },
+                data: arrData
+            },
+
+            {
+                name: '省份',
+                type: 'pie',
+                radius: ['40%', '55%'],
+
+                data: arrProvince.sort(function (a, b) { return a.value - b.value }),
+                labelLine: {
+                    normal: {
+                        lineStyle: {
+                            color: '#909483'
+                        },
+                        smooth: false,
+                        length: 30,
+                        length2: 10
+                    }
+                }
+            }
+            ]
+        };
+        //var _opts = $.extend(_Option, _default);
+        // 使用刚指定的配置项和数据显示图表。
+        myChart.setOption(_Option);
+    }
+</script>

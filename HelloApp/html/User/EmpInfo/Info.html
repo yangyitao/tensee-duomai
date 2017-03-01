@@ -1,0 +1,434 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>个人资料</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style type="text/css">
+        .my-header {
+            background: url('../../../image/mybg.jpg') no-repeat;
+            background-size: cover;
+            min-height: 150px;
+            position: relative;
+            border-radius: 6px;
+        }
+
+        .my-info {
+            position: relative;
+            padding: 20px 0;
+            width: 100%;
+            bottom: 0;
+            text-align: center;
+            vertical-align: center;
+        }
+
+            .my-info img {
+                width: 80px;
+                height: 80px;
+                border-radius: 50%;
+            }
+
+            .my-info p.nickname {
+                margin-top: 5px;
+                color: #ffffff;
+                font-size: 18px;
+            }
+
+        .my-menu {
+            position: absolute;
+            width: 100%;
+            height: 45px;
+            line-height: 45px;
+            left: 0;
+            bottom: 0;
+            text-align: center;
+            background: #ffffff;
+            filter: Alpha(opacity=50);
+            background: rgba(255, 255, 255, 0.2) none repeat scroll 0 0 !important;
+            color: #ffffff;
+            font-size: 14px;
+        }
+
+            .my-menu .aui-col-xs-3 {
+                border-right: 1px solid #9bd6d5;
+            }
+
+                .my-menu .aui-col-xs-3:last-child {
+                    border-right: none;
+                }
+
+            .my-menu > div:active {
+                background: #ffffff;
+                filter: Alpha(opacity=50);
+                background: rgba(255, 255, 255, 0.2) none repeat scroll 0 0 !important;
+            }
+    </style>
+</head>
+<body>
+    <div id="main">
+        <div data-role="80" class="aui-card aui-input-form aui-input-flow" style="margin-bottom: 0px; margin-top: 15px">
+            <div class="my-header">
+                <div class="my-info">
+                    <img id="imgEmpPicture" src="../../../image/head_defalt.jpg" style="width: 100px; height: 100px; border-radius: 50%" />
+                </div>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">工号</span>
+                <input id="EmpCode" type="text" class="aui-input aui-important" readonly="readonly" placeholder="请填写工号!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">姓名</span>
+                <input id="EmpName" type="text" class="aui-input aui-important" readonly="readonly" placeholder="请填写姓名!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">身份证号码</span>
+                <input id="IdentityCode" type="text" class="aui-input" placeholder="请填写身份证号码!" />
+            </div>
+            <div class="aui-input-row" style="padding: 2px">
+                <label class="aui-input-addon">性别</label>
+                <div class="aui-pull-left">
+                    <input class="aui-radio aui-radio-warning" type="radio" name="Sex" value="男" checked><div class="aui-radio-name">男</div>
+                    <input class="aui-radio aui-radio-warning" type="radio" name="Sex" value="女"><div class="aui-radio-name">女</div>
+                </div>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">出生年月</span>
+                <input id="BirthDate" type="text" class="aui-input aui-important" readonly="readonly" placeholder="请选择出生年月!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">学历</span>
+                <select id="Education" class="aui-input aui-important" placeholder="请选择学历!">
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">籍贯(省)</span>
+                <select id="NativeProvince" class="aui-input aui-important" placeholder="请选择籍贯省份!">
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">籍贯(市)</span>
+                <select id="NativeCity" class="aui-input aui-important" placeholder="请选择籍贯市!">
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">民族</span>
+                <select id="Nation" class="aui-input aui-important" placeholder="请选择民族!">
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">政治面貌</span>
+                <select id="PoliticsStatus" class="aui-input aui-important" placeholder="请选择政治面貌!">
+                </select>
+            </div>
+            <div class="aui-input-row" style="padding: 2px">
+                <label class="aui-input-addon">婚姻状况</label>
+                <div class="aui-pull-left">
+                    <input class="aui-radio aui-radio-warning" type="radio" name="IsMarry" value="1" checked><div class="aui-radio-name">已婚</div>
+                    <input class="aui-radio aui-radio-warning" type="radio" name="IsMarry" value="0"><div class="aui-radio-name">未婚</div>
+                </div>
+            </div>
+            <div class="aui-input-row" style="padding: 2px">
+                <label class="aui-input-addon">生育状况</label>
+                <div class="aui-pull-left">
+                    <input class="aui-radio aui-radio-warning" type="radio" name="IsBear" value="1" checked><div class="aui-radio-name">已育</div>
+                    <input class="aui-radio aui-radio-warning" type="radio" name="IsBear" value="0"><div class="aui-radio-name">未育</div>
+                </div>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">血型</span>
+                <select id="BloodType" class="aui-input aui-important" placeholder="请选择血型!">
+                </select>
+            </div>
+            <div id="divOtherBlood" class="aui-input-row" style="display: none">
+                <span class="aui-input-addon">其他血型</span>
+                <input id="OtherBlood" type="text" class="aui-input aui-important" placeholder="请填写其他血型!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">身高(cm)</span>
+                <input id="Height" type="text" class="aui-input aui-important" placeholder="请填写身高,单位(cm)!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">体重(kg)</span>
+                <input id="Weight" type="text" class="aui-input aui-important" placeholder="请填写体重,单位(Kg)!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">毕业院校</span>
+                <input id="School" type="text" class="aui-input" tapmode placeholder="请填写毕业院校!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">专业</span>
+                <input id="Major" type="text" class="aui-input aui-important" placeholder="若无专业请填写“无”!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">户口性质</span>
+                <select id="Nature" class="aui-input aui-important" placeholder="请选择户口性质!">
+                    <option value="">请选择...</option>
+                    <option value="1">本地城镇</option>
+                    <option value="2">本地农村</option>
+                    <option value="3">外埠城镇</option>
+                    <option value="4">外埠农村</option>
+                </select>
+            </div>
+        </div>
+        <div id="divFooter" style="height: 60px;"></div>
+        <footer class="aui-nav" id="footer" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7;">
+            <div id="btnSave" class="aui-btn aui-btn-block aui-btn-info" style="height: 45px; width: 100%; line-height: 0.9;">
+                保存修改
+            </div>
+        </footer>
+    </div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script src="../../../script/honesty.valid.js"></script>
+<script src="../../../script/honesty.location.js"></script>
+<script type="text/javascript">
+    var loc = new Location();
+    apiready = function () {
+        $(function () {
+            LoadData();
+            $("#BirthDate").tap(function () {
+                $honesty.DateTimeSelect({
+                    Type: "Date",
+                    LevelNum: 2,
+                    ControlID: $(this).attr("id"),
+                    ControlValue: $(this).val()
+                });
+            });
+
+            $("#BloodType").change(function () {
+                if ($("#BloodType").val() == "Z") {
+                    $("#divOtherBlood").show();
+                }
+                else {
+                    $("#divOtherBlood").hide();
+                }
+            });
+
+            $("#NativeProvince").change(function () {
+                $("#NativeCity").empty();
+                loc.fillOption("NativeCity", "0," + $("#NativeProvince option:selected").val());
+            });
+
+            $("#btnSave").tap(function () {
+                if (CheckInput()) {
+                    try {
+                        var _options = {
+                            PostData: {
+                                Params: {
+                                    result: "ModifyEmpInfo",
+                                    EmpID: GetSession("UserID"),
+                                    EmpCode: $("#EmpCode").val(),
+                                    EmpName: $("#EmpName").val(),
+                                    EmpPhoto: $("#imgEmpPicture").attr("data-value"),
+                                    EmpPosition: $("#EmpPosition").val(),
+                                    IdentityCode: $("#IdentityCode").val(),
+                                    BirthDate: $("#BirthDate").val(),
+                                    Sex: $("input[name=Sex]:checked").val(),
+                                    Education: $("#Education").val(),
+                                    NativeProvince: $("#NativeProvince option:selected").text(),
+                                    NativeCity: $("#NativeCity option:selected").text(),
+                                    Nation: $("#Nation").val(),
+                                    PoliticsStatus: $("#PoliticsStatus").val(),
+                                    Nature: $("#Nature").val(),
+                                    IsMarry: $("input[name=IsMarry]:checked").val() == "1" ? "是" : "否",
+                                    IsBear: $("input[name=IsBear]:checked").val() == "1" ? "是" : "否",
+                                    BloodType: $("#BloodType").val(),
+                                    OtherBlood: ($("#BloodType").val() == "Z" ? $("#OtherBlood").val() : ""),
+                                    Weight: $("#Weight").val(),
+                                    Height: $("#Height").val(),
+                                    School: $("#School").val(),
+                                    Major: $("#Major").val()
+                                },
+                                ProcName: "proc_SOM_HR_EmpModifyInfo",
+                                DataType: "Bool",
+                                ExecType: "PROC",
+                                Mode: "MSSQL"
+                            }
+                        };
+                        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                            if (_result.Data == "True") {
+                                $honesty.CloseWin();
+                            }
+                            else {
+                                $honesty.ShowMsg({ title: "警告", msg: "保存出现异常!" });
+                            }
+                        });
+                    }
+                    catch (e) {
+                        alert(e);
+                    }
+                }
+            });
+
+            $("#imgEmpPicture").tap(function () {
+                $honesty.ConfirmWin({
+                    title: "提示",
+                    msg: "您是否要更换个人照片?",
+                    buttons: ["确认", "取消"],
+                    callback: function (ret, err) {
+                        if (ret.buttonIndex == 1) {
+                            $honesty.UploadPicture({
+                                callBack: function (ret) {
+                                    if (ret.FilePath != "") {
+                                        $("#imgEmpPicture").attr("src", $honesty.GetSite() + ret.FilePath);
+                                        $("#imgEmpPicture").attr("data-value", ret.FilePath);
+//                                      SetSession("ImgEmpPicture", ret.FilePaths);
+                                    }
+                                }
+                            })
+                        }
+                    }
+                });
+            });
+
+            $("#IdentityCode").on("input", function (e) {
+                if (valid_cardid($("#IdentityCode").val()) == "验证通过!") {
+                    $("#BirthDate").val($("#IdentityCode").val().substring(6, 10) + "-" + $("#IdentityCode").val().substring(10, 12) + "-" + $("#IdentityCode").val().substring(12, 14));
+                    if (parseInt($("#IdentityCode").val().substr(16, 1)) % 2 == 1) {
+                        $("input[name=Sex][value='男']").prop("checked", "checked");
+                    } else {
+                        $("input[name=Sex][value='女']").prop("checked", "checked");
+                    }
+                }
+            });
+        });
+    }
+
+    function LoadData() {
+        InitNation({ Con_ID: "Nation" });
+        InitPolitics({ Con_ID: "PoliticsStatus" });
+        InitBlood({ Con_ID: "BloodType" });
+        InitEducation({ Con_ID: "Education" });
+        $("#Education").val("40");
+        $("#EmpCode").val(GetSession("UserCode"));
+        $("#EmpName").val(GetSession("UserName"));
+        loc.fillOption("NativeProvince", "0");
+        $("#NativeCity").empty();
+        var _options = {
+            PostData: {
+                Params: {
+                    result: "InitModifyEmpInfo",
+                    EmpID: GetSession("UserID")
+                },
+                ProcName: "proc_SOM_HR_EmpModifyInfo",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        if (item.EmpPosition != "") { $("#EmpPosition").val(item.EmpPosition) };
+                        $("#IdentityCode").val(item.IdentityCode);
+                        $("#BirthDate").val(item.BirthDate);
+                        item.Sex = (item.Sex == "女" ? "女" : "男");
+                        $("input[name=Sex][value='" + item.Sex + "']").prop("checked", "checked");
+                        if (item.Education != "") { $("#Education").val(item.Education) };
+                        loc.fillOption("NativeProvince", "0");
+                        $("#NativeProvince option[text='" + item.NativeProvince + "']").attr("selected", true);
+                        $("#NativeCity").empty();
+                        loc.fillOption("NativeCity", "0," + $("#NativeProvince option[text='" + item.NativeProvince + "']").val());
+                        if (item.NativeCity != "") {
+                            $("#NativeCity option[text='" + item.NativeCity + "']").attr("selected", true);
+                        }
+                        if (item.Nation != "") { $("#Nation").val(item.Nation) };
+                        if (item.PoliticsStatus != "") { $("#PoliticsStatus").val(item.PoliticsStatus) };
+                        if (item.Nature != "") { $("#Nature").val(item.Nature) }
+                        $("input[name=IsMarry][value='" + (item.IsMarry == "是" ? "1" : "0") + "']").prop("checked", "checked");
+                        $("input[name=IsBear][value='" + (item.IsBear == "是" ? "1" : "0") + "']").prop("checked", "checked");
+                        $("input[name=IsResume][value='" + (item.IsResume == "是" ? "1" : "0") + "']").prop("checked", "checked");
+                        if (item.BloodType != "") {
+                            $("#BloodType").val(item.BloodType);
+                            if (item.BloodType == "Z") {
+                                $("#divOtherBlood").show();
+                                $("#OtherBlood").val(item.OtherBlood);
+                            }
+                        };
+                        $("#Weight").val(item.Weight);
+                        $("#Height").val(item.Height);
+                        $("#School").val(item.School);
+                        $("#Major").val(item.Major);
+                        if (item.EmpPhoto != "") {
+                            $("#imgEmpPicture").attr("src", $honesty.GetSite() + item.EmpPhoto);
+                            $("#imgEmpPicture").attr("data-value", item.EmpPhoto);
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    function CheckInput() {
+        if ($("#imgEmpPicture").attr("src") == "../../../image/head_defalt.jpg" || $("#imgEmpPicture").attr("src") == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请点击头像维护个人照片!" });
+            return false;
+        }
+        if ($("#EmpName").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请填写姓名!" });
+            return false;
+        }
+        if ($("#IdentityCode").val().trim() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请输入您的身份证号码!" });
+            return false;
+        }
+        else {
+            var _CardResult = valid_cardid($("#IdentityCode").val());
+            if (_CardResult != "验证通过!") {
+                $honesty.ShowMsg({ title: "警告", msg: _CardResult });
+                return false;
+            }
+        }
+        if ($("#BirthDate").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请选择出生年月!" });
+            return false;
+        }
+        if ($("#School").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请填写毕业院校!" });
+            return false;
+        }
+        if ($("#Major").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请填写专业!" });
+            return false;
+        }
+        if ($("#Native").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请填写籍贯!" });
+            return false;
+        }
+        if ($("#Nature").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请选择户口性质!" });
+            return false;
+        }
+        if ($("#BloodType").val() == "Z" && $("#OtherBlood").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "选择其他血型请填写详细血型!" });
+            return false;
+        }
+        if ($("#Height").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请填写身高!" });
+            return false;
+        }
+        else {
+            if (valid_int($("#Height").val())) {
+                $honesty.ShowMsg({ title: "警告", msg: "身高请填整数!" });
+                return false;
+            }
+        }
+        if ($("#Weight").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请填写体重!" });
+            return false;
+        }
+        else {
+            if (valid_float($("#Weight").val())) {
+                $honesty.ShowMsg({ title: "警告", msg: "体重请填写数字!" });
+                return false;
+            }
+        }
+        return true;
+    }
+</script>
+</html>

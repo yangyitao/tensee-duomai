@@ -1,0 +1,236 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>档案详情</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="aui-content">
+        <ul class="aui-list-view aui-in" style="margin-bottom: 0px;">
+            <li class="aui-list-view-cell">
+                <label id="ShopName"></label>
+                <p>店铺全称</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="CompanyCode"></label>
+                <p>公司名称</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="ShopCode"></label>
+                <p>店铺仓号</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="OpenTime"></label>
+                <p>开业时间</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="PhoneNum"></label>
+                <p>联系电话</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="Regional"></label>
+                <p>区域</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="Province"></label>
+                <p>省份</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="City"></label>
+                <p>城市</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="ShopAddress"></label>
+                <p>店铺地址</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="ShopArea"></label>
+                <p>店铺面积</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="WareArea"></label>
+                <p>仓库面积</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="ImageAlgebra"></label>
+                <p>形象代数</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="Brands"></label>
+                <p>经营品牌</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="StorePlanning"></label>
+                <p>卖场规划</p>
+            </li>
+            <li class="aui-list-view-cell" style="padding: 5px">
+                <div id="container" style="width: 100%; height: 150px;"></div>
+            </li>
+            <li class="aui-list-view-cell" style="padding: 5px; display: none;" id="liButton">
+                <button class="aui-btn aui-btn-warning" id="UpdateLocation">更新店铺坐标位置</button>
+            </li>
+        </ul>
+        <ul class="aui-grid-nine">
+            <li class="aui-col-xs-4 aui-text-center" tapmode onclick="LoadImage(0)">
+                <span class="aui-iconfont aui-icon-sponsor aui-text-default" id="imageshow1"></span>
+                <p>门面照</p>
+            </li>
+            <li class="aui-col-xs-4 aui-text-center" tapmode onclick="LoadImage(1)">
+                <span class="aui-iconfont aui-icon-clothes aui-text-danger" id="imageshow2"></span>
+                <p>平面照</p>
+            </li>
+            <li class="aui-col-xs-4 aui-text-center" tapmode onclick="LoadImage(2)">
+                <span class="aui-iconfont aui-icon-vip aui-text-success" id="imageshow3"></span>
+                <p>广告图</p>
+            </li>
+        </ul>
+    </div>
+    <div style="height: 10px"></div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _ImgList = new Array();
+    var _Lon, _Lat;
+    apiready = function () {
+        api.parseTapmode();
+
+        $("#UpdateLocation").tap(function () {
+            $honesty.OpenWin({
+                LevelNum: 2,
+                name: "Info_ShopInfo_ChooseLocation",
+                url: "Info/ShopInfo/ChooseLocation.html",
+                title: "图片列表",
+                pageParam: {
+                    Lon: _Lon,
+                    Lat: _Lat,
+                    OrganizeID: api.pageParam.OrganizeID
+                },
+            })
+        });
+
+    }
+    window.onload = loadScript;
+    function IniInfo() {
+        api.showProgress({
+            animationType: 'fade',
+            title: "请稍等",
+            text: "正在加载...",
+        });
+        var _UserID = GetSession("UserID");
+        var _Leader = GetSession("IsLeader");
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "LoadData",
+                    OrganizeID: api.pageParam.OrganizeID,
+                    UserID: _UserID
+                },
+                ProcName: "proc_SOM_ISR_ShopInfo",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            },
+            Loading: {
+                Show: false
+            }
+        };
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        $("#ShopName").text((item.Name == "" ? "未维护" : item.Name));
+                        $("#CompanyCode").text((item.CompanyCode == "" ? "未维护" : item.CompanyCode));
+                        $("#ShopCode").text((item.ShopCode == "" ? "未维护" : item.ShopCode));
+                        $("#OpenTime").text((item.OpenTime == "" ? "未维护" : item.OpenTime));
+                        $("#PhoneNum").text((item.PhoneNum == "" ? "未维护" : item.PhoneNum));
+                        $("#Regional").text((item.Regional == "" ? "未维护" : item.Regional));
+                        $("#Province").text((item.Province == "" ? "未维护" : item.Province));
+                        $("#City").text((item.City == "" ? "未维护" : item.City));
+                        $("#ShopAddress").html((item.ShopAddress == "" ? "未维护" : item.ShopAddress));
+                        $("#ShopArea").text((item.ShopArea == "" ? "未维护" : item.ShopArea + "平米"));
+                        $("#WareArea").text((item.WareArea == "" ? "未维护" : item.WareArea + "平米"));
+                        $("#ImageAlgebra").text((item.ImageAlgebra == "" ? "未维护" : item.ImageAlgebra));
+                        $("#Brands").text((item.Brands == "" ? "未维护" : item.Brands));
+                        $("#StorePlanning").text((item.StorePlanning == "" ? "未维护" : item.StorePlanning));
+                        //$("#Location").val(item.Location);
+                        _ImgList = Array(item.FacedePicture, item.PlanPicture, item.AdvertPicture);
+                        _Lon = item.lon;
+                        _Lat = item.lat;
+
+                        var map = new BMap.Map("container");
+                        map.centerAndZoom(new BMap.Point(116.331398, 39.897445), 17);
+                        map.disableDragging();
+                        map.disablePinchToZoom();
+                        map.clearOverlays();
+
+                        if (!isNaN(_Lon)) {
+                            var new_point = new BMap.Point(_Lon, _Lat);
+                            var marker = new BMap.Marker(new_point);     // 创建标注
+                            map.addOverlay(marker);                     // 将标注添加到地图中
+                            map.panTo(new_point);
+                        }
+                        if (GetSession("OrganizeID").toUpperCase() == api.pageParam.OrganizeID.toUpperCase() && _Leader != "0") {
+                            $("#liButton").show();
+                        }
+
+                    });
+                }
+            }
+            api.hideProgress();
+        });
+
+        api.addEventListener({
+            name: 'Info_ShopInfo_ChooseLocation'
+        }, function (ret) {
+            if (ret && ret.value) {
+                var map = new BMap.Map("container");
+                map.centerAndZoom(new BMap.Point(116.331398, 39.897445), 17);
+                map.disableDragging();
+                map.disablePinchToZoom();
+                map.clearOverlays();
+                var new_point = new BMap.Point(ret.value.Lon, ret.value.Lat)
+                var marker = new BMap.Marker(new_point);
+                map.addOverlay(marker);
+                map.panTo(new_point);
+
+            }
+        });
+
+    }
+    //图片加载
+    function LoadImage(i) {
+        var strs = new Array();
+        var url = _ImgList[i];
+        if (url != "") {
+            strs = url.split("|");
+            $honesty.OpenWin({
+                LevelNum: 2,
+                name: "Info_ShopInfo_ImageList",
+                url: "Info/ShopInfo/ImageList.html",
+                title: "图片列表",
+                pageParam: {
+                    imageList: strs
+                },
+            })
+        }
+        else {
+            $honesty.ShowToast({ msg: "暂无图片！" });
+        }
+
+    }
+
+    function loadScript() {
+        setTimeout(function () {
+            var script = document.createElement("script");
+            script.src = "http://api.map.baidu.com/api?v=2.0&ak=uFL9R4RZ35RIaVmXrazY4oiU2QDjcFSs&callback=IniInfo";//此为v2.0版本的引用方式  
+            document.body.appendChild(script);
+        }, 100);
+
+    }
+</script>
+</html>

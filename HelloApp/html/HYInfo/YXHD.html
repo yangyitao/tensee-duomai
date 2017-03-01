@@ -1,0 +1,68 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+        content="width = 320,minimum-scale =1,maximum-scale = 1.3 ,user-scalable =no" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>营销活动</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div style="height: 10px;"></div>
+    <div class="aui-content-padded" id="divTab2">
+        <div class="aui-tab">
+            <ul class="aui-tab-nav aui-tab-border" >
+                <li data-role="title2" class="active" data-index="0">开始时间</li>
+                <li data-role="title2" data-index="1">结束时间</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/api.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            var y = $honesty.RangeTop(120);
+            api.openFrameGroup({
+                name: 'YXHD',
+                scrollEnabled: false,
+                rect: { x: 0, y: y, w: 'auto', h: 'auto' },
+                index: 0,
+                preload: 0,
+                frames:
+                [{
+                    name: 'YXHD1',
+                    url: 'YXHD1.html',
+                    bounces: false,
+                    pageParam: {
+                    }
+                }, {
+                    name: 'YXHD2',
+                    url: 'YXHD2.html',
+                    bounces: false,
+                    pageParam: {
+                    }
+                }]
+            });
+
+        });
+
+    }
+
+    $("[data-role='title2']").tap(function () {
+        if (!$(this).hasClass("active")) {
+            $("[data-role='title2']").removeClass("active");
+            $(this).addClass("active");
+            api.setFrameGroupIndex({
+                name: 'YXHD',
+                index: $(this).attr("data-index"),
+                scroll: true
+            });
+        }
+    });
+</script>

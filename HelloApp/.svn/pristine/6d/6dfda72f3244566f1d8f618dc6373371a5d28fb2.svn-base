@@ -1,0 +1,45 @@
+﻿<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>微信专属二维码</title>
+    <link href="../../css/aui.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <p class="aui-text-center aui-padded-10">扫一扫下面的二维码,关注微信公众号</p>
+    <div class="aui-content">
+        <div class="aui-form aui-card" id="divGoodsTarget">
+            <div class="aui-input-row" style="text-align: center; width: 100%">
+                <img id="imgBarcode" src="../../image/logo.png" style="width: 250px; height: 250px" />
+            </div>
+        </div>
+    </div>
+    <div style="height: 10px;"></div>
+</body>
+<script src="../../script/api.js"></script>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            var _options = {
+                Mode: "CreateBarCode",
+                CodeType: "Ever",
+                EventKey: GetSession("UserID"),
+                Loading: {
+                    Show: true,
+                    Title: "二维码加载中..."
+                },
+            };
+            $.when($honesty.WeChatChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    $("#imgBarcode").attr("src", _result.Data);
+                }
+            });
+        });
+    }
+</script>
+</html>

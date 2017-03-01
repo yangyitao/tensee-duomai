@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>title</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="aui-content">
+        <ul class="aui-list-view aui-grid-view" id="imagelist">
+        </ul>
+    </div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var arrImages = new Array();
+    apiready = function () {
+        var strs = api.pageParam.imageList;
+        for (var i = 0; i < strs.length; i++) {
+            $("#imagelist").append('<li class="aui-list-view-cell aui-img aui-col-xs-4" tapmode onclick=\"ShowImg(\'' + i + '\')\"><img class="aui-img-object" style="height:100px;" src="' + $honesty.GetSite() + strs[i] + '"></li>');
+            arrImages.push($honesty.GetSite() + strs[i]);
+        }
+
+
+
+    };
+
+    function ShowImg(activeIndex) {
+        var photoBrowser = api.require('photoBrowser');
+        photoBrowser.open({
+            images: arrImages,
+            activeIndex: activeIndex,
+            bgColor: '#000'
+        }, function (ret) {
+            if (ret) {
+                if (ret.eventType == "click") {
+                    photoBrowser.clearCache();
+                    photoBrowser.close();
+                }
+                else if (ret.eventType == "loadImgFail") {
+                    $honesty.ShowToast({ msg: "Õº∆¨º”‘ÿ ß∞‹" });
+                }
+            }
+        });
+    }
+</script>
+</html>

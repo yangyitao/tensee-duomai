@@ -1,0 +1,123 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>店长自检问题列表</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-list-view-cell {
+            padding: 5px 10px 7px 10px;
+        }
+
+            .aui-list-view-cell table {
+                color: #999999 !important;
+                font-size: 12px;
+                border-collapse: collapse;
+                width: 100%;
+            }
+    </style>
+</head>
+<body>
+    <div class="aui-content">
+        <ul class="aui-list-view" id="ulList">
+        </ul>
+    </div>
+    <div id="divFooter" style="height: 40px; display: none"></div>
+    <footer class="aui-nav" id="footer" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7; display: none">
+        <div id="btnCreate" class="aui-btn aui-btn-block aui-btn-info" style="height: 45px; width: 100%; line-height: 0.9;">
+            新建
+        </div>
+    </footer>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _PatrolID, _ImageScore;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _PatrolID = api.pageParam.PatrolID;
+            _ImageScore = api.pageParam.ImageScore;
+
+            if (_ImageScore == -1) {
+                $("#divFooter").show();
+                $("#footer").show();
+            }
+
+
+            LoadData();
+
+            $("#btnCreate").tap(function () {
+                $honesty.OpenWin({
+                    title: "店长自检",
+                    name: "PatrolShop_SelfPatrol_ProblemInfo",
+                    url: "PatrolShop/SelfPatrol/ProblemInfo.html",
+                    LevelNum: 2,
+                    pageParam: {
+                        PatrolID: _PatrolID,
+                    }
+                });
+            });
+
+            //问题保存监听事件
+            api.addEventListener({
+                name: 'PatrolShop_SelfPatrol_ProblemInfo'
+            }, function (ret) {
+                if (ret && ret.value) {
+                    LoadData();
+                }
+            });
+
+        });
+    };
+
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "SelectList",
+                    PatrolID: _PatrolID
+                },
+                ProcName: "proc_SOM_ISR_PS_Problem",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    var _Content = "";
+                    $.each(_result.Data, function (i, item) {
+                        _Content += '<li class="aui-list-view-cell" tapmode onclick=\"ProblemClick(\'' + item.ID + '\')\"><div class="aui-arrow-right aui-ellipsis-1">' +
+                                    '<label>' + item.ProblemType + ' ' + item.ProblemDescribe + '</label>' +
+                                    '<table><tr><td style="width: 45px;">提交人:</td><td style="width: 50px;">' + item.CreateUserName +
+                                    '</td><td style="width: 55px;">要求时间:</td><td>' + item.ExpectDate + '</td></tr><tr>' +
+                                    '<td>执行人:</td><td>' + item.ExcuteUserName + '</td><td>执行时间:</td><td>' +
+                                    (item.ExcuteDate == "" ? "未执行" : item.ExcuteDate) + '</td></tr></table></div></li>';
+                    });
+                    $("#ulList").html(_Content);
+                    api.parseTapmode();
+                }
+            }
+        });
+    }
+
+    function ProblemClick(id) {
+        $honesty.OpenWin({
+            title: "店长自检",
+            name: "PatrolShop_SelfPatrol_ProblemInfo",
+            url: "PatrolShop/SelfPatrol/ProblemInfo.html",
+            LevelNum: 2,
+            pageParam: {
+                PatrolID: _PatrolID,
+                ID: id
+            }
+        });
+    }
+
+</script>
+</html>

@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>编制调整申请流程</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+    <link href="../../css/aui-flex.css" rel="stylesheet" />
+    <style>
+        .aui-input-row {
+            width: 150px;
+            color: #8f8f94;
+        }
+
+        #bz > .aui-input-row .aui-input-addon {
+            width: 110px;
+            color: #8f8f94;
+            text-align: left;
+            padding-left: 8px;
+            font-size: 13px;
+        }
+
+        #bz > .aui-input-form .aui-input-row {
+            padding-left: 8px;
+            font-weight: 300;
+            font-size: 13px;
+        }
+
+        .aui-input-form .aui-input-row {
+            padding-left: 8px;
+            font-weight: 300;
+            font-size: 13px;
+        }
+
+        .aui-list-view-cell {
+            padding: 5px 15px;
+        }
+
+        .aui-label-title {
+            text-align: right;
+            width: 90px;
+        }
+
+        .aui-flex-item-4 {
+            text-align: center;
+        }
+
+        .aui-flex-item-1, .aui-flex-item-3 {
+            text-align: center;
+        }
+
+        .aui-input {
+            color: #000;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <input type="hidden" id="EmpID" />
+    <input type="hidden" id="ListID" />
+    <input type="hidden" id="SapCode" />
+    <div id="main">
+        <p class="aui-padded-5 aui-text-center" style="color: #3175af; font-size: 16px;">编制调整申请流程</p>
+        <div class="aui-card" style="margin-bottom: 0px;">
+            <ul class="aui-list-view" style="margin-bottom: 0px;">
+                <li class="aui-list-view-cell">
+                    <label id="InfoSN"></label>
+                    <p>单号</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="InfoWriteDate"></label>
+                    <p>日期</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="InfoEmpName"></label>
+                    <p>姓名</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="InfoEmpCode"></label>
+                    <p>工号</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoEmpPosition"></label>
+                    <p>岗位</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoAreaName"></label>
+                    <p>大区</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoProvince"></label>
+                    <p>所属省份</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoCity"></label>
+                    <p>所属城市</p>
+                </li>
+                <li data-role="colspan" data-show="hide" class="aui-list-view-cell" id="liBaseMore">
+                    <p style="text-align: center">点击显示详情</p>
+                </li>
+            </ul>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; margin: 0 10px; font-size: 15px;">编制参考值</p>
+        <div class="aui-card aui-input-form" id="bz" style="margin-bottom: 0px;">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">编制调整类型</span>
+                <select class="aui-input aui-important" id="AdjustmentType" disabled="disabled">
+                    <option value="">请选择...</option>
+                    <option value="现有店编制调整">现有店编制调整</option>
+                    <option value="新开店" disabled="disabled">新开店</option>
+                    <option value="闭店" disabled="disabled">闭店</option>
+                    <option value="储备编制申请" disabled="disabled">储备编制申请</option>
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">店铺代码</span>
+                <input id="InfoShopCode" type="text" class="aui-input aui-important" style="text-align: left;" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">店铺名称</span>
+                <input id="InfoShopName" type="text" class="aui-input aui-important" readonly="readonly" style="text-align: left;" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">店铺级别</span>
+                <input id="InfoSaleslevel" type="text" class="aui-input aui-important" readonly="readonly" style="text-align: left;" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">OTB(万元)</span>
+                <input id="Otb" type="text" class="aui-input aui-important" placeholder="请填写零售额" readonly="readonly" onchange="ModifyInfo(this)" style="text-align: left;" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">人效</span>
+                <input id="PeopleEffect" type="text" class="aui-input aui-important" readonly="readonly" style="text-align: left;" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">编制调整原因</span>
+                <input id="Reason" type="text" class="aui-input aui-important" placeholder="请填写编制调整原因" readonly="readonly" style="text-align: left;" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">开始日期</span>
+                <input id="BeginDate" type="text" class="aui-input aui-important" style="text-align: left;" />
+            </div>
+            <div class="aui-input-row" name="cubei" style="display: none">
+                <span class="aui-input-addon">结束日期</span>
+                <input id="EndDate" type="text" class="aui-input aui-important" style="text-align: left;" />
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; margin: 0 10px; font-size: 15px;">编制人员</p>
+        <div class="aui-card aui-input-form" style="margin-bottom: 0px;">
+            <div class="aui-flex-col aui-input-row aui-flex-middle" style="color: #000">
+                <span class="aui-flex-item-1">序号</span>
+                <span class="aui-flex-item-3">岗位名称</span>
+                <span class="aui-flex-item-4" name="Now">调整前岗位编制</span>
+                <span class="aui-flex-item-4" name="Now">调整后岗位编制</span>
+                <span class="aui-flex-item-4" name="New">编制数</span>
+                <span class="aui-flex-item-4" name="cubei" style="display: none; width: 22% !important">现有<br />
+                    编制数</span>
+                <span class="aui-flex-item-4" name="cubei" style="display: none; width: 22% !important">现有储备<br />
+                    编制数</span>
+                <span class="aui-flex-item-4" name="cubei" style="display: none; width: 22% !important">调整后储备<br />
+                    编制数</span>
+            </div>
+            <div id="FormsList">
+            </div>
+            <div class="aui-flex-col aui-input-row aui-flex-middle aui-flex-center">
+                <span class="aui-flex-item-1">&nbsp;</span>
+                <span class="aui-flex-item-3">总计</span>
+                <span class="aui-flex-item-4" id="SumPeople"></span>
+                <span class="aui-flex-item-4" id="AfSumPeople"></span>
+                <span class="aui-flex-item-4" name="cubei" style="display: none; width: 22% !important" id="AllSum"></span>
+            </div>
+        </div>
+
+        <div style="height: 100px"></div>
+    </div>
+</body>
+<script src="../../script/api.js"></script>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script src="../../script/honesty.flow.js"></script>
+<script src="../../script/honesty.valid.js"></script>
+<script type="text/javascript">
+    var AdjustmentID = "";
+    var JSONOrganization = new Array();
+    var NowDate = $honesty.NowDate();
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            $honestyFlow.InitFlow({ Async: false, wapflowpage: "HRFlow/EmpAdjustment" });
+            var InstanceID = $honestyFlow.GetFlowInfo("instanceid");
+            if (api.pageParam.instanceid != undefined) {
+                AdjustmentID = InstanceID;
+            }
+            InitBase();
+            if ($honestyFlow.GetFlowInfo("stepname") == "发起编制调整申请") {
+                $("#Otb,#Reason").removeAttr("readonly", "");
+                $("#AdjustmentType").removeAttr("disabled", "");
+                if (GetSession("EmpLevel") == "F") {
+                    $("#AdjustmentType option[value='新开店']").attr("disabled", "");
+                    $("#AdjustmentType option[value='闭店']").attr("disabled", "");
+                    $("#AdjustmentType option[value='现有店编制调整']").removeAttr("disabled", "disabled");
+                    $("#AdjustmentType option[value='储备编制申请']").attr("disabled", "disabled");
+
+                }
+                else {
+                    $("#AdjustmentType option[value='新开店']").removeAttr("disabled", "");
+                    $("#AdjustmentType option[value='闭店']").removeAttr("disabled", "");
+                    $("#AdjustmentType option[value='现有店编制调整']").attr("disabled", "disabled");
+                    $("#AdjustmentType option[value='储备编制申请']").removeAttr("disabled", "disabled");
+                }
+                var _List = $("#FormsList").children();
+                for (var i = 0; i < _List.length; i++) {
+                    $("#Af_" + i).removeAttr("readonly", "");
+                }
+            }
+            //基本信息点击展示隐藏
+            $("#liBaseMore").tap(function () {
+                $("[data-role='baseMore']").fadeToggle(200);
+                if ($("#liBaseMore").attr("data-show") == "hide") {
+                    $("#liBaseMore").children("p").html("点击收起");
+                    $("#liBaseMore").attr("data-show", "show");
+                }
+                else {
+                    $("#liBaseMore").children("p").html("点击显示详情");
+                    $("#liBaseMore").attr("data-show", "hide");
+                }
+            });
+            $("#btnSend").unbind("tap").tap(function () {
+                if (SaveData()) {
+                    $honestyFlow.SendFlow();
+                }
+            });
+            $("#btnPause").unbind("tap").tap(function () {
+                if (SaveData()) {
+                    $honestyFlow.PauseFlow();
+                }
+            });
+            $("#BeginDate").tap(function () {
+                $honesty.DateTimeSelect({
+                    LevelNum: 1,
+                    Type: "Date",
+                    ControlID: "BeginDate",
+                    ControlValue: $("#BeginDate").val()
+                });
+            });
+            $("#EndDate").tap(function () {
+                $honesty.DateTimeSelect({
+                    LevelNum: 1,
+                    Type: "Date",
+                    ControlID: "EndDate",
+                    ControlValue: $("#EndDate").val(),
+                    onchange: function (ret) {
+                        if (ret) {
+                            if ($("#BeginDate").val() != "") {
+                                var BeginDate = parseInt($("#BeginDate").val().replace(/-/g, ''), 10);
+                                var EndDate = parseInt($("#EndDate").val().replace(/-/g, ''), 10);
+                                if (BeginDate > EndDate) {
+                                    $("#EndDate").val("");
+                                    $honesty.ShowMsg({ title: "警告", msg: "结束时间不能在开始时间之前" });
+                                }
+                                else {
+                                    if (DateDiff(BeginDate, EndDate) > 120) {
+                                        $honesty.ShowMsg({ title: "警告", msg: "开始时间结束时间之间不能大于120天" });
+                                    }
+                                }
+                            }
+                            else {
+                                $("#EndDate").val("");
+                                $honesty.ShowMsg({ title: "警告", msg: "开始日期不能为空" });
+                            }
+                        }
+                    }
+                });
+            });
+            $("#btnComplete").unbind("tap").tap(function () {
+                if (SaveData()) {
+                    //调整编制信息
+                    var JSONOrganization = new Array();
+                    var _options = {
+                        PostData: {
+                            Params: {
+                                Result: "InitOrganization",
+                                AdjustmentID: AdjustmentID
+                            },
+                            ProcName: "proc_SOM_HR_EmpAdjustmentList",
+                            DataType: "DataTable",
+                            ExecType: "PROC",
+                            Mode: "MSSQL"
+                        },
+                        async: false
+                    };
+                    var _result = $honesty.AjaxChannel(_options);
+                    if (_result.Code == "1") {
+                        if (_result.Data.length > 0) {
+                            if ($("#AdjustmentType").val() != "储备编制申请") {
+                                $.each(_result.Data, function (i, item) {
+                                    JSONOrganization.push({
+                                        EMPID: $("#EmpID").val(),
+                                        ZLSDH: $honestyFlow.GetFlowInfo("sn"),
+                                        Z_CREDATE: $("#InfoWriteDate").html(),
+                                        Z_SPRQ: NowDate,
+                                        ZZ_QYJB: $("#InfoProvince").html(),
+                                        Z_REASON: $("#Reason").val(),
+                                        Z_SAPCODE: $("#SapCode").val(),
+                                        ZZ_YGJB: item.empLevel,
+                                        Z_OLD: item.BeforeCount,
+                                        Z_NEW: item.AfterCount,
+                                        Z_TZBE: $("#BeginDate").val(),
+                                        Z_TZED: "9999/12/31"
+                                    });
+                                });
+                            } else {
+                                $.each(_result.Data, function (i, item) {
+                                    JSONOrganization.push({
+                                        EMPID: $("#EmpID").val(),
+                                        ZLSDH: $honestyFlow.GetFlowInfo("sn"),
+                                        Z_CREDATE: $("#InfoWriteDate").html(),
+                                        Z_SPRQ: NowDate,
+                                        ZZ_QYJB: $("#InfoProvince").html(),
+                                        Z_REASON: $("#Reason").val(),
+                                        Z_SAPCODE: $("#SapCode").val(),
+                                        ZZ_YGJB: item.empLevel,
+                                        Z_OLD: item.BeforeCount,
+                                        Z_NEW: item.BeforeCount,
+                                        Z_CBSL_OLD: item.AfterCount,
+                                        Z_CBSL_NEW: item.AllCount,
+                                        Z_TZBE: $("#BeginDate").val(),
+                                        Z_TZED: $("#EndDate").val(),
+                                    });
+                                });
+                            }
+                        }
+                    }
+                    var EmpAdjustment = {
+                        PostData: {
+                            ITable: {
+                                "PTI_BZTZ": JSONOrganization
+                            },
+                            Export: [
+                                "POC_RETURN_ID",
+                                "POC_RETURN_DESC"
+                            ],
+                            FunctionName: "ZHR_FM_BZTZ_INPUT",
+                            Mode: "RFC"
+                        },
+                        async: false
+                    };
+                    var _result = $honesty.AjaxChannel(EmpAdjustment);
+                    if (_result.Code == "1") {
+                        if (_result.Data.Export.POC_RETURN_ID == "000") {
+                            $honestyFlow.CompleteFlow();
+                        }
+                        else {
+                            $honesty.ShowMsg({ msg: _result.Data.Export.POC_RETURN_DESC, title: "警告" });
+                        }
+                    }
+                }
+            });
+            $("#out_edit").unbind("tap").tap(function () {
+                $("#flow_button,#out_info,#set_info").hide();
+                $("#list_info").show();
+                $("#flow_form").scrollTop("0");
+            });
+            $("#btnCancel").unbind("tap").tap(function () {
+            });
+            $("#Otb").change(function () {
+                if (isNaN($("#Otb").val())) {
+                    $("#Otb").val("");
+                    $("#Otb").focus();
+                    $honesty.ShowMsg({ title: "警告", msg: "请输入数字" });
+                }
+            });
+            $("#AdjustmentType").change(function () {
+                if ($("#AdjustmentType").val() == "新开店") {
+                    $("#InfoShopCode,#InfoShopName,#InfoSaleslevel").val("");
+                    $("#SumPeople").html("");
+                    $("#InfoShopName,#InfoSaleslevel").removeAttr("readonly", "");
+                    AjType(1);
+                }
+                if ($("#AdjustmentType").val() == "闭店" || $("#AdjustmentType").val() == "储备编制申请") {
+                    $("#InfoShopCode,#InfoShopName,#InfoSaleslevel").val("");
+                    $("#FormsList").html("");
+                }
+                //if ($("#AdjustmentType").val() == "储备编制申请") {
+                //    AjType(2);
+                //}
+                if ($("#AdjustmentType").val() == "现有店编制调整") {
+                    AjType(3);
+                }
+            });
+            $("#InfoShopCode").change(function () {
+                var _Content = "";
+                var _SumPeople = 0;
+                var _AfSumPeople = 0;
+                if ($("#AdjustmentType").val() == "闭店") {
+                    $("[name='Now']").css("display", "none");
+                    $("[name='New']").css("display", "");
+                    $("[name='cubei']").css("display", "none");
+                    $("#SumPeople,#AfSumPeople").css("width", "33% !important");
+                    var _options = {
+                        PostData: {
+                            Params: {
+                                result: "EmpShopInfo",
+                                ShopCode: $("#InfoShopCode").val()
+                            },
+                            ProcName: "proc_SOM_HR_EmpAdjustment",
+                            DataType: "DataTable",
+                            ExecType: "PROC",
+                            Mode: "MSSQL"
+                        },
+                        async: false
+                    };
+                    $("#FormsList").html("");
+                    var _result = $honesty.AjaxChannel(_options);
+                    if (_result.Code == "1") {
+                        if (_result.Data.length > 0) {
+                            $.each(_result.Data, function (i, item) {
+                                $("#InfoShopName").val(item.Name);
+                                $("#InfoSaleslevel").val(item.Saleslevel);
+                                $("#SapCode").val(item.SapCode);
+                                _Content += "<div class='aui-flex-col aui-input-row aui-flex-middle aui-flex-center'><span class='aui-flex-item-1' aid=\"" + new $honesty.GUID().NewGUID() + "\" >" + (i + 1) + "</span>" +
+                                 "<span class='aui-flex-item-3'>" + item.Post + "</span><span class='aui-flex-item-4'>" + item.OZpeople + "</span><div class='aui-flex-item-4'>" +
+                                 "<input type='text' class='aui-input aui-important' id=Af_" + i + " onchange='CheckInfo(this)' readonly='readonly'/></div></div>"
+                                _SumPeople += Number(item.OZpeople);
+                            })
+                        }
+                    }
+                    else {
+                        $honesty.ShowMsg({ title: "警告", msg: "暂无该店仓号的店铺编制" });
+                        $("#InfoShopCode").val("");
+                    }
+                    $("#SumPeople").html(_SumPeople);
+                    $("#FormsList").html(_Content);
+                }
+                if ($("#AdjustmentType").val() == "储备编制申请") {
+                    $("[name='Now']").css("display", "none");
+                    $("[name='New']").css("display", "none");
+                    $("[name='cubei']").css("display", "");
+                    $("#SumPeople,#AfSumPeople").css("width", "22% !important");
+                    var _options = {
+                        PostData: {
+                            Params: {
+                                result: "EmpShopInfo",
+                                ShopCode: $("#InfoShopCode").val()
+                            },
+                            ProcName: "proc_SOM_HR_EmpAdjustment",
+                            DataType: "DataTable",
+                            ExecType: "PROC",
+                            Mode: "MSSQL"
+                        },
+                        async: false
+                    };
+                    $("#FormsList").html("");
+                    var _result = $honesty.AjaxChannel(_options);
+                    if (_result.Code == "1") {
+                        if (_result.Data.length > 0) {
+                            $.each(_result.Data, function (i, item) {
+                                $("#InfoShopName").val(item.Name);
+                                $("#InfoSaleslevel").val(item.Saleslevel);
+                                $("#SapCode").val(item.SapCode);
+                                _Content += "<div class='aui-flex-col aui-input-row aui-flex-middle aui-flex-center'><span class='aui-flex-item-1' aid=\"" + new $honesty.GUID().NewGUID() + "\" >" + (i + 1) + "</span>" +
+                                 "<span class='aui-flex-item-3'>" + item.Post + "</span><span class='aui-flex-item-4' style='width: 22% !important'>" + item.OZpeople + "</span><span class='aui-flex-item-4'style='width: 22% !important'>" + item.reserveCount + "</span><div class='aui-flex-item-4' style='width: 22% !important'>" +
+                                 "<input type='text' class='aui-input aui-important' id=Af_" + i + " onchange='CheckInfo(this)'/></div></div>"
+                                _SumPeople += Number(item.OZpeople);
+                                _AfSumPeople += Number(item.reserveCount);
+                            })
+                        }
+                        else {
+                            $honesty.ShowMsg({ title: "警告", msg: "暂无该店仓号的店铺编制" });
+                            $("#InfoShopCode").val("");
+                        }
+                        $("#SumPeople").html(_SumPeople);
+                        $("#AfSumPeople").html(_AfSumPeople);
+                        $("#FormsList").html(_Content);
+                    }
+                }
+            });
+        });
+    };
+    //加载编制调整信息
+    function InitBase() {
+        if (AdjustmentID != "") {
+            //加载编制调整信息
+            var _options = {
+                PostData: {
+                    Params: {
+                        Result: "InitEmpAdjustment",
+                        ID: AdjustmentID
+                    },
+                    ProcName: "proc_SOM_HR_EmpAdjustment",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                async: false
+            };
+            var _result = $honesty.AjaxChannel(_options);
+            if (_result.Data.length > 0) {
+                $.each(_result.Data, function (i, item) {
+                    $("#InfoWriteDate").html(item.WriteDate == "" ? "未维护" : item.WriteDate);
+                    $("#InfoEmpCode").html(item.EmpCode == "" ? "未维护" : item.EmpCode);
+                    $("#InfoEmpName").html(item.EmpName == "" ? "未维护" : item.EmpName);
+                    $("#InfoAreaName").html(item.AreaName == "" ? "未维护" : item.AreaName);
+                    $("#InfoShopCode").val(item.ShopCode == "" ? "未维护" : item.ShopCode);
+                    $("#InfoShopName").val(item.ShopName == "" ? "未维护" : item.ShopName);
+                    $("#InfoEmpPosition").html(item.EmpPosition == "" ? "未维护" : item.EmpPosition);
+                    $("#InfoSaleslevel").val(item.Saleslevel == "" ? "未维护" : item.Saleslevel);
+                    $("#InfoProvince").html(item.Province == "" ? "未维护" : item.Province);
+                    $("#InfoCity").html(item.City == "" ? "未维护" : item.City);
+                    $("#SapCode").val(item.SapCode == "" ? "未维护" : item.SapCode);
+                    $("#AdjustmentType").val(item.AdjustmentType == "" ? "未维护" : item.AdjustmentType);
+                    $("#Otb").val(item.OTB);
+                    $("#PeopleEffect").val(item.PeopleEffect);
+                    $("#BeginDate").val(item.BeginDate);
+                    $("#EndDate").val(item.EndDate);
+                    $("#Reason").val(item.Reason);
+                    $("#EmpID").val(item.EmpID);
+                });
+            }
+
+
+            var _Content = "";
+            var _SumPeople = 0;
+            var _AfSumPeople = 0;
+            var _AllPeople = 0;
+            //获取店铺岗位编制
+            var _List = {
+                PostData: {
+                    Params: {
+                        result: "InitEmpAdjustmentList",
+                        AdjustmentID: AdjustmentID
+                    },
+                    ProcName: "proc_SOM_HR_EmpAdjustmentList",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                async: false
+            };
+            var _Tabel = $honesty.AjaxChannel(_List);
+            if (_Tabel.Data.length > 0) {
+                $("#FormsList").html("");
+                if ($("#AdjustmentType").val() == "现有店编制调整") {
+                    $("[name='Now']").css("display", "");
+                    $("[name='New']").css("display", "none");
+                    $("[name='cubei']").css("display", "none");
+                    $("#SumPeople,#AfSumPeople").css("width", "33% !important");
+                    $.each(_Tabel.Data, function (i, item) {
+                        _Content += "<div class='aui-flex-col aui-input-row aui-flex-middle aui-flex-center'><span class='aui-flex-item-1'aid=\"" + item.ID + "\" >" + item.Num + "</span>" +
+                                   "<span class='aui-flex-item-3'>" + item.Position + "</span><span class='aui-flex-item-4'>" + item.BeforeCount + "</span><div class='aui-flex-item-4'>" +
+                                   "<input type='text' class='aui-input aui-important' id=Af_" + i + " value = '" + item.AfterCount + "' onchange='CheckInfo(this)' readonly='readonly'/></div></div>"
+                        _SumPeople += Number(item.BeforeCount);
+                        _AfSumPeople += Number(item.AfterCount);
+                        $("#ListID").val(item.ID);
+                    });
+                    $("#FormsList").html(_Content);
+                    $("#SumPeople").html(_SumPeople);
+                    $("#AfSumPeople").html(_AfSumPeople);
+
+                }
+                if ($("#AdjustmentType").val() == "新开店") {
+                    $("[name='Now']").css("display", "none");
+                    $("[name='New']").css("display", "");
+                    $("[name='cubei']").css("display", "none");
+                    $.each(_Tabel.Data, function (i, item) {
+                        _Content += "<div class='aui-flex-col aui-input-row aui-flex-middle aui-flex-center'><span class='aui-flex-item-1'aid=\"" + item.ID + "\" >" + item.Num + "</span>" +
+                                   "<span class='aui-flex-item-3'>" + item.Position + "</span><div class='aui-flex-item-4'>" +
+                                   "<input type='text' class='aui-input aui-important' id=Af_" + i + " value = '" + item.BeforeCount + "' onchange='CheckInfo(this)' readonly='readonly'/></div></div>"
+                        _SumPeople += Number(item.BeforeCount);
+                        $("#ListID").val(item.ID);
+                    });
+                    $("#FormsList").html(_Content);
+                    $("#SumPeople").html(_SumPeople);
+                }
+                if ($("#AdjustmentType").val() == "闭店") {
+                    $("[name='Now']").css("display", "none");
+                    $("[name='New']").css("display", "");
+                    $("[name='cubei']").css("display", "none");
+                    $.each(_Tabel.Data, function (i, item) {
+                        _Content += "<div class='aui-flex-col aui-input-row aui-flex-middle aui-flex-center'><span class='aui-flex-item-1' aid=\"" + new $honesty.GUID().NewGUID() + "\" >" + (i + 1) + "</span>" +
+                         "<span class='aui-flex-item-3'>" + item.Position + "</span><span class='aui-flex-item-4'>" + item.BeforeCount + "</span><div class='aui-flex-item-4'>" +
+                         "<input type='text' class='aui-input aui-important' id=Af_" + i + " onchange='CheckInfo(this)' readonly='readonly'/></div></div>"
+                        _SumPeople += Number(item.BeforeCount);
+                    });
+                    $("#FormsList").html(_Content);
+                    $("#SumPeople").html(_SumPeople);
+                }
+                if ($("#AdjustmentType").val() == "储备编制申请") {
+                    $("[name='Now']").css("display", "none");
+                    $("[name='New']").css("display", "none");
+                    $("[name='cubei']").css("display", "");
+                    $("#SumPeople,#AfSumPeople").css("width", "22% !important");
+                    $.each(_Tabel.Data, function (i, item) {
+                        _Content += "<div class='aui-flex-col aui-input-row aui-flex-middle aui-flex-center'><span class='aui-flex-item-1' aid=\"" + new $honesty.GUID().NewGUID() + "\" >" + (i + 1) + "</span>" +
+                         "<span class='aui-flex-item-3'>" + item.Position + "</span><span class='aui-flex-item-4' style='width: 22% !important'>" + item.BeforeCount + "</span><span class='aui-flex-item-4'style='width: 22% !important'>" + item.AfterCount + "</span><div class='aui-flex-item-4' style='width: 22% !important'>" +
+                         "<input type='text' class='aui-input aui-important' id=Af_" + i + " value = '" + item.AllCount + "' onchange='CheckInfo(this)' readonly='readonly'/></div></div>"
+                        _SumPeople += Number(item.BeforeCount);
+                        _AfSumPeople += Number(item.AfterCount);
+                        _AllPeople += Number(item.AllCount);
+                    });
+                    $("#FormsList").html(_Content);
+                    $("#SumPeople").html(_SumPeople);
+                    $("#AfSumPeople").html(_AfSumPeople);
+                    $("#AllSum").html(_AllPeople);
+                }
+                if ($honestyFlow.GetFlowInfo("stepname") == "发起编制调整申请") {
+                    var _List = $("#FormsList").children();
+                    for (var i = 0; i < _List.length; i++) {
+                        $("#Af_" + i).removeAttr("readonly", "");
+                    }
+                }
+            }
+        }
+        else {
+            AdjustmentID = $honestyFlow.GetFlowInfo("instanceid");
+            $("#InfoWriteDate").html($honesty.NowDate().Format("yyyy-MM-dd"));
+            $("#InfoEmpCode").html(GetSession("UserCode") == "" ? "未维护" : GetSession("UserCode"));
+            $("#InfoEmpName").html(GetSession("UserName") == "" ? "未维护" : GetSession("UserName"));
+            $("#InfoAreaName").html(GetSession("AreaName") == "" ? "未维护" : GetSession("AreaName"));
+            $("#InfoProvince").html(GetSession("Province") == "" ? "未维护" : GetSession("Province"));
+            //$("#InfoCompanyName").html(GetSession("CompanyName") == "" ? "未维护" : GetSession("CompanyName"));
+            $("#InfoShopName").val(GetSession("ShopName") == "" ? "未维护" : GetSession("ShopName"));
+            $("#InfoShopCode").val(GetSession("ShopCode") == "" ? "未维护" : GetSession("ShopCode"));
+            $("#SapCode").val(GetSession("SapCode") == "" ? "未维护" : GetSession("SapCode"));
+            $("#InfoEmpPosition").html(GetSession("Position") == "" ? "未维护" : GetSession("Position"));
+            //获取店铺销售级别
+            if (GetSession("EmpLevel") == "F" || GetSession("EmpLevel") == "E") {
+                var date = $honesty.NowDate();
+                var _Year = date.getFullYear();
+                var _options = {
+                    PostData: {
+                        Params: {
+                            Result: "EmpInfoSaleslevel",
+                            OrganizeID: GetSession("OrganizeID"),
+                            Year: _Year
+                        },
+                        ProcName: "proc_SOM_HR_EmpAdjustment",
+                        DataType: "DataTable",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    }
+                };
+                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                    if (_result.Code == "1") {
+                        if (_result.Data.length > 0) {
+                            $.each(_result.Data, function (i, item) {
+                                $("#InfoSaleslevel").val(item.Saleslevel);
+                            });
+                        }
+                        else {
+                            $("#InfoSaleslevel").val("未维护");
+                        }
+                    }
+                });
+                $("#InfoProvince").html(GetSession("Province"));
+                $("#InfoCity").html(GetSession("City"));
+                var _Content = "";
+
+                $("#AdjustmentType").val("现有店编制调整");
+                $("[name='New']").css("display", "none")
+                var _SumPeople = 0;
+                //获取店铺岗位编制
+                var _options = {
+                    PostData: {
+                        Params: {
+                            Result: "EmpInfoSPostion",
+                            OrganizeID: GetSession("OrganizeID")
+                        },
+                        ProcName: "proc_SOM_HR_EmpAdjustment",
+                        DataType: "DataTable",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    }
+                };
+                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                    if (_result.Code == "1") {
+                        if (_result.Data.length > 0) {
+                            $("#FormsList").html("");
+                            $.each(_result.Data, function (i, item) {
+                                _Content += "<div class='aui-flex-col aui-input-row aui-flex-middle aui-flex-center'><span class='aui-flex-item-1'aid=\"" + new $honesty.GUID().NewGUID() + "\" >" + (i + 1) + "</span>" +
+                                           "<span class='aui-flex-item-3'>" + item.Post + "</span><span class='aui-flex-item-4'>" + item.OZpeople + "</span><div class='aui-flex-item-4'>" +
+                                           "<input type='text' class='aui-input aui-important' id=Af_" + i + " onchange='CheckInfo(this)'readonly='readonly'/></div></div>"
+                                _SumPeople += Number(item.OZpeople);
+                            });
+                            $("#FormsList").html(_Content);
+                            $("#SumPeople").html(_SumPeople);
+                            if ($honestyFlow.GetFlowInfo("stepname") == "发起编制调整申请") {
+                                var _List = $("#FormsList").children();
+                                for (var i = 0; i < _List.length; i++) {
+                                    $("#Af_" + i).removeAttr("readonly", "");
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            else {
+                AjType();
+            }
+        }
+    }
+    //编制申请类型
+    function AjType(type) {
+        var _Content = "";
+        $("#FormsList").html("");
+        if (type == 1) {
+            $("[name='Now']").css("display", "none");
+            $("[name='New']").css("display", "");
+            $("[name='cubei']").css("display", "none");
+            $("#SumPeople,#AfSumPeople").css("width", "33% !important");
+            var arry = ["店经理", "高级店长", "中级店长", "初级店长", "高级导购", "导购"];
+            for (var i = 0; i < 5; i++) {
+                _Content += "<div class='aui-flex-col aui-input-row aui-flex-middle aui-flex-center'><span class='aui-flex-item-1' aid=\"" + new $honesty.GUID().NewGUID() + "\" >" + (i + 1) + "</span>" +
+                 "<span class='aui-flex-item-3'>" + arry[i] + "</span><div class='aui-flex-item-4'>" +
+                 "<input type='text' class='aui-input aui-important' id=Af_" + i + " onchange='CheckInfo(this)'/></div><span class='aui-flex-item-4'></span></div>"
+            }
+        }
+        //if (type == 2) {
+        //    $("[name='Now']").css("display", "none");
+        //    $("[name='New']").css("display", "none");
+        //    $("[name='cubei']").css("display", "");
+        //    $("#SumPeople,#AfSumPeople").css("width", "22% !important");
+        //    var _options = {
+        //        PostData: {
+        //            Params: {
+        //                result: "EmpInfoSPostion",
+        //                OrganizeID: GetSession("OrganizeID")
+        //            },
+        //            ProcName: "proc_SOM_HR_EmpAdjustment",
+        //            DataType: "DataTable",
+        //            ExecType: "PROC",
+        //            Mode: "MSSQL"
+        //        },
+        //        async: false
+        //    };
+        //    var _SumPeople = 0;
+        //    var _AfSumPeople = 0;
+        //    var _result = $honesty.AjaxChannel(_options);
+        //    if (_result.Code == "1") {
+        //        if (_result.Data.length > 0) {
+        //            $.each(_result.Data, function (i, item) {
+        //                _Content += "<div class='aui-flex-col aui-input-row aui-flex-middle aui-flex-center'><span class='aui-flex-item-1' aid=\"" + new $honesty.GUID().NewGUID() + "\" >" + (i + 1) + "</span>" +
+        //                 "<span class='aui-flex-item-3'>" + item.Post + "</span><span class='aui-flex-item-4' style='width: 22% !important'>" + item.OZpeople + "</span><span class='aui-flex-item-4'style='width: 22% !important'>" + item.reserveCount + "</span><div class='aui-flex-item-4' style='width: 22% !important'>" +
+        //                 "<input type='text' class='aui-input aui-important' id=Af_" + i + " onchange='CheckInfo(this)'/></div></div>"
+        //                _SumPeople += Number(item.OZpeople);
+        //                _AfSumPeople += Number(item.reserveCount);
+        //            })
+        //        }
+        //        $("#SumPeople").html(_SumPeople);
+        //        $("#AfSumPeople").html(_AfSumPeople);
+        //    }
+        //}
+        if (type == 3) {
+            $("[name='Now']").css("display", "");
+            $("[name='New']").css("display", "none");
+            $("[name='cubei']").css("display", "none");
+            $("#SumPeople,#AfSumPeople").css("width", "33% !important");
+            $("#AllSum").html("");
+            var _options = {
+                PostData: {
+                    Params: {
+                        result: "EmpInfoSPostion",
+                        OrganizeID: GetSession("OrganizeID")
+                    },
+                    ProcName: "proc_SOM_HR_EmpAdjustment",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                async: false
+            };
+            var _SumPeople = 0;
+            var _AfSumPeople = 0;
+            var _result = $honesty.AjaxChannel(_options);
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        _Content += "<div class='aui-flex-col aui-input-row aui-flex-middle aui-flex-center'><span class='aui-flex-item-1' aid=\"" + new $honesty.GUID().NewGUID() + "\" >" + (i + 1) + "</span>" +
+                         "<span class='aui-flex-item-3'>" + item.Post + "</span><span class='aui-flex-item-4'>" + item.OZpeople + "</span><div class='aui-flex-item-4'>" +
+                         "<input type='text' class='aui-input aui-important' id=Af_" + i + " onchange='CheckInfo(this)'/></div></div>"
+                        _SumPeople += Number(item.OZpeople);
+                        _AfSumPeople += Number(item.reserveCount);
+                    })
+                }
+                $("#SumPeople").html(_SumPeople);
+                $("#AfSumPeople").html(_AfSumPeople);
+            }
+        }
+        $("#FormsList").html(_Content);
+    }
+    //检验调整后编制
+    function CheckInfo(obj) {
+        if (isNaN($.trim($(obj).val()))) {
+            $honesty.ShowMsg({ title: "警告", msg: "输入不合法，请输入正整数" });
+            $(obj).val("");
+            $(obj).focus();
+            return false;
+        }
+        var Sum = 0;
+        var _List = $("#FormsList").children();
+        for (var i = 0; i < _List.length; i++) {
+            Sum += Number($("#Af_" + i).val());
+        }
+        if ($("#AdjustmentType").val() == "新开店" || $("#AdjustmentType").val() == "闭店") {
+            $("#SumPeople").html(Sum);
+        }
+        if ($("#AdjustmentType").val() == "储备编制申请") {
+            $("#AllSum").html(Sum);
+        }
+        else {
+            $("#AfSumPeople").html(Sum);
+        }
+    }
+    //获取人效
+    function ModifyInfo(Control) {
+        $("#PeopleEffect").val(($.trim($(Control).val()) / $("#SumPeople").html() / 12).toFixed(2));
+    }
+    //保存基本信息
+    function SaveData() {
+        if ($honestyFlow.GetFlowInfo("stepname") == "发起编制调整申请") {
+            if ($("#Otb").val() == "") {
+                $honesty.ShowMsg({ title: "警告", msg: "请填写OTB" });
+                return false;
+            }
+            if ($("#Reason").val() == "") {
+                $honesty.ShowMsg({ title: "警告", msg: "请填写编制调整原因" });
+                return false;
+            }
+            if ($("#BeginDate").val() == "") {
+                $honesty.ShowMsg({ title: "警告", msg: "请选择编制开始时间" });
+                return false;
+            }
+            var _options = {
+                PostData: {
+                    Params: {
+                        result: "ModifyEmpAdjustment",
+                        ID: AdjustmentID,
+                        SN: $("#InfoSN").html(),
+                        EmpID: GetSession("UserID"),
+                        EmpCode: GetSession("UserCode"),
+                        EmpName: GetSession("UserName"),
+                        OrganizeID: GetSession("OrganizeID"),
+                        AreaName: GetSession("AreaName"),
+                        //CompanyName: GetSession("CompanyName"),
+                        EmpPosition: GetSession("Position"),
+                        EmpLevel: GetSession("EmpLevel"),
+                        LevelDesc: GetSession("LevelDesc"),
+                        Province: GetSession("Province"),
+                        City: GetSession("City"),
+                        AdjustmentType: $("#AdjustmentType").val(),
+                        ShopCode: $("#InfoShopCode").val(),
+                        SapCode: $("#SapCode").val(),
+                        ShopName: $("#InfoShopName").val(),
+                        Saleslevel: $("#InfoSaleslevel").val() == "未维护" ? "" : $("#InfoSaleslevel").val(),
+                        OTB: $("#Otb").val(),
+                        PeopleEffect: $("#PeopleEffect").val(),
+                        EndDate: $("#EndDate").val(),
+                        BeginDate: $("#BeginDate").val(),
+                        Reason: $("#Reason").val(),
+                        Title: $honestyFlow.GetFlowInfo("title"),
+                    },
+                    ProcName: "proc_SOM_HR_EmpAdjustment",
+                    DataType: "Bool",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                async: false
+            };
+            var _result = $honesty.AjaxChannel(_options);
+            if (_result.Code == "1") {
+                if (_result.Data == "True") {
+                    var Concent = "";
+                    Concent = "<?xml version=\"1.0\" encoding=\"gb2312\"?><root>";
+                    var _List = $("#FormsList").children();
+                    if ($("#AdjustmentType").val() == "新开店") {
+                        for (var i = 0; i < _List.length; i++) {
+                            var _valueList = $(_List[i]).children();
+                            var _Num = $(_valueList[0]).text();
+                            var _Position = $(_valueList[1]).text();
+                            if ($(_valueList[2]).children().val() == "") {
+                                $(_valueList[2]).children().val(0);
+                            }
+                            var _BeforeCount = $(_valueList[2]).children().val();
+                            Concent += "<Item " + ($(_valueList[0]).attr("aid") == undefined ? "" : " ID=\"" + $(_valueList[0]).attr("aid")) + "\" AdjustmentID=\"" + AdjustmentID + "\" Position=\"" + _Position + "\" BeforeCount=\"" + _BeforeCount + "\" Num=\"" + _Num + "\"/>";
+                        }
+                    }
+                    if ($("#AdjustmentType").val() == "闭店") {
+                        for (var i = 0; i < _List.length; i++) {
+                            var _valueList = $(_List[i]).children();
+                            var _Num = $(_valueList[0]).text();
+                            var _Position = $(_valueList[1]).text();
+                            var _BeforeCount = $(_valueList[2]).text();
+                            Concent += "<Item " + ($(_valueList[0]).attr("aid") == undefined ? "" : " ID=\"" + $(_valueList[0]).attr("aid")) + "\" AdjustmentID=\"" + AdjustmentID + "\" Position=\"" + _Position + "\" BeforeCount=\"" + _BeforeCount + "\" Num=\"" + _Num + "\"/>";
+                        }
+                    }
+                    if ($("#AdjustmentType").val() == "储备编制申请") {
+                        for (var i = 0; i < _List.length; i++) {
+                            var _valueList = $(_List[i]).children();
+                            var _Num = $(_valueList[0]).text();
+                            var _Position = $(_valueList[1]).text();
+                            var _BeforeCount = $(_valueList[2]).text();
+                            var _AfterCount = $(_valueList[3]).text();
+                            if ($(_valueList[4]).children().val() == "") {
+                                $(_valueList[4]).children().val(_AfterCount);
+                            }
+                            var _AllCount = $(_valueList[4]).children().val();
+                            Concent += "<Item " + ($(_valueList[0]).attr("aid") == undefined ? "" : " ID=\"" + $(_valueList[0]).attr("aid")) + "\" AdjustmentID=\"" + AdjustmentID + "\" Position=\"" + _Position + "\" BeforeCount=\"" + _BeforeCount + "\" AfterCount=\"" + _AfterCount + "\" AllCount=\"" + _AllCount + "\" Num=\"" + _Num + "\"/>";
+                        }
+                    }
+                    if ($("#AdjustmentType").val() == "现有店编制调整") {
+                        for (var i = 0; i < _List.length; i++) {
+                            var _valueList = $(_List[i]).children();
+                            var _Num = $(_valueList[0]).text();
+                            var _Position = $(_valueList[1]).text();
+                            var _BeforeCount = $(_valueList[2]).text();
+                            if ($(_valueList[3]).children().val() == "") {
+                                $(_valueList[3]).children().val(_BeforeCount);
+                            }
+                            var _AfterCount = $(_valueList[3]).children().val();
+                            Concent += "<Item " + ($(_valueList[0]).attr("aid") == undefined ? "" : " ID=\"" + $(_valueList[0]).attr("aid")) + "\" AdjustmentID=\"" + AdjustmentID + "\" Position=\"" + _Position + "\" BeforeCount=\"" + _BeforeCount + "\" AfterCount=\"" + _AfterCount + "\" Num=\"" + _Num + "\"/>";
+                        }
+                    }
+                    Concent += "</root>";
+                    var _options = {
+                        PostData: {
+                            Params: {
+                                result: "ModifyEmpAdjustmentList",
+                                Type: $("#AdjustmentType").val(),
+                                Sql: Concent
+                            },
+                            ProcName: "proc_SOM_HR_EmpAdjustmentList",
+                            DataType: "Bool",
+                            ExecType: "PROC",
+                            Mode: "MSSQL"
+                        },
+                        async: false
+                    };
+                    var _result = $honesty.AjaxChannel(_options);
+                    if (_result.Code == "1") {
+                        if (_result.Data == "True") {
+                            return true;
+                        }
+                        else {
+                            $honesty.ShowMsg({ msg: "业务数据保存失败!", title: "警告" });
+                            return false;
+                        }
+                    }
+                }
+                else {
+                    $honesty.ShowMsg({ msg: "业务数据保存失败!", title: "警告" });
+                    return false;
+                }
+            }
+        }
+        else {
+            return true;
+        }
+    }
+</script>
+</html>

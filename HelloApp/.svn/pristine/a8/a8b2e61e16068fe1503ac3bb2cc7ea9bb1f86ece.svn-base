@@ -1,0 +1,352 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>签卡申请流程</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div id="main">
+        <p class="aui-padded-5 aui-text-center" style="color: #3175af">基本资料</p>
+        <div class="aui-card" style="margin-bottom: 0px;">
+            <ul class="aui-list-view aui-list-flow" style="margin-bottom: 0px;">
+                <li class="aui-list-view-cell">
+                    <label id="InfoSN"></label>
+                    <p>单据编号</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="InfoEmpName"></label>
+                    <p>申请人</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="InfoEmpCode"></label>
+                    <p>申请人工号</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="InfoEmpPosition"></label>
+                    <p>申请人岗位</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoWriteDate"></label>
+                    <p>日期</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoShopName"></label>
+                    <p>店铺名称</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoAreaName"></label>
+                    <p>大区</p>
+                </li>
+                <li class="aui-list-view-cell aui-list-view-cell-last" style="display: none">
+                    <label id="InfoCompanyName"></label>
+                    <p>所属公司</p>
+                </li>
+                <li data-role="colspan" data-show="hide" class="aui-list-view-cell" id="liBaseMore">
+                    <p style="text-align: center">点击显示详情</p>
+                </li>
+            </ul>
+        </div>
+        <p class="aui-padded-5 aui-text-center" style="color: #3175af">签卡明细</p>
+        <div id="InfoList">
+        </div>
+        <div id="divAdd" style="width: 100%; padding-left: 10px; padding-right: 10px;">
+            <div id="btnAdd" tapmode class="aui-btn aui-btn-block aui-btn-warning aui-iconfont aui-icon-add1" style="padding: 10px;">
+                添加一行
+            </div>
+        </div>
+        <div style="height: 100px"></div>
+    </div>
+</body>
+</html>
+<script src="../../script/api.js"></script>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script src="../../script/honesty.flow.js"></script>
+<script type="text/javascript">
+    var SignID = "";
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            $honestyFlow.InitFlow({ Async: false });
+            var InstanceID = $honestyFlow.GetFlowInfo("instanceid");
+            if (api.pageParam.instanceid != undefined) {
+                SignID = InstanceID;
+            }
+            InitBase();
+            $("#btnSend").unbind("tap").tap(function () {
+                if (SaveData()) {
+                    $honestyFlow.SendFlow();
+                }
+            });
+
+            $("#btnPause").unbind("tap").tap(function () {
+                if (SaveData()) {
+                    $honestyFlow.PauseFlow();
+                }
+            });
+
+            //基本信息点击展示隐藏
+            $("#liBaseMore").tap(function () {
+                $("[data-role='baseMore']").fadeToggle(200);
+                if ($("#liBaseMore").attr("data-show") == "hide") {
+                    $("#liBaseMore").children("p").html("点击收起");
+                    $("#liBaseMore").attr("data-show", "show");
+                }
+                else {
+                    $("#liBaseMore").children("p").html("点击显示详情");
+                    $("#liBaseMore").attr("data-show", "hide");
+                }
+            });
+
+            //添加按钮点击
+            $("#btnAdd").tap(function () {
+
+                $honesty.OpenWin({
+                    title: "签卡明细维护",
+                    name: "HRFlow_EmpSignInfo",
+                    url: "HRFlow/EmpSignInfo.html",
+                    pageParam: {
+                        SignID: SignID,
+                        StepName: $honestyFlow.GetFlowInfo("stepname")
+                    }
+                });
+            });
+
+            //签卡保存监听事件
+            api.addEventListener({
+                name: 'HRFlow_EmpSign_EmpSignInfo'
+            }, function (ret) {
+                if (ret && ret.value) {
+                    var _Content = ReturnList(ret.value);
+                    if (ret.value.IsNew) {
+                        $("#InfoList").append(_Content);
+                    }
+                    else {
+                        $("#" + ret.value.ID).html(_Content);
+                    }
+                    api.parseTapmode();
+                }
+            });
+        });
+
+    };
+
+    function InitBase() {
+        if (SignID != "") {
+            //加载签卡基础信息
+            var _options = {
+                PostData: {
+                    Params: {
+                        result: "InitEmpSign",
+                        ID: SignID
+                    },
+                    ProcName: "proc_SOM_HR_EmpSign",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        $.each(_result.Data, function (i, item) {
+                            $("#InfoSN").html(item.SN);
+                            $("#InfoWriteDate").html(item.WriteDate);
+                            $("#InfoEmpCode").html(item.EmpCode);
+                            $("#InfoEmpName").html(item.EmpName);
+                            $("#InfoAreaName").html(item.AreaName);
+                            $("#InfoCompanyName").html(item.CompanyName);
+                            $("#InfoShopCode").html(item.ShopCode);
+                            $("#InfoShopName").html(item.ShopName);
+                            $("#InfoEmpPosition").html(item.EmpPosition);
+                            $("#SN").val(item.SN);
+                        })
+                    }
+                }
+            });
+            //加载签卡明细信息
+            _options = {
+                PostData: {
+                    Params: {
+                        result: "InitEmpSignList",
+                        SignID: SignID
+                    },
+                    ProcName: "proc_SOM_HR_EmpSignList",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        var _Content = "";
+                        $.each(_result.Data, function (i, item) {
+                            _Content += ReturnList(item);
+                        });
+                        $("#InfoList").html(_Content);
+                    }
+                    api.parseTapmode();
+                    if ($honestyFlow.GetFlowInfo("stepname") != "提交签卡申请") {
+                        $("#divAdd,[data-role='divDel']").hide();
+                    }
+                    if ($honestyFlow.GetFlowInfo("isread") == "true") {
+                        $("#flow_button").hide();
+                        $("#divAdd,[data-role='divDel']").hide();
+                    }
+                }
+            });
+        }
+        else {
+            SignID = $honestyFlow.GetFlowInfo("instanceid");
+            $("#InfoWriteDate").html($honesty.NowDate().Format("yyyy-MM-dd"));
+            $("#InfoSN").html($honestyFlow.GetFlowInfo("SN"));
+            $("#InfoEmpCode").html(GetSession("UserCode"));
+            $("#InfoEmpName").html(GetSession("UserName"));
+            $("#InfoAreaName").html(GetSession("AreaName"));
+            $("#InfoCompanyName").html(GetSession("CompanyName"));
+            $("#InfoShopCode").html(GetSession("ShopCode"));
+            $("#InfoShopName").html(GetSession("ShopName"));
+            $("#InfoEmpPosition").html(GetSession("Position"));
+        }
+
+    }
+
+    function SaveData() {
+        if ($honestyFlow.GetFlowInfo("stepname") == "提交签卡申请") {
+            if ($("#InfoList div").length < 1) {
+                $honesty.ShowMsg({ title: "警告", msg: "请先维护签卡申请明细!" })
+                return false;
+            }
+            else {
+                var _options = {
+                    PostData: {
+                        Params: {
+                            result: "ModifyEmpSign",
+                            ID: SignID,
+                            SN: $("#InfoSN").html(),
+                            EmpID: GetSession("UserID"),
+                            EmpCode: GetSession("UserCode"),
+                            EmpName: GetSession("UserName"),
+                            OrganizeID: GetSession("OrganizeID"),
+                            AreaName: GetSession("AreaName"),
+                            CompanyName: GetSession("CompanyName"),
+                            SapCode: GetSession("SapCode"),
+                            ShopCode: GetSession("ShopCode"),
+                            ShopName: GetSession("ShopName"),
+                            EmpPosition: GetSession("Position"),
+                            EmpLevel: GetSession("EmpLevel"),
+                            LevelDesc: GetSession("LevelDesc"),
+                            Title: $honestyFlow.GetFlowInfo("title"),
+                        },
+                        ProcName: "proc_SOM_HR_EmpSign",
+                        DataType: "Bool",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    },
+                    async: false,
+                };
+                var _result = $honesty.AjaxChannel(_options);
+                if (_result.Code == "1") {
+                    if (_result.Data == "True") {
+                        return true
+                    }
+                    else {
+                        $honesty.ShowMsg({ title: "错误", msg: "业务数据保存失败!" });
+                        return false;
+                    }
+                }
+                else {
+                    return false;
+                }
+            }
+        }
+        else {
+            return true;
+        }
+    }
+
+    function DelInfo(id) {
+        $("[data-id]").css("pointer-events", "none");
+        setTimeout(function () {
+            $("[data-id]").css("pointer-events", "auto");
+        }, 350);
+        $honesty.ConfirmWin({
+            title: "提示",
+            msg: "是否要删除该条签卡明细?",
+            buttons: ["确认", "取消"],
+            callback: function (ret, err) {
+                if (ret.buttonIndex == 1) {
+                    var _ItemXML = "<root><Item ID=\"" + id + "\" /></root>";
+
+                    var _options = {
+                        PostData: {
+                            Params: {
+                                result: "DeleteEmpSignList",
+                                ItemXML: _ItemXML
+                            },
+                            ProcName: "proc_SOM_HR_EmpSignList",
+                            DataType: "Bool",
+                            ExecType: "PROC",
+                            Mode: "MSSQL"
+                        }
+                    };
+
+                    $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                        if (_result.Code == "1") {
+                            if (_result.Data == "True") {
+                                $("#" + id).remove();
+                            }
+                            else {
+                                $honesty.ShowMsg({ title: "错误", msg: "删除数据失败!" });
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    function ShowInfo(options) {
+
+        $honesty.OpenWin({
+            title: "签卡明细维护",
+            name: "HRFlow_EmpSignInfo",
+            url: "HRFlow/EmpSignInfo.html",
+            pageParam: {
+                SignID: SignID,
+                StepName: $honestyFlow.GetFlowInfo("stepname"),
+                SignInfo: options
+            }
+        });
+
+    }
+
+    function ReturnList(options) {
+        var defaults = {
+            ID: "",
+            Reason: "",
+            OtherReason: "",
+            ShiftName: "",
+            SignTime: ""
+        }
+        _opts = $.extend(defaults, options);
+        return "<div id='" + _opts.ID + "' class='aui-card aui-noborder' style='pointer-events:auto' >" +
+               "<div data-role='divDel' tapmode onclick=\"DelInfo(\'" + _opts.ID + "\')\"  style='position: absolute; right: -.2em; top: -.6em; zoom: 2;z-index:2' class='aui-iconfont aui-icon-roundclosefill aui-text-danger'></div>" +
+               "<div class='aui-form' data-id=\'" + _opts.ID + "\' tapmode  onclick='ShowInfo({ID:\"" + _opts.ID + "\",Reason:\"" + _opts.Reason + "\",OtherReason:\"" + _opts.OtherReason + "\",ShiftName:\"" + _opts.ShiftName + "\",SignTime:\"" + _opts.SignTime.replace(/-/g, "/") + "\"})'>" +
+               "<div class='aui-input-row'>" +
+               "<span class='aui-input-addon aui-label-title'>签卡时间：</span>" +
+               "<div class='aui-div' style='padding: 5px;'>" + _opts.SignTime + "</div></div>" +
+               "<div class='aui-input-row'>" +
+               "<span class='aui-input-addon aui-label-title'>签卡班次：</span>" +
+               "<div id='Div5' class='aui-div' style='padding: 5px;'>" + _opts.ShiftName + "</div></div>" +
+               "<div class='aui-input-row'>" +
+               "<span class='aui-input-addon aui-label-title'>签卡原因：</span>" +
+               "<div class='aui-div' style='padding: 5px;'>" + _opts.Reason + "</div></div>" +
+               "</div></div>";
+
+    }
+</script>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>VIP信息</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-input-row .aui-input-addon
+        {
+            width: 65px;
+        }
+    </style>
+</head>
+<body>
+    <div class="aui-content">
+        <p class="aui-padded-10 aui-text-center">VIP信息</p>
+        <ul class="aui-list-view aui-in" style="margin-bottom: 0">
+            <li class="aui-list-view-cell">
+                <label id="UpgradeEdit_VIPName"></label>
+                <p>VIP姓名</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="UpgradeEdit_CardType"></label>
+                <p>卡类型</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="UpgradeEdit_CardNum"></label>
+                <p>卡号</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="UpgradeEdit_Sex"></label>
+                <p>性别</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="UpgradeEdit_Telephone"></label>
+                <p>电话号码</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="UpgradeEdit_DifferenceMoney"></label>
+                <p>差异金额</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="UpgradeEdit_LastCostDate"></label>
+                <p>最后一次消费日期</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="UpgradeEdit_LastCostMoney"></label>
+                <p>最后一次消费金额</p>
+            </li>
+            <li class="aui-list-view-cell">
+                <label id="UpgradeEdit_Integral"></label>
+                <p>积分</p>
+            </li>
+        </ul>
+        <p class="aui-padded-10 aui-text-center">回访记录</p>
+        <div class="aui-form aui-input-form" id="" style="padding: 3px;">
+            <div class="aui-input-row">
+                <textarea id="UpgradeEdit_VisitRecord" class="aui-input" style="height: 70px; border: 1px solid #c8c7cc;overflow-y:auto"readonly="readonly"></textarea>
+            </div>
+            <div class="aui-btn-row" id="divSave" style="display: none;">
+                <div id="btnSave" class="aui-btn aui-btn-block aui-btn-warning">
+                    保存
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _VipID;
+    var _EmpID;
+    var _VisitRecord;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _EmpID = api.pageParam.EmpID;
+            _VipID = api.pageParam.VipID;
+            if (_EmpID == GetSession("UserID")) {
+                $("#divSave").css("display", "");
+                $("#UpgradeEdit_VisitRecord").removeAttr("readonly");
+            }
+            var _options = {
+                PostData: {
+                    Params: {
+                        Result: "SelectSingle",
+                        ID: _VipID
+                    },
+                    ProcName: "proc_SOM_ISR_VIPUpgrade",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        $.each(_result.Data, function (i, item) {
+                            $("#UpgradeEdit_VIPName").text(item.VIPName == "" ? "未维护" : item.VIPName);
+                            $("#UpgradeEdit_Sex").text(item.Sex == "" ? "未维护" : item.Sex);
+                            $("#UpgradeEdit_Telephone").text(item.Telephone == "" ? "未维护" : item.Telephone);
+                            $("#UpgradeEdit_CardType").text(item.CardType == "" ? "未维护" : item.CardType);
+                            $("#UpgradeEdit_CardNum").text(item.CardNum == "" ? "未维护" : item.CardNum);
+                            $("#UpgradeEdit_DifferenceMoney").text(item.DifferenceMoney == "" ? "未维护" : item.DifferenceMoney);
+                            $("#UpgradeEdit_LastCostDate").text(item.LastCostDate == "" ? "未维护" : item.LastCostDate);
+                            $("#UpgradeEdit_LastCostMoney").text(item.LastCostMoney == "" ? "未维护" : item.LastCostMoney);
+                            $("#UpgradeEdit_Integral").text(item.Integral == "" ? "未维护" : item.Integral);
+                            $("#UpgradeEdit_VisitRecord").val(item.VisitRecord);
+                        });
+                        $("#btnSave").tap(function () {
+                            _VisitRecord = $.trim($("#UpgradeEdit_VisitRecord").val());
+                            if (_VisitRecord == "") {
+                                $honesty.ShowMsg({ title: "警告", msg: "请填写处理结果" });
+                            }
+                            else {
+                                var _options = {
+                                    PostData: {
+                                        Params: {
+                                            Result: "UpdateDeal",
+                                            VisitRecord: _VisitRecord,
+                                            ID: _VipID
+                                        },
+                                        ProcName: "proc_SOM_ISR_VIPUpgrade",
+                                        DataType: "Bool",
+                                        ExecType: "PROC",
+                                        Mode: "MSSQL"
+                                    }
+                                };
+                                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                                    if (_result.Data == "True") {
+                                        $honesty.ShowMsg({
+                                            title: "提示",
+                                            msg: "保存成功",
+                                            callback: function () {
+                                                api.sendEvent({
+                                                    name: 'UpgradeSaveEvent',
+                                                    extra: {
+                                                    }
+                                                });
+                                                api.closeWin();
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }
+            });
+        });
+    };
+</script>
+</html>

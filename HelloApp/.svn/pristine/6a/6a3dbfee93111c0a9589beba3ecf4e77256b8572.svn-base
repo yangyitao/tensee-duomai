@@ -1,0 +1,126 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>员工目标（月计划报表）</title>
+    <link href="../../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-list-view-cell {
+            padding: 5px;
+        }
+
+            .aui-list-view-cell table {
+                width: 100%;
+                font-size: 13px;
+                color: gray;
+                table-layout: fixed;
+                border-collapse: collapse;
+            }
+
+                .aui-list-view-cell table .value {
+                    word-break: keep-all;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    text-align: right;
+                    padding-right: 5px;
+                    letter-spacing: 0.4px;
+                }
+    </style>
+</head>
+<body>
+    <div style="height:5px;"></div>
+    <div id="divList">
+    </div>
+    <div style="height:10px;"></div>
+</body>
+</html>
+<script src="../../../../script/zepto.js"></script>
+<script src="../../../../script/api.js"></script>
+<script src="../../../../script/honesty.base.js"></script>
+
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            LoadData();
+
+            //下拉刷新
+            api.setRefreshHeaderInfo({
+                visible: true,
+                loadingImg: 'widget://image/refresh.png',
+                bgColor: '#fff',
+                textColor: '#000',
+                textDown: '下拉刷新...',
+                textUp: '松开刷新...',
+                showTime: true
+            }, function (ret, err) {
+                LoadData();
+                api.refreshHeaderLoadDone();
+            });
+        });
+    }
+
+    function LoadData()
+    {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "FormEmpTarget",
+                    MonthID: api.pageParam.MonthID
+                },
+                ProcName: "proc_SOM_ISR_MonthSale",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    var _Content = "";
+                    $.each(_result.Data, function (i, item) {
+                        _Content += "<div class='aui-content aui-card'><ul class='aui-list-view'><li class='aui-list-view-cell'>" +
+                                    "<p style='color:#000'>" + item.EmpCode + "&nbsp;" + item.EmpName + "<label style='float: right'>" + item.EmpPost +
+                                    "</label></p></li><li class='aui-list-view-cell'><table><tr><td style='width: 90px;'>目标:</td>" +
+                                    "<td class='value' style='color:#000'>" + item.TargetSale + "</td></tr><tr><td>实际销售:</td><td class='value'>" +
+                                    (Number(item.ActualSale)+Number(item.ShareSale)) + "</td><tr><td>销售达成:</td><td class='value'>" +
+                                    (item.TargetSale == "0" ? "0" : ((Number(item.ActualSale) + Number(item.ShareSale)) / Number(item.TargetSale) * 100).toFixed(0)) +
+                                    "%</td></tr><tr style='display:none' data-empcode='" + item.EmpCode + "'>" +
+                                    "<td>客单价:</td><td class='value'>" + item.CustomerUnitPrice + "</td></tr>" +
+                                    "<tr style='display:none' data-empcode='" + item.EmpCode + "'><td>客单件:</td>" +
+                                    "<td class='value'>" + item.CustomerSingle + "</td></tr><tr style='display:none' data-empcode='" +
+                                    item.EmpCode + "'><td>单数:</td><td class='value'>" + item.OrderNum + "</td></tr>" +
+                                    "<tr style='display:none' data-empcode='" + item.EmpCode + "'><td>件数:</td>" +
+                                    "<td class='value'>" + item.ClothesNum + "</td></tr><tr style='display:none' data-empcode='" +
+                                    item.EmpCode + "'><td>开卡目标:</td><td class='value'>" + item.CardTarget + "</td></tr>" +
+                                    "<tr style='display:none' data-empcode='" + item.EmpCode + "'><td>实际开卡:</td>" +
+                                    "<td class='value'>" + item.CardActual + "</td></tr><tr style='display:none' data-empcode='" +
+                                    item.EmpCode + "'><td>备注说明:</td><td class='value'>" + item.Remark + "</td></tr></table></li>" +
+                                    "<li data-role='colspan' data-show='hide' class='aui-list-view-cell' onclick=\"ShowMore(this,\'" + item.EmpCode + "\')\">" +
+                                    "<p style='text-align: center'>点击显示详情</p></li></ul></div>";
+                    });
+                    $("#divList").html(_Content);
+                    api.parseTapmode();
+                }
+            }
+        });
+    }
+
+    //点击显示全部内容函数
+    function ShowMore(control, empCode)
+    {
+        $("[data-empcode='" + empCode + "']").fadeToggle(200);
+        if ($(control).attr("data-show") == "hide") {
+            $(control).children("p").html("点击收起");
+            $(control).attr("data-show", "show");
+        }
+        else {
+            $(control).children("p").html("点击显示详情");
+            $(control).attr("data-show", "hide");
+        }
+    }
+</script>

@@ -1,0 +1,232 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>签卡申请流程行项目维护</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="aui-content">
+        <p class="aui-padded-5 aui-text-center">签卡详情</p>
+        <div data-role="80" class="aui-form aui-input-form aui-input-flow">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">签卡时间</span>
+                <input id="SignTime" type="text" class="aui-input" placeholder="请选择签卡时间" readonly="readonly" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">签卡班次</span>
+                <input id="ShiftName" type="text" class="aui-input" placeholder="班次自动获取" readonly="readonly" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">签卡原因</span>
+                <select id="Reason" class="aui-input">
+                    <option value="新入职">新入职</option>
+                    <option value="调动">调动</option>
+                    <option value="漏打卡" selected="selected">漏打卡</option>
+                    <option value="上错班补卡">上错班补卡</option>
+                    <option value="考勤机无人员信息">考勤机无人员信息</option>
+                    <option value="上班时间早于商场打卡时间">上班时间早于商场打卡时间</option>
+                    <option value="过零点忘打卡">过零点忘打卡</option>
+                    <option value="已打卡但考勤机未显示">已打卡但考勤机未显示</option>
+                    <option value="系统问题">系统问题</option>
+                    <option value="考勤机问题">考勤机问题</option>
+                    <option value="不可抗力">不可抗力</option>
+                    <option value="其他">其他</option>
+                </select>
+            </div>
+            <div id="divOtherReason" class="aui-input-row">
+                <span class="aui-input-addon">原因说明</span>
+                <input id="OtherReason" type="text" class="aui-input" maxlength="50" placeholder="请填写原因说明" />
+            </div>
+        </div>
+    </div>
+    <div id="divFooter" style="height: 40px; display: none"></div>
+    <footer class="aui-nav" id="footer" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7; display: none">
+        <div id="btnSave" class="aui-btn aui-btn-block aui-btn-warning" style="height: 45px; width: 100%; line-height: 0.9;">
+            保存
+        </div>
+    </footer>
+</body>
+</html>
+<script src="../../script/api.js"></script>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script src="../../script/honesty.flow.js"></script>
+<script type="text/javascript">
+    var SignID = "", ID = "";
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            SignID = api.pageParam.SignID;
+            if (api.pageParam.SignInfo) {
+                ID = api.pageParam.SignInfo.ID;
+            }
+            else {
+                ID = new $honesty.GUID().NewGUID();
+            }
+            LoadData();
+            $("#SignTime").tap(function () {
+                if (api.pageParam.StepName == "提交签卡申请") {
+                    $honesty.DateTimeSelect({
+                        ControlID: "SignTime",
+                        ControlValue: $(this).val(),
+                        onchange: function (ret) {
+                            if (ret) {
+                                if ($("#SignTime").val() != "") {
+                                    if (GetSession("LastShiftDate") != "" && GetSession("LastShiftDate") != undefined) {
+                                        if (Date.parse($("#SignTime").attr("value").replace(/-/g, "/")) > Date.parse(GetSession("LastShiftDate").replace(/-/g, "/"))) {
+                                            $honesty.ShowMsg({ title: "警告", msg: "您签卡的那天未进行排班，您当前的最后排班日期：" + GetSession("LastShiftDate") + "" });
+                                            $("#SignTime,#ShiftName").val("");
+                                            return;
+                                        }
+                                        else {
+                                            if ($("#SignTime").attr("value") != "") {
+                                                var _options = {
+                                                    PostData: {
+                                                        result: "CheckShiftByDate",
+                                                        UserCode: GetSession("UserID"),
+                                                        StartDate: $("#SignTime").val().replace(/-/g, "/")
+                                                    },
+                                                    MathType: "Sign",
+                                                    Loading: {
+                                                        Title: "班次获取中...",
+                                                        Show: true
+                                                    }
+                                                };
+                                                $.when($honesty.AjaxAttend(_options)).done(function (_result) {
+                                                    try {
+                                                        if (_result.result != "True") {
+                                                            $honesty.ShowMsg({ title: "警告", msg: _result.result });
+                                                            $("#SignTime,#ShiftName").val("");
+                                                            return false;
+                                                        }
+                                                        else {
+                                                            $("#ShiftName").val(_result.ShiftName);
+                                                        }
+                                                    }
+                                                    catch (e) {
+                                                        $honesty.ShowMsg({ title: "警告", msg: "班次数据验证有误" });
+                                                        $("#SignTime,#ShiftName").val("");
+                                                        return false;
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    }
+                                    else {
+                                        $honesty.ShowMsg({ title: "警告", msg: "您的领导未进行排班操作" });
+                                        $("#SignTime,#ShiftName").val("");
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+
+            $("#Reason").change(function () {
+                if ($("#Reason").val() == "其他" || $("#Reason").val() == "系统问题" || $("#Reason").val() == "考勤机问题") {
+                    $("#divOtherReason").show();
+                }
+                else {
+                    $("#divOtherReason").hide();
+                }
+            });
+
+            $("#btnSave").click(function () {
+                if ($("#SignTime").attr("value") == undefined || $("#SignTime").attr("value") == "") {
+                    $honesty.ShowMsg({ title: "警告", msg: "请选择补签时间" });
+                    return false;
+                }
+                if ($("#Reason").val() == "") {
+                    $honesty.ShowMsg({ title: "警告", msg: "请选择签卡原因" });
+                    return false;
+                }
+                else {
+                    if ($("#Reason").val() == "其他" || $("#Reason").val() == "系统问题" || $("#Reason").val() == "考勤机问题") {
+                        if ($("#OtherReason").val() == "") {
+                            $honesty.ShowMsg({ title: "警告", msg: "该原因需填写额外详细说明" });
+                            return false;
+                        }
+                    }
+                    else {
+                        $("#OtherReason").val("");
+                    }
+                }
+                var _options = {
+                    PostData: {
+                        Params: {
+                            result: "ModifyEmpSignList",
+                            ID: ID,
+                            SignID: SignID,
+                            SignTime: $("#SignTime").val(),
+                            Reason: $("#Reason").val(),
+                            OtherReason: $("#OtherReason").val().trim(),
+                            ShiftName: $("#ShiftName").val()
+                        },
+                        ProcName: "proc_SOM_HR_EmpSignList",
+                        DataType: "Bool",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    }
+                };
+                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                    if (_result.Code == "1") {
+                        if (_result.Data == "True") {
+                            api.sendEvent({
+                                name: 'HRFlow_EmpSign_EmpSignInfo',
+                                extra: {
+                                    ID: ID,
+                                    Reason: $("#Reason").val(),
+                                    ShiftName: $("#ShiftName").val(),
+                                    SignTime: $("#SignTime").val(),
+                                    IsNew: (api.pageParam.SignInfo == undefined ? true : false),
+                                    OtherReason: $("#OtherReason").val().trim()
+                                }
+                            });
+                            api.closeWin();
+                        }
+                        else {
+                            $honesty.ShowMsg({ title: "错误", msg: "保存失败" });
+                        }
+                    }
+                });
+            });
+
+
+        });
+
+    };
+
+    function LoadData() {
+        if (api.pageParam.SignInfo) {
+            var SignInfo = api.pageParam.SignInfo;
+            $("#ShiftName").val(SignInfo.ShiftName);
+            $("#SignTime").val(SignInfo.SignTime);
+            $("#Reason").val(SignInfo.Reason);
+            if (SignInfo.Reason == "其他" || SignInfo.Reason == "系统问题" || SignInfo.Reason == "考勤机问题") {
+                $("#divOtherReason").show();
+            }
+            else {
+                $("#divOtherReason").hide();
+            }
+            $("#OtherReason").val(SignInfo.OtherReason);
+        }
+        else {
+            $("#divOtherReason").hide();
+        }
+        if (api.pageParam.StepName != "提交签卡申请") {
+            $("#footer").hide();
+            $("#divFooter").hide();
+        }
+        else {
+            $("#footer").show();
+            $("#divFooter").show();
+        }
+    }
+
+
+</script>

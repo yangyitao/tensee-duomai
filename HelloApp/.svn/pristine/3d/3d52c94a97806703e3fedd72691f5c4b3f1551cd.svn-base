@@ -1,0 +1,205 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>银行信息</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div id="main">
+        <div data-role="80" class="aui-card aui-input-form aui-input-flow" style="margin-bottom: 0px; margin-top: 15px">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">开户银行</span>
+                <select id="BankType" class="aui-input aui-important">
+                    <option value="">请选择</option>
+                    <option value="中国银行">中国银行</option>
+                    <option value="中国工商银行">中国工商银行</option>
+                    <option value="中国农业银行">中国农业银行</option>
+                    <option value="中国建设银行">中国建设银行</option>
+                    <option value="中国邮政储蓄银行">中国邮政储蓄银行</option>
+                    <option value="中国光大银行">中国光大银行</option>
+                    <option value="中国民生银行">中国民生银行</option>
+                    <option value="招商银行">招商银行</option>
+                    <option value="中信银行">中信银行</option>
+                    <option value="交通银行">交通银行</option>
+                    <option value="兴业银行">兴业银行</option>
+                    <option value="浦发银行">浦发银行</option>
+                    <option value="华夏银行">华夏银行</option>
+                    <option value="广东发展银行">广东发展银行</option>
+                    <option value="其他银行">其他银行</option>
+                </select>
+            </div>
+            <div id="divOtherBankType" class="aui-input-row" style="display: none">
+                <span class="aui-input-addon">其他银行</span>
+                <input id="OtherBankType" type="text" class="aui-input aui-important" placeholder="请填写其他开户银行!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">开户支行</span>
+                <input id="BankName" type="text" class="aui-input aui-important" placeholder="请填写开户支行!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">开户行省份</span>
+                <select id="BankProvince" class="aui-input aui-important" placeholder="请选择开户行省份!">
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">开户行城市</span>
+                <select id="BankCity" class="aui-input aui-important" placeholder="请选择开户行城市!">
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">银行卡号</span>
+                <input id="BankCode" type="text" class="aui-input aui-important" placeholder="请填写银行卡号!" />
+            </div>
+        </div>
+        <div id="divFooter" style="height: 60px;"></div>
+        <footer class="aui-nav" id="footer" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7;">
+            <div id="btnSave" class="aui-btn aui-btn-block aui-btn-warning" style="height: 45px; width: 100%; line-height: 0.9;">
+                保存修改
+            </div>
+        </footer>
+    </div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script src="../../../script/honesty.valid.js"></script>
+<script src="../../../script/honesty.location.js"></script>
+<script type="text/javascript">
+    var loc = new Location();
+    apiready = function () {
+        $(function () {
+            LoadData();
+
+            $("#BankType").change(function () {
+                if ($("#BankType").val() == "其他银行") {
+                    $("#divOtherBankType").show();
+                }
+                else {
+                    $("#divOtherBankType").hide();
+                }
+            });
+
+            $("#BankProvince").change(function () {
+                $("#BankCity").empty();
+                loc.fillOption("BankCity", "0," + $("#BankProvince option:selected").val());
+            });
+
+            $("#btnSave").tap(function () {
+                if (CheckInput()) {
+                    try {
+                        var _options = {
+                            PostData: {
+                                Params: {
+                                    result: "ModifyEmpBank",
+                                    EmpID: GetSession("UserID"),
+                                    BankProvince: $("#BankProvince option:selected").text(),
+                                    BankCity: $("#BankCity option:selected").text(),
+                                    BankType: $("#BankType").val(),
+                                    OtherBankType: $("#OtherBankType").val(),
+                                    BankName: $("#BankName").val(),
+                                    BankCode: $("#BankCode").val()
+                                },
+                                ProcName: "proc_SOM_HR_EmpModifyInfo",
+                                DataType: "Bool",
+                                ExecType: "PROC",
+                                Mode: "MSSQL"
+                            }
+                        };
+                        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                            if (_result.Data == "True") {
+                                $honesty.CloseWin();
+                            }
+                            else {
+                                $honesty.ShowMsg({ title: "警告", msg: "保存出现异常!" });
+                            }
+                        });
+                    }
+                    catch (e) {
+                        alert(e);
+                    }
+                }
+            });
+        });
+    }
+
+    function LoadData() {
+        loc.fillOption("BankProvince", "0");
+        $("#BankCity").empty();
+        var _options = {
+            PostData: {
+                Params: {
+                    result: "InitModifyEmpInfo",
+                    EmpID: GetSession("UserID")
+                },
+                ProcName: "proc_SOM_HR_EmpModifyInfo",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        loc.fillOption("BankProvince", "0");
+                        $("#BankProvince option[text='" + item.BankProvince + "']").attr("selected", true);
+                        $("#BankCity").empty();
+                        loc.fillOption("BankCity", "0," + $("#BankProvince option[text='" + item.BankProvince + "']").val());
+                        if (item.BankCity != "") {
+                            $("#BankCity option[text='" + item.BankCity + "']").attr("selected", true);
+                        }
+                        if (item.BankType != "") {
+                            $("#BankType").val(item.BankType);
+                            if (item.BankType == "其他银行") {
+                                $("#divOtherBankType").show();
+                                $("#OtherBankType").val(item.OtherBankType);
+                            }
+                        };
+                        $("#BankName").val(item.BankName);
+                        $("#BankCode").val(item.BankCode);
+                    });
+                }
+            }
+        });
+    }
+
+    function CheckInput() {
+        if ($("#BankType").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请选择开户银行!" });
+            return false;
+        }
+        else if ($("#BankType").val() == "其他银行") {
+            if ($("#OtherBankType").val() == "") {
+                $honesty.ShowMsg({ title: "警告", msg: "开户银行选择其他银行请填写其他开户银行名称!" });
+                return false;
+            }
+            else if ($("#OtherBankType").val().length > 20) {
+                $honesty.ShowMsg({ title: "警告", msg: "其他银行字数不得超过20字!" });
+                return false;
+            }
+        }
+        if ($("#BankName").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请填写开户支行!" });
+            return false;
+        }
+        if ($("#BankProvince").val() == "请选择" || $("#BankProvince").val() == "9000") {
+            $honesty.ShowMsg({ title: "警告", msg: "请选择开户行省份!" });
+            return false;
+        }
+        if ($("#BankCode").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请填写银行卡卡号!" });
+            return false;
+        }
+        else {
+            if (valid_cardnum($("#BankCode").val())) {
+                $honesty.ShowMsg({ title: "警告", msg: "银行卡号不正确!" });
+                return false;
+            }
+        }
+        return true;
+    }
+</script>
+</html>

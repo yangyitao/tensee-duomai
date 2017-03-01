@@ -1,0 +1,138 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>紧急联系人</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div id="main">
+        <div data-role="80" class="aui-card aui-input-form aui-input-flow" style="margin-bottom: 0px; margin-top: 15px">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">姓名</span>
+                <input id="UrgencyName" type="text" class="aui-input" tapmode placeholder="请填写紧急联系人姓名!" />
+            </div>
+            <div class="aui-input-row">
+                <label class="aui-input-addon">联系电话</label>
+                <input id="UrgencyPhone" type="text" class="aui-input aui-important" placeholder="请填写紧急联系人联系电话!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">现住地址</span>
+                <input id="UrgencyAddress" type="text" class="aui-input aui-important" placeholder="请填写紧急联系人现住地址!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">工作单位</span>
+                <input id="UrgencyUnit" type="text" class="aui-input aui-important" placeholder="请填写紧急联系人工作单位!" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">职务</span>
+                <input id="UrgencyDuty" type="text" class="aui-input aui-important" placeholder="请填写紧急联系人职务!" />
+            </div>
+        </div>
+        <div id="divFooter" style="height: 60px;"></div>
+        <footer class="aui-nav" id="footer" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7;">
+            <div id="btnSave" class="aui-btn aui-btn-block aui-btn-warning" style="height: 45px; width: 100%; line-height: 0.9;">
+                保存修改
+            </div>
+        </footer>
+    </div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script src="../../../script/honesty.valid.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        $(function () {
+            LoadData();
+
+            $("#btnSave").tap(function () {
+                if (CheckInput()) {
+                    try {
+                        var _options = {
+                            PostData: {
+                                Params: {
+                                    result: "ModifyEmpUrgency",
+                                    EmpID: GetSession("UserID"),
+                                    UrgencyName: $("#UrgencyName").val(),
+                                    UrgencyPhone: $("#UrgencyPhone").val(),
+                                    UrgencyUnit: $("#UrgencyUnit").val(),
+                                    UrgencyDuty: $("#UrgencyDuty").val(),
+                                    UrgencyAddress: $("#UrgencyAddress").val()
+                                },
+                                ProcName: "proc_SOM_HR_EmpModifyInfo",
+                                DataType: "Bool",
+                                ExecType: "PROC",
+                                Mode: "MSSQL"
+                            }
+                        };
+                        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                            if (_result.Data == "True") {
+                                $honesty.CloseWin();
+                            }
+                            else {
+                                $honesty.ShowMsg({ title: "警告", msg: "保存出现异常!" });
+                            }
+                        });
+                    }
+                    catch (e) {
+                        alert(e);
+                    }
+                }
+            });
+        });
+    }
+
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    result: "InitModifyEmpInfo",
+                    EmpID: GetSession("UserID")
+                },
+                ProcName: "proc_SOM_HR_EmpModifyInfo",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        $("#UrgencyName").val(item.UrgencyName);
+                        $("#UrgencyPhone").val(item.UrgencyPhone);
+                        $("#UrgencyUnit").val(item.UrgencyUnit);
+                        $("#UrgencyDuty").val(item.UrgencyDuty);
+                        $("#UrgencyAddress").val(item.UrgencyAddress);
+                    });
+                }
+            }
+        });
+    }
+
+    function CheckInput() {
+        if ($("#UrgencyName").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请填写紧急联系人!" });
+            return false;
+        }
+        if ($("#UrgencyPhone").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请填写紧急联系人电话!" });
+            return false;
+        }
+        else {
+            if (valid_phone($("#UrgencyPhone").val())) {
+                $honesty.ShowMsg({ title: "警告", msg: "紧急联系人电话格式不正确!" });
+                return false;
+            }
+        }
+        if ($("#UrgencyAddress").val() == "") {
+            $honesty.ShowMsg({ title: "警告", msg: "请填写紧急联系人现住地址!" });
+            return false;
+        }
+        return true;
+    }
+</script>
+</html>

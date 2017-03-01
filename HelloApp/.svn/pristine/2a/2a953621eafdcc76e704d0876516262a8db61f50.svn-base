@@ -1,0 +1,110 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>商品分析报表</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="aui-tab" id="divTab" style="overflow: auto;">
+        <ul id="TopBar" class="aui-tab-nav">
+            <li data-index="0" class="active">季节</li>
+            <li data-index="1">系列</li>
+            <li data-index="2">大类</li>
+            <li data-index="3">小类</li>
+        </ul>
+    </div>
+
+</body>
+</html>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            var h = $honesty.RangeTop(45);
+            api.openFrameGroup({
+                name: 'GoodsAnalysis_Tab',
+                scrollEnabled: false,
+                rect: { x: 0, y: $("#divTab").height() + h, w: 'auto', h: 'auto' },
+                index: 0,
+                preload: 0,
+                frames:
+                [{
+                    name: 'PatrolShop_GoodsAnalysis_SeasonGoos',
+                    url: 'SeasonGoos.html',
+                    bounces: false,
+                    pageParam: {
+                        Year: api.pageParam.Year,
+                        ShopCode: api.pageParam.ShopCode,
+                        BeginDate: api.pageParam.BeginDate,
+                        EndDate: api.pageParam.EndDate,
+                        Season: api.pageParam.Season,
+                        Type:1
+                    }
+                }, {
+                    name: 'PatrolShop_GoodsAnalysis_SeriesGoods',
+                    url: 'SeriesGoods.html',
+                    bounces: false,
+                    pageParam: {
+                        Year: api.pageParam.Year,
+                        ShopCode: api.pageParam.ShopCode,
+                        BeginDate: api.pageParam.BeginDate,
+                        EndDate: api.pageParam.EndDate,
+                        Season: api.pageParam.Season,
+                        Type:2
+                    }
+                }, {
+                    name: 'PatrolShop_GoodsAnalysis_BigClassGoos',
+                    url: 'BigClassGoos.html',
+                    bounces: false,
+                    pageParam: {
+                        Year: api.pageParam.Year,
+                        ShopCode: api.pageParam.ShopCode,
+                        BeginDate: api.pageParam.BeginDate,
+                        EndDate: api.pageParam.EndDate,
+                        Season: api.pageParam.Season,
+                        Type:3
+                    }
+                }, {
+                    name: 'PatrolShop_GoodsAnalysis_SmallClassGoods',
+                    url: 'SmallClassGoods.html',
+                    bounces: false,
+                    pageParam: {
+                        Year: api.pageParam.Year,
+                        ShopCode: api.pageParam.ShopCode,
+                        BeginDate: api.pageParam.BeginDate,
+                        EndDate: api.pageParam.EndDate,
+                        Season: api.pageParam.Season,
+                        Type:5
+                    }
+                }]
+            },
+             function (ret, err) {
+                 var index = ret.index;
+                 $("#TopBar").find(".active").removeClass("active");
+                 $("[data-index='" + index + "']").addClass("active");
+
+             });
+
+
+            //Tab点击
+            $("#TopBar").children("li").tap(function () {
+                $("#TopBar").find(".active").removeClass("active");
+                $(this).addClass("active");
+
+                api.setFrameGroupIndex({
+                    name: 'GoodsAnalysis_Tab',
+                    index: $(this).data("index"),
+                    scroll: true
+                });
+            });
+        });
+
+    }
+</script>

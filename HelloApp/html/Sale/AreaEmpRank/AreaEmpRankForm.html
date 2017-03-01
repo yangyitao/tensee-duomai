@@ -1,0 +1,145 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>区域员工排名（导购页面）</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="aui-content" style="margin-bottom: 0px;">
+        <ul class="aui-list-view" style="margin-bottom: 0px;">
+            <li class="aui-list-view-cell" style="padding: 3px;" id="liInfo"></li>
+        </ul>
+    </div>
+    <div id="main" style="width: 100%; height: 100%;"></div>
+</body>
+</html>
+
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script src="../../../script/echarts.min.js"></script>
+<script type="text/javascript">
+    var myChart;
+    var _Option = {
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+            }
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            top: '3%',
+            containLabel: true
+        },
+        xAxis: {
+            type: 'value'
+        },
+        yAxis: {
+            type: 'category',
+        },
+        series: []
+    };
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            //下拉刷新
+            api.setRefreshHeaderInfo({
+                visible: true,
+                loadingImg: 'widget://image/refresh.png',
+                bgColor: '#fff',
+                textColor: '#000',
+                textDown: '下拉刷新...',
+                textUp: '松开刷新...',
+                showTime: true
+            }, function (ret, err) {
+                LoadData();
+                api.refreshHeaderLoadDone();
+            });
+
+            LoadData();
+        });
+
+    }
+
+    function LoadData() {
+
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "GetAreaEmpRankGuide",
+                    OrganizeID: api.pageParam.OrganizeID,
+                    Year: api.pageParam.Year,
+                    Month: api.pageParam.Month,
+                    LevelDesc: api.pageParam.LevelDesc,
+                    UserID: GetSession("UserID")
+                },
+                ProcName: "proc_SaleForm",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                var arrData = new Array();
+                var arrCategory = new Array();
+                var Num = 0;
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        if (Num == 0) {
+                            Num = item.RowID;
+                        }
+                        if (item.EmpID.toLocaleLowerCase() == GetSession("UserID").toLocaleLowerCase()) {
+                            $("#liInfo").html("对应条件区域人数为:<span style='color:blue'>" + Num + "</span>,您的区域排名为:<span style='color:red'>" + item.RankID + "</span>" + (item.RankID == "1" ? "请继续保持" : "请继续努力！"));
+                            arrCategory.push({ value: item.EmpName + "\n排名:" + item.RankID, textStyle: { color: "#e74c3c" } });
+                            arrData.push({ value: item.SaleRate, ShowInfo: "零售部:" + item.DeptName + "<br>区域:" + item.AreaName + "<br>店铺:" + item.ShopName + "<br>名字:" + item.EmpName + "<br>达成率:" + item.SaleRate + "%<br>排名:" + item.RankID, itemStyle: { normal: { color: "#e74c3c" } } });
+                        }
+                        else {
+                            arrCategory.push({ value: item.EmpName + "\n排名:" + item.RankID });
+                            arrData.push({ value: item.SaleRate, ShowInfo: "零售部:" + item.DeptName + "<br>区域:" + item.AreaName + "<br>店铺:" + item.ShopName + "<br>名字:" + item.EmpName + "<br>达成率:" + item.SaleRate + "%<br>排名:" + item.RankID });
+                        }
+                    });
+                    var _default = {
+                        formatter: function (params, ticket, callback) {
+                            var res = "";
+                            $.each(params, function (i, item) {
+                                res = item.data.ShowInfo;
+                            });
+                            setTimeout(function () { callback(ticket, res); }, 10);
+                            return 'loading';
+                        },
+                        yAxis: {
+                            type: 'category',
+                            data: arrCategory,
+                        },
+                        series: [{
+                            name: '达成率',
+                            type: 'bar',
+                            stack: '达成率',
+                            itemStyle: { normal: { color: "#91c7a1" } },
+                            label: {
+                                normal: {
+                                    show: true,
+                                    position: 'insideRight'
+                                }
+                            },
+                            data: arrData
+                        }]
+                    }
+                    $("#main").height(api.frameHeight - $(".aui-content").height());
+                    // 基于准备好的dom，初始化echarts实例
+                    myChart = echarts.init(document.getElementById('main'));
+                    var _opts = $.extend(_Option, _default);
+                    // 使用刚指定的配置项和数据显示图表。
+                    myChart.setOption(_opts);
+                }
+            }
+        });
+    }
+</script>

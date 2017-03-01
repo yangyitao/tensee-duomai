@@ -1,0 +1,159 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>店铺员工排名内容</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-list-view-cell {
+            padding: 5px;
+        }
+
+        .form {
+            width: 100%;
+            text-align: center;
+            font-size: 13px;
+            border-collapse: collapse;
+        }
+
+            .form td, .form th {
+                border-bottom: 1px solid rgba(216, 216, 216, 0.1);
+                height: 35px;
+                letter-spacing: 0.4px;
+            }
+
+            .form th {
+                font-weight: 400;
+            }
+
+            .form tbody td {
+                color: #8f8f94;
+            }
+
+        /*.form tbody td:first-child {
+                    color: #000;
+                }*/
+    </style>
+</head>
+<body>
+    <div class="aui-content" id="divTitle">
+        <ul class="aui-list-view" style="margin-bottom: 0px;">
+            <li class="aui-list-view-cell" style="padding: 3px;">
+                <table class="form">
+                    <tbody id="tbInfo"></tbody>
+                </table>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>
+
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _OrganizeID, _Year, _Month, _LevelDesc;
+    var _PageNum = 1;
+    var _RowNum = 1;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _OrganizeID = api.pageParam.OrganizeID || "";
+            _Year = api.pageParam.Year;
+            _Month = api.pageParam.Month;
+            _LevelDesc = api.pageParam.LevelDesc || "";
+
+            //下拉刷新
+            api.setRefreshHeaderInfo({
+                visible: true,
+                loadingImg: 'widget://image/refresh.png',
+                bgColor: '#fff',
+                textColor: '#000',
+                textDown: '下拉刷新...',
+                textUp: '松开刷新...',
+                showTime: true
+            }, function (ret, err) {
+                $("#tbInfo").html("");
+                _PageNum = 1;
+                _RowNum = 1;
+                LoadData();
+                api.refreshHeaderLoadDone();
+            });
+
+            api.addEventListener({
+                name: 'scrolltobottom',
+                extra: {
+                    threshold: 60
+                }
+            }, function (ret, err) {
+                LoadData();
+            });
+
+            LoadData();
+
+        });
+
+    }
+
+    function LoadData() {
+        if (_PageNum != 0) {
+            var _options = {
+                PostData: {
+                    Params: {
+                        Result: "GetAreaEmpRank",
+                        OrganizeID: _OrganizeID,
+                        Year: _Year,
+                        Month: _Month,
+                        LevelDesc: _LevelDesc,
+                        PageNum: _PageNum,
+                        PageSize: 30,
+                        UserID: GetSession("UserID")
+                    },
+                    ProcName: "proc_SaleForm",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        var _Content = "";
+                        $.each(_result.Data, function (i, item) {
+                            _Content += "<tr onclick=\'ItemClick(this,\"" + item.ShopName + "\",\"" + _RowNum + "\")\'><td style='width: 25%;'>" + item.DeptName + "</td>" +
+                                         "<td style='width: 25%;'>" + item.AreaName + "</td>" +
+                                         "<td style='width: 25%;color: #000;'>" + item.EmpName + "</td>" +
+                                         "<td style='width: 15%;color: #3175af;'>" + item.SaleRate + "%</td>" +
+                                         "<td style='width: 10%;'>" + item.RankID + "</td>" +
+                                         "</tr>"
+                        });
+                        $("#tbInfo").append(_Content);
+                        _PageNum++;
+                        _RowNum++;
+                    }
+                    else {
+                        if (_PageNum == 1) {
+                            $("#tbInfo").html("<tr><td style='text-align:center'>尊敬的用户，您好，无排名数据</td></tr>");
+                        }
+                        else {
+                            $honesty.ShowToast({ msg: "没有更多的数据", location: "bottom" });
+                        }
+                        _PageNum = 0;
+                    }
+                }
+            });
+        }
+    }
+
+    function ItemClick(control, title) {
+        var e = event || window.event;
+        var obj = api.require('bubbleMenu');
+        obj.open({
+            centerX: api.frameWidth / 2,
+            centerY: e.clientY + $honesty.RangeTop(85),
+            btnArray: [{ title: title, length: (title.length * 20 > api.frameWidth - 50 ? api.frameWidth - 50 : title.length * 20) }],
+        });
+    }
+</script>

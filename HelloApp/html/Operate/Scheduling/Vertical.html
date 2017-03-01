@@ -1,0 +1,249 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>纵统计</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style type="text/css">
+        select {
+            margin-bottom: 0px;
+            border: 0;
+        }
+
+        table.gridtable {
+            font-family: verdana,arial,sans-serif;
+            color: #333333;
+            border-width: 1px;
+            border-color: #666666;
+            border-collapse: collapse;
+            text-align: center;
+            font-size: 13px;
+        }
+
+            table.gridtable th {
+                border-width: 1px;
+                border-style: solid;
+                border-color: rgba(200,199,204,.5);
+                background-color: #dedede;
+                text-align: center;
+                height: 45px;
+            }
+
+            table.gridtable td {
+                border-width: 1px;
+                border-style: solid;
+                border-color: rgba(216, 216, 216, 0.5);
+                background-color: #ffffff;
+                text-align: center;
+                height: 45px;
+            }
+
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        .aui-content {
+            background: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div id="FromScheduling" class="aui-content" style="margin-bottom: 0px;">
+        <table style="table-layout: fixed;">
+            <tr>
+                <td style="padding: 0px; margin: 0px; vertical-align: top;">
+                    <div id="divSchedulingLeft">
+                        <div style="width: 70px">
+                            <table class="gridtable">
+                                <tr style="height: 90px">
+                                    <th style="width: 70px">班次(人数)</th>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="divFixScheduling" style="width: 70px; overflow: hidden">
+                        <table class="gridtable" id="FormsType">
+                        </table>
+                    </div>
+                </td>
+                <td style="padding: 0px; margin: 0px; border: 0px;">
+                    <div id="DivType" style="overflow-x: scroll;">
+                        <div id="divDate" style="overflow-y: hidden; overflow-x: hidden">
+                            <table class="gridtable" style="width: 420px; overflow: auto;">
+                                <tr id="selectdate">
+                                </tr>
+                                <tr>
+                                    <th style="width: 60px">一</th>
+                                    <th>二</th>
+                                    <th>三</th>
+                                    <th>四</th>
+                                    <th>五</th>
+                                    <th>六</th>
+                                    <th>七</th>
+                                </tr>
+                            </table>
+                        </div>
+                        <div id="divTypeBody" style="overflow: auto">
+                            <table class="gridtable" id="FormsContent" style="width: 420px; overflow: auto;">
+                            </table>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+
+<script type="text/javascript">
+    var _year, _month, _week, _OrganizeID, _Date;
+    var _UserID = GetSession("UserID");
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _Date = $honesty.NowDate();
+            _OrganizeID = api.pageParam.OrganizeID;
+            _year = api.pageParam.Year;
+            _month = api.pageParam.Month;
+            _week = api.pageParam.Week;
+            $("#divTypeBody").scroll(function () {
+                $("#divDate").scrollLeft($("#divTypeBody").scrollLeft());
+                $("#divFixScheduling").scrollTop($("#divTypeBody").scrollTop());
+            });
+            $("#DivType").width($("#FromScheduling").width() - $("#divSchedulingLeft").width() - 7);
+            $("#divFixScheduling,#divTypeBody").height(api.frameHeight - 100);
+            GetInfo();
+        });
+        function GetInfo() {
+            var _dset = $honesty.NowDate();
+            _dset.setFullYear(_year, _month - 1, 1);
+            var w1 = _dset.getDay();
+            if (w1 == 0) w1 = 7;
+            _dset.setFullYear(_year, _month, 0);
+            var dd = _dset.getDate();
+            if (w1 != 1) d1 = 7 - w1 + 2;
+            else d1 = 1;
+            var monday = d1 + (_week - 1) * 7;
+            var sunday = monday + 6;
+
+            var from = _year + "/" + _month + "/" + monday;
+            var end;
+            if (sunday <= dd) {
+                end = _year + "/" + _month + "/" + sunday;
+            } else {
+                _dset.setFullYear(_month - 1, sunday);
+                end = _dset.getFullYear() + "/" + (_dset.getMonth() + 1) + "/" + _dset.getDate();
+            }
+            function toDate(str) {
+                var sd = str.split("/");
+                return new Date(sd[0], sd[1], sd[2]);
+            }
+            var d1 = new Date(from);
+            var d2 = new Date(end);
+            var _ContentDate = "";
+            $("#selectdate").html("");
+            for (var i = 0; i < 7; i++) {
+                var d3 = dateAdd("d", i, d1);
+                var strs = new Date(d3);
+                var d4 = strs.getMonth() + 1 + "/" + strs.getDate()
+                _ContentDate += "<th style='width: 60px'>" + d4 + "</td>";
+            };
+            $("#selectdate").html(_ContentDate);
+
+            var _ContentName = "";
+            var _Content = "";
+            //获取店铺排班班次
+            var _Type = {
+                PostData: {
+                    Params: { "Result": "SelectShopType", "UserID": _UserID, "OrganizeID": _OrganizeID },
+                    ProcName: "proc_SOM_ISR_Scheduling",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                Loading: {
+                    Show: false
+                }
+            };
+            $("#FormsType").html("");
+
+            $.when($honesty.AjaxChannel(_Type)).done(function (_resultType) {
+                if (_resultType.Code == "1") {
+                    if (_resultType.Data.length > 0) {
+                        $.each(_resultType.Data, function (i, item) {
+                            _ContentName += "<tr title ='" + item.Num + "' ><td style='width: 70px'>" + item.Title + "</td></tr>";
+                            _Content += "<tr>";
+                            for (var i = 0; i < 7; i++) {
+                                _Content += "<td><input type='text'style='margin-bottom: 0px;;padding:0;border:0;text-align:center'readonly='true'  value=''/></td>";
+                            }
+                            _Content += "</tr>"
+                        });
+                        $("#FormsContent").html(_Content);
+                        $("#FormsType").html(_ContentName);
+                        LoadData();
+                    }
+                }
+            });
+            //获取店铺人员排班数据
+
+        }
+
+        //日期增加函数
+        function dateAdd(strInterval, NumDay, dtDate) {
+            var dtTmp = new Date(dtDate);
+            if (isNaN(dtTmp)) dtTmp = new Date();
+            switch (strInterval) {
+                case "s": return new Date(Date.parse(dtTmp) + (1000 * NumDay));
+                case "n": return new Date(Date.parse(dtTmp) + (60000 * NumDay));
+                case "h": return new Date(Date.parse(dtTmp) + (3600000 * NumDay));
+                case "d": return new Date(Date.parse(dtTmp) + (86400000 * NumDay));
+                case "w": return new Date(Date.parse(dtTmp) + ((86400000 * 7) * NumDay));
+                case "m": return new Date(dtTmp.getFullYear(), (dtTmp.getMonth()) + NumDay, dtTmp.getDate(), dtTmp.getHours(), dtTmp.getMinutes(), dtTmp.getSeconds());
+                case "y": return new Date((dtTmp.getFullYear() + NumDay), dtTmp.getMonth(), dtTmp.getDate(), dtTmp.getHours(), dtTmp.getMinutes(), dtTmp.getSeconds());
+            }
+        }
+        function LoadData() {
+            var _Datelist = $("#selectdate").children();
+            var _Countlist = $("#FormsContent").children();
+            var _Typelist = $("#FormsType").children();
+            var _parames = {
+                PostData: {
+                    Params: { "Result": "LoadInfo", "OrganizeID": _OrganizeID, "Year": _year, "Month": _month, "Week": _week },
+                    ProcName: "proc_SOM_ISR_Scheduling",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                async: false
+            };
+            var _CountTable = $honesty.AjaxChannel(_parames);
+            for (var j = 0 ; j < _Typelist.length; j++) {
+                var _Sum = $(_Countlist[j]).children("td").children();
+                var _typeID = $(_Typelist[j]).attr("title");
+                for (var i = 0; i < _Datelist.length; i++) {
+
+                    var count = 0;
+                    if (_CountTable["Data"].length > 0) {
+                        $.each(_CountTable["Data"], function (k, item) {
+                            var _date = $(_Datelist[i]).text();
+                            var strs = new Date(item.Date);
+                            var d1 = strs.getMonth() + 1 + "/" + strs.getDate();
+                            if (item.Num == _typeID && d1 == _date) {
+                                count += 1;
+                            }
+                        });
+                    }
+                    $(_Sum[i]).val(count);
+                    if ($(_Sum[i]).val() == 0) {
+                        $(_Sum[i]).val("");
+                    }
+                }
+            }
+        }
+    }
+</script>

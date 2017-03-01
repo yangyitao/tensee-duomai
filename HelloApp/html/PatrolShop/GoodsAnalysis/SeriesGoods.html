@@ -1,0 +1,258 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>商品分析表(系列)</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        body {
+            background: #fff;
+        }
+
+        .aui-list-view-cell {
+            padding: 5px;
+        }
+
+        .form {
+            text-align: center;
+            font-size: 13px;
+            border-collapse: collapse;
+            background: #fff;
+        }
+
+            .form td, .form th {
+                border: 1px solid rgba(216, 216, 216, 0.1);
+                height: 35px;
+                letter-spacing: 0.4px;
+            }
+
+            .form th {
+                font-weight: 400;
+            }
+
+            .form tbody td {
+                color: #8f8f94;
+            }
+
+            .form thead td {
+                height: 20px;
+            }
+
+            .form tbody tr:last-child td {
+                color: #000;
+            }
+
+        #tbType td{
+            color:#000;
+        }
+    </style>
+</head>
+<body>
+    <div class="aui-content" style="margin-bottom: 0px;">
+        <table style="table-layout: fixed;" cellspacing="0" cellpadding="0">
+            <tr>
+                <td>
+                    <div style="width: 80px; overflow-x: hidden">
+                        <table class="form" style="width: 80px;">
+                            <thead>
+                                <tr>
+                                    <td style="height: 44px;">系列</td>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </td>
+                <td>
+                    <div id="divTitle" style="overflow-x: hidden">
+                        <table class="form" style="width: 840px">
+                            <thead>
+                                <tr>
+                                    <td colspan="2">SKU数</td>
+                                    <td colspan="2">数量</td>
+                                    <td colspan="2">吊牌金额</td>
+                                    <td colspan="3">吊牌金额%</td>
+                                    <td rowspan="2" style="width: 100px;">零售金额</td>
+                                    <td colspan="2">分析维度</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 60px;">库存</td>
+                                    <td style="width: 60px;">销售</td>
+                                    <td style="width: 60px;">库存</td>
+                                    <td style="width: 60px;">销售</td>
+                                    <td style="width: 100px;">库存</td>
+                                    <td style="width: 100px;">销售</td>
+                                    <td style="width: 60px;">库存</td>
+                                    <td style="width: 60px;">销售</td>
+                                    <td style="width: 60px;">差异</td>
+                                    <td style="width: 60px;">折扣</td>
+                                    <td style="width: 60px;">库销比</td>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div id="divType" style="width: 80px; overflow: hidden;">
+                        <table class="form" style="width: 80px">
+                            <tbody id="tbType">
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+                <td>
+                    <div id="divBody" style="overflow-x: scroll;">
+                        <table class="form" style="width: 840px">
+                            <tbody id="tbBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+    
+</body>
+</html>
+
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _Year, _ShopCode, _BeginDate, _EndDate, _Season, _Type;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _Year = api.pageParam.Year || "";
+            _ShopCode = api.pageParam.ShopCode || "";
+            _BeginDate = api.pageParam.BeginDate || "";
+            _EndDate = api.pageParam.EndDate || "";
+            _Season = api.pageParam.Season || "";
+            _Type = api.pageParam.Type || "";
+
+            $("#divBody").width(window.screen.width - 80);
+            $("#divTitle").width(window.screen.width - 80);
+            $("#divBody").height(api.frameHeight - $("#divTitle").height());
+            $("#divType").height(api.frameHeight - $("#divTitle").height());
+            LoadData();
+
+            $("#divBody").scroll(function () {
+                $("#divTitle").scrollLeft($("#divBody").scrollLeft());
+                $("#divType").scrollTop($("#divBody").scrollTop());
+            });
+
+
+            //下拉刷新
+            api.setRefreshHeaderInfo({
+                visible: true,
+                loadingImg: 'widget://image/refresh.png',
+                bgColor: '#fff',
+                textColor: '#000',
+                textDown: '下拉刷新...',
+                textUp: '松开刷新...',
+                showTime: true
+            }, function (ret, err) {
+                LoadData();
+                api.refreshHeaderLoadDone();
+            });
+        });
+
+    }
+
+    function LoadData() {
+        var s_skuStock = 0, s_skuSale = 0, s_numStock = 0,
+                        s_numSale = 0, s_tagStock = 0, s_tagSale = 0, s_saleAmount = 0;
+
+        var arrskuStock = [0, 0, 0, 0];
+        var arrskuSale = [0, 0, 0, 0];
+        var arrnumStock = [0, 0, 0, 0];
+        var arrnumSale = [0, 0, 0, 0];
+        var arrtagStock = [0, 0, 0, 0];
+        var arrtagSale = [0, 0, 0, 0];
+        var arrsaleAmount = [0, 0, 0, 0];
+        var arrcontent = ["", "", "", ""];
+        var content = "";
+        var typeContent = "";
+        var _options = {
+            PostData: {
+                Params: {
+                    shopCode: _ShopCode,
+                    beginDate: _BeginDate,
+                    endDate: _EndDate,
+                    type: _Type,
+                    zYear: _Year,
+                    season: _Season
+                },
+                URL: "goods/getGoodsAnalysis",
+                Mode: "ESB",
+                Handle: "GET"
+            },
+            Loading: {
+                Title: "正在获取商品数据...",
+                Show: true
+            }
+        };
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data != undefined) {
+                    $.each(_result.Data, function (i, item) {
+                        var className = (item.className == undefined ? "" : item.className);
+                        var skuStock = (item.skuStock == undefined ? "0" : item.skuStock);
+                        var skuSale = (item.skuStock == undefined ? "0" : item.skuSale);
+                        var numStock = (item.numStock == undefined ? "0" : item.numStock);
+                        var numSale = (item.numSale == undefined ? "0" : item.numSale);
+                        var tagStock = (item.tagStock == undefined ? "0" : item.tagStock);
+                        var tagSale = (item.tagSale == undefined ? "0" : item.tagSale);
+                        var tagPerStock = (item.tagPerStock == undefined ? "0" : item.tagPerStock);
+                        var tagPerSale = (item.tagPerSale == undefined ? "0" : item.tagPerSale);
+                        var saleAmount = (item.saleAmount == undefined ? "0" : item.saleAmount);
+
+                        s_skuStock = s_skuStock + Number(skuStock);
+                        s_skuSale = s_skuSale + Number(skuSale);
+                        s_numStock = s_numStock + Number(numStock);
+                        s_numSale = s_numSale + Number(numSale);
+                        s_tagStock = s_tagStock + Number(tagStock);
+                        s_tagSale = s_tagSale + Number(tagSale);
+                        s_saleAmount = s_saleAmount + Number(saleAmount);
+
+                        typeContent += "<tr><td>" + className + "</td></tr>";
+                        content += "<tr>" +
+                                   "<td style='width:60px;'>" + skuStock + "</td>" +
+                                   "<td style='width:60px;'>" + skuSale + "</td>" +
+                                   "<td style='width:60px;'>" + numStock + "</td>" +
+                                   "<td style='width:60px;'>" + numSale + "</td>" +
+                                   "<td style='width:100px;'>" + tagStock + "</td>" +
+                                   "<td style='width:100px;'>" + tagSale + "</td>" +
+                                   "<td style='width:60px;'>" + tagPerStock + "%</td>" +
+                                   "<td style='width:60px;'>" + tagPerSale + "%</td>" +
+                                   "<td style='width:60px;'>" + (Number(tagPerSale) - Number(tagPerStock)) + "%</td>" +
+                                   "<td style='width:100px;'>" + saleAmount + "</td>" +
+                                   "<td style='width:60px;'>" + (tagSale == "0" ? "0" : (Number(saleAmount) / Number(tagSale) * 100).toFixed(0)) + "%</td>" +
+                                   "<td style='width:60px;'>" + (tagSale == "0" ? "0" : (Number(tagStock) / Number(tagSale)).toFixed(1)) + "</td>" +
+                                   "</tr>";
+
+                    });
+                    typeContent += "<tr><td>总计</td></tr>";
+                    content += "<tr>" +
+                               "<td>" + s_skuStock + "</td>" +
+                               "<td>" + s_skuSale + "</td>" +
+                               "<td>" + s_numStock + "</td>" +
+                               "<td>" + s_numSale + "</td>" +
+                               "<td>" + s_tagStock + "</td>" +
+                               "<td>" + s_tagSale + "</td>" +
+                               "<td colspan='3'></td>" +
+                               "<td>" + s_saleAmount + "</td>" +
+                               "<td>" + (s_tagSale == "0" ? "0" : (Number(s_saleAmount) / Number(s_tagSale) * 100).toFixed(0)) + "%</td>" +
+                               "<td>" + (s_tagSale == "0" ? "0" : (Number(s_tagStock) / Number(s_tagSale)).toFixed(1)) + "</td>" +
+                               "</tr>";
+
+                    $("#tbBody").html(content);
+                    $("#tbType").html(typeContent);
+                }
+            }
+        });
+    }
+</script>

@@ -1,0 +1,69 @@
+﻿<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title id="PageTitle">详细资料</title>
+    <link href="../../../css/aui-win.css" rel="stylesheet" />
+</head>
+<body>
+    <header id="hHeader" class="aui-bar aui-bar-nav aui-bar-warning">
+        <a id="hLeft" class="aui-btn aui-btn-warning aui-pull-left">
+            <span class="aui-iconfont aui-icon-left"></span>
+        </a>
+        <div id="hTitle" class="aui-title">详细资料</div>
+        <a id="hRight" class="aui-iconfont aui-icon-menu aui-pull-right"></a>
+    </header>
+</body>
+<script src="../../../script/api.js" type="text/javascript"></script>
+<script src="../../../script/zepto.js" type="text/javascript"></script>
+<script src="../../../script/honesty.base.js" type="text/javascript"></script>
+<script src="../../../script/honesty.function.js"></script>
+<script type="text/javascript">
+    function closeWin() {
+        api.closeWin();
+    }
+    apiready = function () {
+        $(function () {
+            try {
+                api.parseTapmode();
+                var header = $api.byId('hHeader');
+                $api.fixStatusBar(header);
+                var headerPos = $api.offset(header);
+                var body_h = $api.offset($api.dom('body')).h;
+                var PageParam = api.pageParam;
+                if (PageParam != null) {
+                    ParentName = PageParam.OpenID || "";
+                    api.openFrame({
+                        name: "Customer_FRM",
+                        url: "widget://html/Customer/WeChat/Customer_Frm.html",
+                        pageParam: PageParam,
+                        rect: {
+                            x: 0,
+                            y: headerPos.h,
+                            w: headerPos.w,
+                            h: "auto"
+                        }
+                    });
+                }
+                $("#btnClose").tap(function () {
+                    api.closeToWin({
+                        name: ParentName,
+                        animation: {
+                            type: "flip",
+                            subType: 'from_bottom',
+                            duration: 200
+                        }
+                    });
+                });
+            }
+            catch (e) {
+                alert(e);
+            }
+            $("#hLeft").tap(function () {
+                $honesty.CloseWin();
+            });
+        });
+    };
+</script>
+</html>

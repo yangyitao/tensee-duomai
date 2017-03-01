@@ -1,0 +1,253 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>周报表</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-list-view-cell {
+            padding: 5px;
+        }
+
+        .form {
+            width: 100%;
+            text-align: center;
+            font-size: 13px;
+            border-collapse: collapse;
+        }
+
+            .form td, .form th {
+                border-bottom: 1px solid rgba(216, 216, 216, 0.1);
+                height: 35px;
+                letter-spacing: 0.4px;
+            }
+
+            .form th {
+                font-weight: 400;
+            }
+
+            .form tbody td {
+                color: #8f8f94;
+            }
+
+                .form tbody td:first-child {
+                    color: #000;
+                }
+
+            .form thead td {
+                height: 20px;
+            }
+
+            .form thead tr:last-child td {
+                border-bottom: 1px solid rgba(216, 216, 216, 0.5);
+            }
+    </style>
+</head>
+<body>
+    <div class="aui-content" id="divTitle">
+        <ul class="aui-list-view" style="margin-bottom: 0px;">
+            <li class="aui-list-view-cell" style="padding: 3px;">
+                <table class="form">
+                    <thead>
+                        <tr>
+                            <td style="width: 60px">周次</td>
+                            <td>第一周</td>
+                            <td>第二周</td>
+                            <td>第三周</td>
+                            <td>第四周</td>
+                            <td data-role="hide" style="display: none">第五周</td>
+
+                        </tr>
+                        <tr>
+                            <td>日期</td>
+                            <td id="WeekDate0"></td>
+                            <td id="WeekDate1"></td>
+                            <td id="WeekDate2"></td>
+                            <td id="WeekDate3"></td>
+                            <td data-role="hide" style="display: none" id="WeekDate4"></td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>周目标</td>
+                            <td id="TargetSale0">0</td>
+                            <td id="TargetSale1">0</td>
+                            <td id="TargetSale2">0</td>
+                            <td id="TargetSale3">0</td>
+                            <td id="TargetSale4" data-role="hide" style="display: none">0</td>
+                        </tr>
+                        <tr>
+                            <td>周实际</td>
+                            <td id="ActualSale0">0</td>
+                            <td id="ActualSale1">0</td>
+                            <td id="ActualSale2">0</td>
+                            <td id="ActualSale3">0</td>
+                            <td id="ActualSale4" data-role="hide" style="display: none">0</td>
+                        </tr>
+                        <tr>
+                            <td>周达成</td>
+                            <td id="SaleRate0">0%</td>
+                            <td id="SaleRate1">0%</td>
+                            <td id="SaleRate2">0%</td>
+                            <td id="SaleRate3">0%</td>
+                            <td id="SaleRate4" data-role="hide" style="display: none">0%</td>
+                        </tr>
+                        <tr>
+                            <td>单数</td>
+                            <td id="OrderNum0">0</td>
+                            <td id="OrderNum1">0</td>
+                            <td id="OrderNum2">0</td>
+                            <td id="OrderNum3">0</td>
+                            <td id="OrderNum4" data-role="hide" style="display: none">0</td>
+                        </tr>
+                        <tr>
+                            <td>客单件</td>
+                            <td id="UnitSingle0">0</td>
+                            <td id="UnitSingle1">0</td>
+                            <td id="UnitSingle2">0</td>
+                            <td id="UnitSingle3">0</td>
+                            <td id="UnitSingle4" data-role="hide" style="display: none">0</td>
+                        </tr>
+                        <tr>
+                            <td>客单价</td>
+                            <td id="UnitPrice0">0</td>
+                            <td id="UnitPrice1">0</td>
+                            <td id="UnitPrice2">0</td>
+                            <td id="UnitPrice3">0</td>
+                            <td id="UnitPrice4" data-role="hide" style="display: none">0</td>
+                        </tr>
+                        <tr>
+                            <td>同比</td>
+                            <td id="YearOnYear0">0%</td>
+                            <td id="YearOnYear1">0%</td>
+                            <td id="YearOnYear2">0%</td>
+                            <td id="YearOnYear3">0%</td>
+                            <td id="YearOnYear4" data-role="hide" style="display: none">0%</td>
+                        </tr>
+                        <tr>
+                            <td>环比</td>
+                            <td id="QuarterOnQuarter0">0%</td>
+                            <td id="QuarterOnQuarter1">0%</td>
+                            <td id="QuarterOnQuarter2">0%</td>
+                            <td id="QuarterOnQuarter3">0%</td>
+                            <td id="QuarterOnQuarter4" data-role="hide" style="display: none">0%</td>
+                        </tr>
+                        <tr>
+                            <td>周占比</td>
+                            <td id="WeekRate0">0%</td>
+                            <td id="WeekRate1">0%</td>
+                            <td id="WeekRate2">0%</td>
+                            <td id="WeekRate3">0%</td>
+                            <td id="WeekRate4" data-role="hide" style="display: none">0%</td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>
+
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _Year, _Month, _OrganizeID;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _Year = api.pageParam.Year;
+            _Month = api.pageParam.Month;
+            _OrganizeID = api.pageParam.OrganizeID;
+            GetHeadInfo();
+            LoadData();
+
+
+            //下拉刷新
+            api.setRefreshHeaderInfo({
+                visible: true,
+                loadingImg: 'widget://image/refresh.png',
+                bgColor: '#fff',
+                textColor: '#000',
+                textDown: '下拉刷新...',
+                textUp: '松开刷新...',
+                showTime: true
+            }, function (ret, err) {
+                LoadData();
+                api.refreshHeaderLoadDone();
+            });
+        });
+
+    }
+
+    function GetHeadInfo() {
+        var _date = new Date(_Year + "/" + _Month + "/01");
+        var _day = _date.getDay() == 0 ? 7 : _date.getDay();
+        if (_day != 1) {
+            _date.addDays(8 - _day);
+        }
+
+        for (var i = 0; i < 5; i++) {
+            var _Content = _date.Format("MM.dd") + "-";
+            _date.addDays(6);
+            _Content += _date.Format("MM.dd");
+            $("#WeekDate" + i).html(_Content);
+            _date.addDays(1);
+            if (i == 4) {
+                $("[data-role='hide']").show();
+            }
+            if (_date.getMonth() + 1 != _Month) {
+                return false;
+            }
+
+        }
+    }
+
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "GetWeekSaleForm",
+                    OrganizeID: _OrganizeID,
+                    Year: _Year,
+                    Month: _Month,
+                    UserID: GetSession("UserID")
+                },
+                ProcName: "proc_SaleForm",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        $("#TargetSale" + i).html(item.TargetSale);
+                        $("#ActualSale" + i).html(item.ActualSale);
+                        $("#SaleRate" + i).html(item.SaleRate + "%");
+                        $("#OrderNum" + i).html(item.OrderNum);
+                        $("#UnitSingle" + i).html(item.UnitSingle);
+                        $("#UnitPrice" + i).html(item.UnitPrice);
+                        $("#YearOnYear" + i).html(item.YearOnYear == "0" ? "0%" : (Number(item.ActualSale) / Number(item.YearOnYear) * 100 - 100).toFixed(0) + "%");
+                        $("#QuarterOnQuarter" + i).html(item.QuarterOnQuarter == "0" ? "0%" : (Number(item.ActualSale) / Number(item.QuarterOnQuarter) * 100 - 100).toFixed(0) + "%");
+                    });
+
+                    var _saleSum = 0;
+                    $("[id^='ActualSale']").each(function () {
+                        _saleSum += Number($(this).html());
+                    })
+                    if (_saleSum != 0) {
+                        for (var i = 0; i < 5; i++) {
+
+                            $("#WeekRate" + i).html(Number(($("#ActualSale" + i).html()) / _saleSum * 100).toFixed(0) + "%");
+                        }
+                    }
+                }
+            }
+        });
+    }
+</script>

@@ -1,0 +1,207 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>考试列表</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="aui-content">
+        <ul class="aui-list-view aui-in" id="ulList">
+        </ul>
+    </div>
+    <div class="aui-dialog aui-hidden" id="dialog">
+        <div class="aui-input-row">
+            <span class="aui-input-addon">入职日期</span>
+            <input id="InDate" type="text" class="aui-input" placeholder="请选择入职日期!" readonly="readonly" />
+        </div>
+        <div class="aui-dialog-footer">
+            <div class="aui-dialog-btn aui-text-info" tapmode id="btnOK">确定</div>
+        </div>
+    </div>
+</body>
+</html>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/api.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _PageNum = 1, EmpInDate = "", EmpExamName = "", EmpExamID = 0, EmpBeginDate = "", EmpEndDate = "";
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            LoadData();
+            //下拉刷新
+            api.setRefreshHeaderInfo({
+                visible: true,
+                loadingImg: "widget://image/refresh.png",
+                bgColor: "#fff",
+                textColor: "#000",
+                textDown: "下拉刷新...",
+                textUp: "松开刷新...",
+                showTime: true
+            }, function (ret, err) {
+                $("#ulList").html("");
+                _PageNum = 1;
+                LoadData();
+                api.refreshHeaderLoadDone();
+            });
+            api.addEventListener({
+                name: "scrolltobottom",
+                extra: {
+                    threshold: 60
+                }
+            }, function (ret, err) {
+                LoadData();
+            });
+            api.addEventListener({
+                name: "SubmitExame",
+            }, function (ret, err) {
+                if (ret) {
+                    _PageNum = 1;
+                    LoadData();
+                }
+            });
+            $("#btnOK").tap(function () {
+                if ($("#InDate").val() == "") {
+                    $honesty.ShowToast({ msg: "请选择您的入职日期！", location: "middle" });
+                    return false;
+                }
+                var _options = {
+                    PostData: {
+                        Params: {
+                            result: "SaveInDate",
+                            InDate: $("#InDate").val(),
+                            EmpID: GetSession("UserID")
+                        },
+                        ProcName: "proc_SOM_HR_EmpExam",
+                        DataType: "Bool",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    }
+                };
+                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                    if (_result.Code == "1") {
+                        if (_result.Data == "True") {
+                            $("li").attr("data-indate", $("#InDate").val());
+                            $(".aui-mask").remove();
+                            $("#dialog").addClass("aui-hidden");
+                            $honesty.OpenWin({
+                                name: "Examine_ExamineInfo",
+                                url: "Examine/ExamineInfo.html",
+                                title: EmpExamName,
+                                pageParam: {
+                                    ExamID: EmpExamID,
+                                    BeginDate: EmpBeginDate,
+                                    EndDate: EmpEndDate
+                                }
+                            });
+                        }
+                        else {
+                            $honesty.ShowToast({ msg: "入职日期更新失败，请稍后重试！", location: "middle" });
+                        }
+                    }
+                    else {
+                        $honesty.ShowToast({ msg: "入职日期更新失败，请稍后重试！", location: "middle" });
+                    }
+                });
+            });
+            $("#InDate").tap(function () {
+                $honesty.DateTimeSelect({
+                    Type: "Date",
+                    ControlID: $(this).attr("id"),
+                    ControlValue: $(this).val()
+                });
+            });
+        });
+    }
+    //数据加载函数
+    function LoadData() {
+        $("#ulList").empty();
+        if (_PageNum != 0) {
+            var _options = {
+                PostData: {
+                    Params: {
+                        result: "InitSoonExam",
+                        BeginDate: api.pageParam.BeginDate,
+                        EndDate: api.pageParam.EndDate,
+                        EmpID: GetSession("UserID"),
+                        ExamName: api.pageParam.ExamName || "",
+                        PageNum: _PageNum,
+                        PageSize: 15
+                    },
+                    ProcName: "proc_SOM_HR_EmpExam",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    var _Content = "";
+                    if (_result.Data.length > 0) {
+                        $.each(_result.Data, function (i, item) {
+                            _Content += "<li class='aui-list-view-cell' tapmode data-indate=\"" + item.InDate + "\" onclick=\'ShowInfo(\"" + item.ExamID + "\",\"" + item.IsSubmit + "\",\"" + item.BeginDate + "\",\"" + item.EndDate + "\",\"" + item.ExamName + "\",\"" + item.InDate + "\",this)\'>" +
+                                        "<a class='aui-arrow-right'><label>" + item.ExamName + "</label><p>时间：" + new Date(item.BeginDate.replace(/-/g, "/")).Format("yyyy-MM-dd hh:mm") +
+                                        "至" + new Date(item.EndDate.replace(/-/g, "/")).Format("yyyy-MM-dd hh:mm") + "</p></a></li>";
+                        });
+                        _PageNum++;
+                        $("#ulList").append(_Content);
+                    }
+                    else {
+                        if (_PageNum == 1) {
+                            $("#ulList").html("<li style='text-align:center'>尊敬的用户，您好，无考试列表数据</li>")
+                        }
+                        else {
+                            $honesty.ShowToast({ msg: "没有更多的数据", location: "bottom" });
+                        }
+                        _PageNum = 0;
+                    }
+                    api.parseTapmode();
+                }
+            });
+        }
+    }
+    function ShowInfo(ExamID, IsSubmit, BeginDate, EndDate, ExamName, InDate, Control) {
+
+        if (IsSubmit > 0) {
+            $honesty.ShowToast({ msg: "该项考试您已经提交试卷，不可重复答题！", location: "middle" });
+            return false;
+        }
+        else if (Date.parse(BeginDate) > Date.parse($honesty.NowDate())) {
+            $honesty.ShowToast({ msg: "该项考试尚未开始，请耐心等待！", location: "middle" });
+            return false;
+        }
+        else if (Date.parse(EndDate) < Date.parse($honesty.NowDate())) {
+            $honesty.ShowToast({ msg: "该项考试已结束，禁止答题！", location: "middle" });
+            return false;
+        }
+        $honesty.ConfirmWin({
+            msg: "本考试只能一次，请确定是否开始考试？",
+            callback: function (ret, err) {
+                if (ret.buttonIndex == "1") {
+                    EmpExamID = ExamID;
+                    EmpExamName = ExamName;
+                    EmpBeginDate = BeginDate;
+                    EmpEndDate = EndDate;
+                    if ($(Control).attr("data-indate") == "") {
+                        $("body").append("<div class=\"aui-mask\" style=\"background: rgba(0, 0, 0, 0.1);\"></div>");
+                        $(".aui-dialog.aui-hidden").removeClass("aui-hidden");
+                        return false;
+                    }
+                    $honesty.OpenWin({
+                        name: "Examine_ExamineInfo",
+                        url: "Examine/ExamineInfo.html",
+                        title: ExamName,
+                        pageParam: {
+                            ExamID: ExamID,
+                            BeginDate: BeginDate,
+                            EndDate: EndDate
+                        }
+                    });
+                }
+            }
+        });
+    }
+</script>

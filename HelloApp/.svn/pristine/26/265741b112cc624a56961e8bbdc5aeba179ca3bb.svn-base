@@ -1,0 +1,37 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+        content="width = 320,minimum-scale =1,maximum-scale = 1.3 ,user-scalable =no" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>销售贡献</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+    <style>
+        .sale-header {
+            background: url('../../image/hyyj.png');
+            background-size: cover;
+            height: 400px;
+            width: 100%;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <div class="aui-content sale-header" style="margin-bottom: 0px;">
+        <div class="sale-info" id="divForm">
+        </div>
+    </div>
+</body>
+</html>
+
+<script src="../../script/zepto.js"></script>
+<script src="../../script/api.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script src="../../script/honesty.flow.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        api.parseTapmode();
+
+    };
+</script>

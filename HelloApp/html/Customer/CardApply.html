@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>补卡申请流程</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-input-row .aui-input-addon
+        {
+            width: 110px;
+            color: #8f8f94;
+            text-align: left;
+        }
+
+        .aui-input-form .aui-input-row .aui-input-addon
+        {
+            padding-left: 8px;
+            font-weight: 300;
+            font-size: 13px;
+        }
+
+        .aui-list-view-cell
+        {
+            padding: 5px 15px;
+        }
+
+        .aui-label-title
+        {
+            text-align: right;
+            width: 90px;
+        }
+    </style>
+</head>
+<body>
+    <div id="main">
+        <p class="aui-padded-5 aui-text-center" style="color: #3175af; font-size: 16px;">补卡申请流程</p>
+        <div class="aui-card" style="margin-bottom: 0px;">
+            <ul class="aui-list-view" style="margin-bottom: 0px;">
+                <li class="aui-list-view-cell">
+                    <label id="InfoSN"></label>
+                    <p>单据编号</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="ApplyUserName"></label>
+                    <p>申请人</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="ShopName"></label>
+                    <p>店铺名称</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="Address"></label>
+                    <p>店铺地址</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="ShopCode"></label>
+                    <p>店仓号</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="ApplyDate"></label>
+                    <p>申请日期</p>
+                </li>
+
+                <li data-role="colspan" data-show="hide" class="aui-list-view-cell" id="liBaseMore">
+                    <p style="text-align: center">点击显示详情</p>
+                </li>
+
+            </ul>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; margin: 0 10px; font-size: 15px;">申请信息</p>
+        <div class="aui-card aui-input-form" style="margin-bottom: 0px;">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">申请电话</span>
+                <input id="ApplyTel" type="text" class="aui-input aui-important" placeholder="请输入电话号码" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">剩余卡数</span>
+                <input id="ReaminNum" type="text" class="aui-input aui-important" placeholder="请输入正整数" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">申请卡数</span>
+                <input id="ApplyNum" type="text" class="aui-input aui-important" placeholder="请输入正整数" />
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; margin: 0 10px; font-size: 15px;" id="expressTitle">快递信息</p>
+        <div class="aui-card aui-input-form" style="margin-bottom: 0px;" id="expressInfo">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">快递公司</span>
+                <select class="aui-input aui-important" id="ExpressCompany">
+                    <option value="">请选择</option>
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">快递单号</span>
+                <input id="DeliveryNum" type="text" class="aui-input aui-important" placeholder="请输入正整数" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">发货时间</span>
+                <input id="DeliveryDate" type="text" class="aui-input" readonly="true" />
+            </div>
+        </div>
+        <div style="height: 100px"></div>
+    </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script src="../../script/honesty.flow.js"></script>
+<script src="../../script/honesty.valid.js"></script>
+<script type="text/javascript">
+    var _ApplyID = "";
+    var _Date = $honesty.NowDate();
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            $("#DeliveryDate").val(_Date.Format("yyyy-MM-dd"));
+            $("#DeliveryDate").tap(function () {
+                if ($honestyFlow.GetFlowInfo("stepname") == "VIP专员审核") {
+                    $honesty.DateTimeSelect({
+                        LevelNum: 1,
+                        Type: "Date",
+                        ControlID: "DeliveryDate",
+                        ControlValue: $("#DeliveryDate").val(),
+                        onchange: function (ret) {
+                            if (ret) {
+                            }
+                        }
+                    });
+                }
+            });
+
+            $honestyFlow.InitFlow({ Async: false, wapflowpage: "Customer/CardApply" });
+            
+            var InstanceID = $honestyFlow.GetFlowInfo("instanceid");
+            if (api.pageParam.instanceid != undefined) {
+                _ApplyID = InstanceID;
+            }
+            IniInfo();
+            //基本信息点击展示隐藏
+            $("#liBaseMore").tap(function () {
+                $("[data-role='baseMore']").fadeToggle(200);
+                if ($("#liBaseMore").attr("data-show") == "hide") {
+                    $("#liBaseMore").children("p").html("点击收起");
+                    $("#liBaseMore").attr("data-show", "show");
+                }
+                else {
+                    $("#liBaseMore").children("p").html("点击显示详情");
+                    $("#liBaseMore").attr("data-show", "hide");
+                }
+            });
+            $("#btnSend").unbind("tap").tap(function () {
+                if (SaveInfo()) {
+                    $honestyFlow.SendFlow();
+                }
+            });
+            $("#btnPause").unbind("tap").tap(function () {
+                if (SaveInfo()) {
+                    $honestyFlow.PauseFlow();
+                }
+            });
+
+        });
+    };
+    //显示控制
+    function IniShow() {
+        if ($honestyFlow.GetFlowInfo("stepname") == "开始") {
+            $("#expressInfo,#expressTitle").css("display", "none");
+        }
+        if ($honestyFlow.GetFlowInfo("stepname") != "VIP专员审核") {
+            $("input").attr("readonly", "true");
+            $("#ExpressCompany").attr("disabled", "true");
+        }
+        if ($honestyFlow.GetFlowInfo("stepname") == "开始") {
+            $("#ReaminNum").removeAttr("readonly");
+            $("#ApplyNum").removeAttr("readonly");
+            $("#ApplyTel").removeAttr("readonly");
+        }
+    }
+    //加载基础信息
+    function IniInfo() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "SelectExpress"
+                },
+                ProcName: "proc_SOM_ISR_VIP_Apply",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            },
+            async: false
+        };
+        var _result = $honesty.AjaxChannel(_options);
+        if (_result.Code == "1") {
+            if (_result.Data.length > 0) {
+                var content = "<option value=''>请选择</option>";
+                $.each(_result.Data, function (i, item) {
+                    content += "<option value='" + item.ID + "'>" + item.Title + "</option>"
+                })
+                $("#ExpressCompany").html(content);
+            }
+        }
+        if (_ApplyID != "") {
+            var _options = {
+                PostData: {
+                    Params: {
+                        Result: "SelectTitle",
+                        ApplyID: _ApplyID
+                    },
+                    ProcName: "proc_SOM_ISR_VIP_Apply",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        $.each(_result.Data, function (i, item) {
+                            $("#ShopCode").html(item.ShopCode);
+                            $("#ApplyUserName").html(item.ApplyUserName);
+                            $("#ApplyDate").html(item.ApplyDate);
+                            $("#ReaminNum").val(item.ReaminNum);
+                            $("#ApplyNum").val(item.ApplyNum);
+                            $("#ShopName").html(item.ShopName);
+                            $("#Address").html(item.Address);
+                            $("#ApplyTel").val(item.ApplyTel);
+
+                            $("#ExpressCompany").val(item.ExpressCompany);
+                            $("#DeliveryNum").val(item.DeliveryNum);
+                            $("#DeliveryDate").val(item.DeliveryDate);
+                        })
+                    }
+                }
+            });
+        }
+        else {
+
+            _ApplyID = $honestyFlow.GetFlowInfo("instanceid");
+            $("#ShopCode").html(GetSession("ShopCode"));
+            $("#ApplyUserName").html(GetSession("UserName"));
+            $("#ApplyDate").html($honesty.NowDate().Format("yyyy-MM-dd"));
+            var _options = {
+                PostData: {
+                    Params: {
+                        Result: "SelectBaseInfo",
+                        UserID: GetSession("UserID"),
+                        OrganizeID: api.pageParam.OrganizeID,
+                        ShopCode: api.pageParam.ShopCode
+                    },
+                    ProcName: "proc_SOM_ISR_VIP_Apply",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        $.each(_result.Data, function (i, item) {
+                            $("#ShopName").html(item.ShopName);
+                            $("#Address").html(item.ShopAddress);
+                            $("#ApplyTel").val(GetSession("TelPhone"));
+                        })
+
+                    }
+                }
+            })
+        }
+        IniShow();
+    }
+    function isCheck() {
+        if ($honestyFlow.GetFlowInfo("stepname") == "开始") {
+            if ($.trim($("#ApplyTel").val()) == "") {
+                $honesty.ShowMsg({ msg: "申请人号码不能为空", title: "警告" });
+            }
+            else if (valid_phone($.trim($("#ApplyTel").val()))) {
+                $honesty.ShowMsg({ msg: "输入的申请人号码不合法", title: "警告" });
+            }
+            else if ($.trim($("#ReaminNum").val()) == "") {
+                $honesty.ShowMsg({ msg: "剩余卡数不能为空", title: "警告" });
+            }
+            else if (valid_int($.trim($("#ReaminNum").val()))) {
+                $honesty.ShowMsg({ msg: "剩余卡数不为整数", title: "警告" });
+            }
+            else if ($.trim($("#ApplyNum").val()) == "") {
+                $honesty.ShowMsg({ msg: "申请卡数不能为空", title: "警告" });
+            }
+            else if (valid_int($.trim($("#ApplyNum").val()))) {
+                $honesty.ShowMsg({ msg: "申请卡数不为整数", title: "警告" });
+            }
+            else {
+                return true;
+            }
+        }
+        else if ($honestyFlow.GetFlowInfo("stepname") == "VIP专员审核") {
+            if ($("#ExpressCompany").val() == "") {
+                $honesty.ShowMsg({ msg: "请选择快递公司", title: "警告" });
+            }
+            else if ($.trim($("#DeliveryNum").val()) == "") {
+                $honesty.ShowMsg({ msg: "请填写快递单号", title: "警告" });
+            }
+            else if ($("#DeliveryDate").val() == "") {
+                $honesty.ShowMsg({ msg: "请填写发货时间", title: "警告" });
+            }
+            else {
+                return true;
+            }
+        }
+    }
+    function SaveInfo() {
+        if (isCheck()) {
+            var _options = {
+                PostData: {
+                    Params: {
+                        Result: "MaintainInfo",
+                        ApplyID: _ApplyID,
+                        SN: $("#InfoSN").html(),
+                        OrganizeID: GetSession("OrganizeID"),
+                        ShopCode: $("#ShopCode").html(),
+                        ShopName: $("#ShopName").html(),
+                        ApplyDate: $("#ApplyDate").html(),
+                        Address: $("#Address").html(),
+                        ApplyTel: $("#ApplyTel").val(),
+                        ApplyUserID: GetSession("UserID"),
+                        ApplyUserName: GetSession("UserName"),
+                        ExpressCompany: $("#ExpressCompany").val(),
+                        DeliveryNum: $("#DeliveryNum").val(),
+                        DeliveryDate: $("#DeliveryDate").val(),
+                        ReaminNum: $("#ReaminNum").val(),
+                        ApplyNum: $("#ApplyNum").val()
+                    },
+                    ProcName: "proc_SOM_ISR_VIP_Apply",
+                    DataType: "Bool",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                async: false
+            };
+            var _result = $honesty.AjaxChannel(_options);
+            if (_result.Data == "True") {
+                return true;
+            }
+            else {
+                $honesty.ShowMsg({ title: "错误", msg: "业务数据保存失败!" });
+                return false;
+            }
+
+        }
+    }
+</script>
+</html>

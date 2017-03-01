@@ -1,0 +1,210 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>其他应用模块（会员模块）</title>
+    <link href="../../css/aui.css" rel="stylesheet" type="text/css" />
+    <style>
+    #ulMenu li:nth-child(1){
+    background:url(../../launch/yqrh2.png) no-repeat center 0.6rem;
+background-size:50% 50%;
+    }
+     #ulMenu li:nth-child(2){
+    background:url(../../launch/yxhd.png) no-repeat center 0.8rem;
+background-size:55% 50%;    }
+     #ulMenu li:nth-child(3){
+    background:url(../../launch/mdhd.png) no-repeat center 0.9rem;
+background-size:49% 44%;    }
+      #ulMenu2 li:nth-child(1){
+    background:url(../../launch/wdhy.png) no-repeat center 0.8rem;
+background-size:50% 50%;    }
+      #ulMenu2 li:nth-child(2){
+    background:url(../../launch/hyfz.png) no-repeat center 0.8rem;
+background-size:55% 55%;    }
+      #ulMenu2 li:nth-child(3){
+    background:url(../../launch/hypj.png) no-repeat center 0.8rem;
+background-size:44% 44%;    }
+      #ulMenu2 li:nth-child(4){
+    background:url(../../launch/hyyj.png) no-repeat center 0.8rem;
+background-size:44% 44%;    }
+      #ulMenu2 li:nth-child(5){
+    background:url(../../launch/hyfx.png) no-repeat center 0.8rem;
+background-size:50% 45%;    }
+      #ulMenu2 li:nth-child(6){
+    background:url(../../launch/hydb.png) no-repeat center 0.8rem;
+background-size:43% 43%;    }
+ .aui-content p,#ulMenu2,#ulMenu,#ulMenu2 p,#ulMenu p{
+color:#757575;
+}
+#ulMenu2 li,#ulMenu li{
+float:left;
+width:25%;
+position:relative;
+}
+#ulMenu2 li,#ulMenu li{
+height:6rem;
+
+border-radius: 2px 2px 2px 2px;
+}
+#ulMenu2 li p,#ulMenu li p{
+position:absolute;
+margin: 0rem 0.5rem;
+bottom:0.5rem;
+
+
+}
+
+    </style>
+</head>
+<body>
+    <div class="aui-content">
+    	<p class="aui-padded-10 aui-text-center">活动模块</p>
+        <ul class="aui-grid-nine" id="ulMenu"></ul>
+        <p class="aui-padded-10 aui-text-center">会员模块</p>
+        <ul class="aui-grid-nine" id="ulMenu2"></ul>
+    </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script src="../../script/aui-skin.js"></script>
+<script type="text/javascript">
+
+    apiready = function () {
+        $(function () {
+        	
+            LoadData();
+
+            //下拉刷新
+            api.setRefreshHeaderInfo({
+                visible: true,
+                loadingImg: 'widget://image/refresh.png',
+                bgColor: '#fff',
+                textColor: '#000',
+                textDown: '下拉刷新...',
+                textUp: '松开刷新...',
+                showTime: true
+            }, function (ret, err) {
+                LoadData();
+                api.refreshHeaderLoadDone();
+            });
+        });
+
+    };
+    //数据加载函数
+    function LoadData() {
+        //var _options = {
+        //    PostData: {
+        //        Params: { "Result": "GetAppMenu", "UserID": GetSession("UserID") },
+        //        ProcName: "proc_SOM_Others_APPMenu",
+        //        DataType: "DataTable",
+        //        ExecType: "PROC",
+        //        Mode: "MSSQL"
+        //    }
+        //};
+
+        //$.when($honesty.AjaxChannel(_options)).done(function (_result) {
+        //    if (_result.Code == "1") {
+        //        if (_result.Data.length > 0) {
+        //            var _Content = "";
+        //            $.each(_result.Data, function (i, item) {
+        //                _Content += "<li tapmode class='aui-col-xs-6 aui-text-center' data-id='" + item.ID + "' data-title='" + item.Title + "' data-appfunction='" + item.AppFunction + "' onclick='ClickMenu(this)'>" +
+        //                       "<span class='aui-iconfont " + item.AppIcoClass + "'></span><p>" + item.Title + "</p></li>";
+        //            });
+        //            if (_result.Data.length % 2 != 0) {
+        //                _Content += "<li class='aui-col-xs-6 aui-text-center'><span class='aui-iconfont'>&nbsp;</span><p>&nbsp;</p></li>";
+        //            }
+        //            $("#ulMenu").html(_Content);
+        //            api.parseTapmode();
+        //        }
+        //    }
+
+        //});
+//      var _Content = "";
+//      _Content += "<li tapmode class='aui-col-xs-4 aui-text-center' data-id='' data-title='邀请入会' data-appfunction='" + '$honesty.OpenWin({ title: "微信专属二维码", name: "User_BarCode", url: "User/BarCode.html" });' + "' onclick='ClickMenu(this)'>" +
+//     "<span class='aui-iconfont aui-icon-same aui-text-warning'></span><p>邀请入会</p></li>";
+//      _Content += "<li tapmode class='aui-col-xs-4 aui-text-center' data-id='' data-title='我的会员' data-appfunction='" + '$honesty.OpenWin({ title: "我的会员", name: "Info_Myhy", url: "HYInfo/MyHy.html" });' + "' onclick='ClickMenu(this)'>" +
+//      "<span class='aui-iconfont aui-icon-friendfavor aui-text-warning'></span><p>我的会员</p></li>";
+//      _Content += "<li tapmode class='aui-col-xs-4 aui-text-center' data-id='' data-title='会员分组' data-appfunction='" + '$honesty.OpenWin({ title: "会员分组", name: "Info_HYFZ", url: "HYInfo/HYFZ.html" });' + "' onclick='ClickMenu(this)'>" +
+//     "<span class='aui-iconfont aui-icon-group aui-text-warning'></span><p>会员分组</p></li>";
+//      _Content += "<li tapmode class='aui-col-xs-4 aui-text-center' data-id='' data-title='会员评价' data-appfunction='" + '$honesty.OpenWin({ title: "会员评价", name: "Info_HYPJ", url: "HYInfo/HYPJ.html" });' + "' onclick='ClickMenu(this)'>" +
+//     "<span class='aui-iconfont aui-icon-communityfill aui-text-warning'></span><p>会员评价</p></li>";
+//      _Content += "<li tapmode class='aui-col-xs-4 aui-text-center' data-id='' data-title='会员业绩' data-appfunction='" + '$honesty.OpenWin({ title: "会员业绩", name: "Info_HYYJ", url: "HYInfo/HYYJ.html" });' + "' onclick='ClickMenu(this)'>" +
+//     "<span class='aui-iconfont aui-icon-selectionfill aui-text-warning'></span><p>会员业绩</p></li>";
+//      _Content += "<li tapmode class='aui-col-xs-4 aui-text-center' data-id='' data-title='会员分析' data-appfunction='" + '$honesty.OpenWin({ title: "会员分析", name: "Info_HYFX", url: "HYInfo/HYFX.html" });' + "' onclick='ClickMenu(this)'>" +
+//     "<span class='aui-iconfont aui-icon-calendar aui-text-warning'></span><p>会员分析</p></li>";
+//      _Content += "<li tapmode class='aui-col-xs-4 aui-text-center' data-id='' data-title='营销活动' data-appfunction='" + '$honesty.OpenWin({ title: "营销活动", name: "Info_YXHD", url: "HYInfo/YXHD.html" });' + "' onclick='ClickMenu(this)'>" +
+//     "<span class='aui-iconfont aui-icon-cartfill aui-text-warning'></span><p>营销活动</p></li>";
+//      _Content += "<li tapmode class='aui-col-xs-4 aui-text-center' data-id='' data-title='门店活动' data-appfunction='" + '$honesty.OpenWin({ title: "门店活动", name: "Info_MDHD", url: "HYInfo/MDHD.html" });' + "' onclick='ClickMenu(this)'>" +
+//     "<span class='aui-iconfont aui-icon-shopfill aui-text-warning'></span><p>门店活动</p></li>";
+//      $("#ulMenu").html(_Content);
+//      api.parseTapmode();
+        
+		var _Content = "";
+        _Content += "<li tapmode class='aui-col-xs-4 aui-text-center' data-id='' data-title='邀请入会' data-appfunction='" + '$honesty.OpenWin({ title: "微信专属二维码", name: "User_BarCode", url: "User/BarCode.html" });' + "' onclick='ClickMenu(this)'>" +
+        "<span class='aui-iconfont  aui-text-warning'></span><p>邀请入会</p ></li>";
+        _Content += "<li tapmode class='aui-col-xs-4 aui-text-center' data-id='' data-title='营销活动' data-appfunction='" + '$honesty.OpenWin({ title: "营销活动", name: "User_BarCode", url: "HYInfo/YXHD.html" });' + "' onclick='ClickMenu(this)'>" +
+        "<span class='aui-iconfont  aui-text-warning'></span><p>营销活动</p ></li>";
+        _Content += "<li tapmode class='aui-col-xs-4 aui-text-center' data-id='' data-title='门店活动' data-appfunction='" + '$honesty.OpenWin({ title: "门店活动", name: "User_BarCode", url: "HYInfo/MDHD.html" });' + "' onclick='ClickMenu(this)'>" +
+        "<span class='aui-iconfont  aui-text-warning'></span><p>门店活动</p ></li>";
+        $("#ulMenu").html(_Content);
+        api.parseTapmode();
+        
+        var _Content2 = "";
+        _Content2 += "<li tapmode class='aui-col-xs-4 aui-text-center' data-id='' data-title='我的会员' data-appfunction='" + '$honesty.OpenWin({ title: "我的会员", name: "Info_Myhy", url: "HYInfo/MyHy.html" });' + "' onclick='ClickMenu(this)'>" +
+        "<span class='aui-iconfont  aui-text-warning'></span><p>我的会员</p ></li>";
+        _Content2 += "<li tapmode class='aui-col-xs-4 aui-text-center' data-id='' data-title='会员分组' data-appfunction='" + '$honesty.OpenWin({ title: "会员分组", name: "Info_HYFZ", url: "HYInfo/HYFZ.html" });' + "' onclick='ClickMenu(this)'>" +
+       "<span class='aui-iconfont  aui-text-warning'></span><p>会员分组</p ></li>";
+        _Content2 += "<li tapmode class='aui-col-xs-4 aui-text-center' data-id='' data-title='会员评价' data-appfunction='" + '$honesty.OpenWin({ title: "会员评价", name: "Info_HYPJ", url: "HYInfo/HYPJ.html" });' + "' onclick='ClickMenu(this)'>" +
+       "<span class='aui-iconfont  aui-text-warning'></span><p>会员评价</p ></li>";
+        _Content2 += "<li tapmode class='aui-col-xs-4 aui-text-center' data-id='' data-title='会员业绩' data-appfunction='" + '$honesty.OpenWin({ title: "会员业绩", name: "Info_HYYJ", url: "HYInfo/HYYJ.html" });' + "' onclick='ClickMenu(this)'>" +
+       "<span class='aui-iconfont  aui-text-warning'></span><p>会员业绩</p ></li>";
+        _Content2 += "<li tapmode class='aui-col-xs-4 aui-text-center' data-id='' data-title='会员分析' data-appfunction='" + '$honesty.OpenWin({ title: "会员分析", name: "Info_HYFX", url: "HYInfo/HYFX.html" });' + "' onclick='ClickMenu(this)'>" +
+       "<span class='aui-iconfont  aui-text-warning'></span><p>会员分析</p ></li>";
+        _Content2 += "<li tapmode class='aui-col-xs-4 aui-text-center' data-id='' data-title='会员打标' data-appfunction='" + '$honesty.OpenWin({ title: "会员打标", name: "Info_HYDB", url: "HYInfo/HYDB.html" });' + "' onclick='ClickMenu(this)'>" +
+       "<span class='aui-iconfont  aui-text-warning'></span><p>会员打标</p ></li>";
+       $("#ulMenu2").html(_Content2);
+        api.parseTapmode();
+    }
+    function ClickMenu(_Menu) {
+        var Menu = $(_Menu);
+        try {
+            var _options = {
+                PostData: {
+                    Params: {
+                        result: "ModifyVisitLog",
+                        EmpID: GetSession("UserID"),
+                        //ModuleID: Menu.attr("data-id"),
+                        ModuleName: Menu.attr("data-title"),
+                        AppVersion: api.appVersion,
+                        SystemType: api.systemType,
+                        SystemVersion: api.systemVersion,
+                        DeviceID: api.deviceId,
+                        DeviceModel: api.deviceModel,
+                        DeviceName: api.deviceName,
+                        Operator: api.operator,
+                        ConnectionType: api.connectionType,
+                        ScreenWidth: api.screenWidth,
+                        ScreenHeight: api.screenHeight
+                    },
+                    ProcName: "proc_SOM_Sys_ModuleVisitLog",
+                    DataType: "Bool",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                Loading: {
+                    Show: false
+                },
+                ShowError: false
+            };
+            $honesty.AjaxChannel(_options);
+        }
+        catch (e) {
+
+        }
+        eval(Menu.attr("data-appfunction"));
+    }
+</script>
+</html>

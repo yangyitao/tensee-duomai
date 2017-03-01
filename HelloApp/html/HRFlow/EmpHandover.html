@@ -1,0 +1,1699 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>工作交接流程</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-input-row .aui-input-addon {
+            width: 120px;
+            color: #8f8f94;
+            text-align: left;
+        }
+
+        .aui-input-form .aui-input-row .aui-input-addon {
+            padding-left: 8px;
+            font-weight: 300;
+            font-size: 13px;
+        }
+
+        .aui-list-view-cell {
+            padding: 5px 15px;
+        }
+
+        .aui-label-title {
+            text-align: right;
+            width: 90px;
+        }
+    </style>
+</head>
+<body>
+    <input id="ContractID" type="hidden" />
+    <input id="ContractOrganizeID" type="hidden" />
+    <input id="ContractEmpLevel" type="hidden" />
+    <input id="ContractLevelDesc" type="hidden" />
+    <input id="ContractIsleader" type="hidden" />
+    <input id="ContractSapCode" type="hidden" />
+    <input id="HandoverUserID" type="hidden" />
+    <div id="main">
+        <p class="aui-padded-5 aui-text-center" style="color: #3175af; font-size: 16px;">工作交接流程</p>
+        <div class="aui-card" style="margin-bottom: 0px;">
+            <ul class="aui-list-view" style="margin-bottom: 0px;">
+                <li class="aui-list-view-cell">
+                    <label id="InfoSN"></label>
+                    <p>单号</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="InfoEmpName"></label>
+                    <p>姓名</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="InfoWriteDate"></label>
+                    <p>日期</p>
+                </li>
+                <li class="aui-list-view-cell">
+                    <label id="InfoEmpCode"></label>
+                    <p>工号</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoAreaName"></label>
+                    <p>大区</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoProvince"></label>
+                    <p>区域</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoEmpPosition"></label>
+                    <p>岗位</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoSapCode"></label>
+                    <p>店铺代码</p>
+                </li>
+                <li class="aui-list-view-cell" data-role="baseMore" style="display: none">
+                    <label id="InfoShopName"></label>
+                    <p>店铺名称</p>
+                </li>
+                <li data-role="colspan" data-show="hide" class="aui-list-view-cell" id="liBaseMore">
+                    <p style="text-align: center">点击显示详情</p>
+                </li>
+            </ul>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; margin: 0 10px; font-size: 15px;">基本信息</p>
+        <div class="aui-card aui-input-form" style="margin-bottom: 0px;">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">交接人工号</span>
+                <input id="ContractCode" type="text" class="aui-input aui-important" placeholder="请填写员工工号" onchange="UserInfo()" disabled="disabled" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">交接人姓名</span>
+                <input id="ContractName" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">所在店铺</span>
+                <input id="ContractShopName" type="text" class="aui-input" readonly="readonly" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">岗位</span>
+                <input id="ContractPosition" type="text" class="aui-input" readonly="readonly" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">入职日期</span>
+                <input id="InDate" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">是否试用期</span>
+                <select class="aui-input aui-important" id="IsTry" disabled="disabled">
+                    <option value="">请选择...</option>
+                    <option value="否">否</option>
+                    <option value="是">是</option>
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">是否是店铺领导</span>
+                <select class="aui-input aui-important" id="IsLeader" disabled="disabled">
+                    <option value="">请选择...</option>
+                    <option value="否">否</option>
+                    <option value="是">是</option>
+                </select>
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; margin: 0 10px; font-size: 15px;">交接清单</p>
+        <div class="aui-card aui-input-form" style="margin-bottom: 0px;">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">工作交接原因</span>
+                <select class="aui-input aui-important" id="HandType" disabled="disabled">
+                    <option value="">请选择...</option>
+                    <option value="调动">调动</option>
+                    <option value="自动离职">自动离职</option>
+                    <option value="员工辞职">员工辞职</option>
+                    <option value="公司辞退">公司辞退</option>
+                    <option value="协商解除">协商解除</option>
+                    <option value="合同不续签">合同不续签</option>
+                </select>
+            </div>
+            <div class="aui-input-row" id="SalaryChangeFrom" style="display: none">
+                <span class="aui-input-addon">基本工资是否变更</span>
+                <select class="aui-input aui-important" id="SalaryChange" disabled="disabled">
+                    <option value="">请选择...</option>
+                    <option value="是">是</option>
+                    <option value="否">否</option>
+                </select>
+            </div>
+            <div class="aui-input-row" id="ChangeDateFrom" style="display: none">
+                <span class="aui-input-addon">基本工资生效日期</span>
+                <input id="ChangeDate" type="text" class="aui-input" readonly="readonly" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">相关流程单号</span>
+                <input id="LinkSN" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-input-row" id="LastDateFrom" style="display: none" title="NotSee">
+                <span class="aui-input-addon">最后工作日</span>
+                <input id="LastDate" type="text" class="aui-input" disabled="disabled" />
+            </div>
+            <div class="aui-input-row" id="TransLeaderFrom" style="display: none" title="NotSee">
+                <span class="aui-input-addon">是否调入店领导</span>
+                <select class="aui-input aui-important" id="IsShopLeader" disabled="disabled">
+                    <option value="">请选择...</option>
+                    <option value="是">是</option>
+                    <option value="否">否</option>
+                </select>
+            </div>
+            <div class="aui-input-row" id="SalesVolumeFrom" style="display: none" title="NotSee">
+                <span class="aui-input-addon">销售额</span>
+                <input id="SalesVolume" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-input-row" id="SalesTargetFrom" style="display: none" title="NotSee">
+                <span class="aui-input-addon">销售目标</span>
+                <input id="SalesTarget" type="text" class="aui-input aui-important" disabled="disabled" placeholder="请填写销售目标" />
+            </div>
+            <div class="aui-input-row" id="KindHandForm" style="display: none">
+                <span class="aui-input-addon">货品交接</span>
+                <select class="aui-input aui-important" id="KindHand" disabled="disabled">
+                    <option value="">请选择...</option>
+                    <option value="是">有差异</option>
+                    <option value="否">无差异</option>
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">工作牌</span>
+                <select class="aui-input aui-important" id="WorkPermit" disabled="disabled">
+                    <option value="">请选择...</option>
+                    <option value="是">已交接</option>
+                    <option value="否">未交接</option>
+                </select>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">工作服</span>
+                <select class="aui-input aui-important" id="WorkDress" disabled="disabled">
+                    <option value="">请选择...</option>
+                    <option value="是">已交接</option>
+                    <option value="否">未交接</option>
+                </select>
+            </div>
+            <div class="aui-input-row" id="WorkFilesForm" title="Shoplearder">
+                <span class="aui-input-addon">文件/书籍/手册</span>
+                <select class="aui-input aui-important" id="WorkFiles" disabled="disabled">
+                    <option value="">请选择...</option>
+                    <option value="是">已交接</option>
+                    <option value="否">未交接</option>
+                </select>
+            </div>
+            <div class="aui-input-row" id="UnWorkForm" title="Shoplearder">
+                <span class="aui-input-addon">未完成工作事项</span>
+                <input id="UnWork" type="text" class="aui-input aui-important" disabled="disabled" placeholder="请填写未完成工作事项" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">特别说明事项</span>
+                <input id="OtherNot" type="text" class="aui-input aui-important" disabled="disabled" placeholder="请填写特别说明事项" />
+            </div>
+            <div class="aui-input-row" id="HandoverForm" title="Shoplearder">
+                <span class="aui-input-addon">交接人</span>
+                <input id="Handover" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-input-row" id="HandoverNameForm" title="Shoplearder">
+                <span class="aui-input-addon">接收人</span>
+                <select class="aui-input aui-important" id="HandoverName" disabled="disabled">
+                </select>
+            </div>
+            <div class="aui-input-row" id="HandoverLeaderForm" style="display: none" title="NotSee">
+                <span class="aui-input-addon">接收人是否为临时负责人</span>
+                <select class="aui-input aui-important" id="HandoverLeader">
+                    <option value="">请选择...</option>
+                    <option value="是">是</option>
+                    <option value="否">否</option>
+                </select>
+            </div>
+        </div>
+        <p class="aui-padded-5 aui-text-left" style="color: #3175af; margin: 0 10px; font-size: 15px;">其他信息</p>
+        <div class="aui-card aui-input-form" style="margin-bottom: 0px;">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">合同开始日期</span>
+                <input id="ContractBegin" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">合同结束日期</span>
+                <input id="ContractEnd" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">劳动关系所在公司</span>
+                <input id="ContractCompany" type="text" class="aui-input aui-important" readonly="true" />
+            </div>
+            <div class="aui-input-row" id="DebtFrom" title="Finance">
+                <span class="aui-input-addon">欠款情况</span>
+                <select class="aui-input aui-important" id="Debt" disabled="disabled">
+                    <option value="">请选择...</option>
+                    <option value="是">已清理</option>
+                    <option value="否">未清理</option>
+                </select>
+            </div>
+            <div class="aui-input-row" id="ReimburseFrom" title="Finance">
+                <span class="aui-input-addon">报销情况</span>
+                <select class="aui-input aui-important" id="Reimburse" disabled="disabled">
+                    <option value="">请选择...</option>
+                    <option value="是">已清理</option>
+                    <option value="否">未清理</option>
+                </select>
+            </div>
+            <div class="aui-input-row" id="KindDiffFrom" title="Finance">
+                <span class="aui-input-addon">货品差异处理情况</span>
+                <select class="aui-input aui-important" id="KindDiff" disabled="disabled">
+                    <option value="">请选择...</option>
+                    <option value="是">已清理</option>
+                    <option value="否">未清理</option>
+                </select>
+            </div>
+            <div class="aui-input-row" id="IsProcedureFrom" title="human">
+                <span class="aui-input-addon">是否已办结手续</span>
+                <select class="aui-input aui-important" id="IsProcedure">
+                    <option value="">请选择...</option>
+                    <option value="是">是</option>
+                    <option value="否">否</option>
+                </select>
+            </div>
+            <div class="aui-input-row" id="LeftProveFrom" title="human">
+                <span class="aui-input-addon">是否开具离职证明</span>
+                <select class="aui-input aui-important" id="LeftProve">
+                    <option value="">请选择...</option>
+                    <option value="是">是</option>
+                    <option value="否">否</option>
+                </select>
+            </div>
+            <div class="aui-input-row" id="SocialOverDateFrom" title="human">
+                <span class="aui-input-addon">社会统筹缴纳至何时</span>
+                <input id="SocialOverDate" type="text" class="aui-input" />
+            </div>
+            <div class="aui-input-row" id="ComAssumeDateFrom" title="human">
+                <span class="aui-input-addon">公司承担部分</span>
+                <input id="ComAssume" type="text" class="aui-input aui-important" placeholder="请填写公司承担部分" />
+            </div>
+            <div class="aui-input-row" id="UserAssumeFrom" title="human">
+                <span class="aui-input-addon">个人承担部分</span>
+                <input id="UserAssume" type="text" class="aui-input aui-important" placeholder="请填写个人承担部分" />
+            </div>
+            <div class="aui-input-row" id="YearTimeFrom" title="human">
+                <span class="aui-input-addon">年假余额</span>
+                <input id="YearTime" type="text" class="aui-input aui-important" />
+            </div>
+            <div class="aui-input-row" id="ExtraTimeFrom" title="human">
+                <span class="aui-input-addon">调休假余额</span>
+                <input id="ExtraTime" type="text" class="aui-input aui-important" />
+            </div>
+            <div class="aui-btn-row">
+                <div class="aui-btn aui-btn-success" id="btnSlaves" style="float: left">上传附件</div>
+                <div style="float: left; width: 10px;">&nbsp;</div>
+                <div class="aui-btn aui-btn-warning" onclick="loadsheet()" style="float: left">店长交接表</div>
+                <table class="aui-salves" id="tbSlaves">
+                </table>
+            </div>
+        </div>
+    </div>
+    <div style="height: 100px"></div>
+</body>
+<script src="../../script/api.js"></script>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script src="../../script/honesty.flow.js"></script>
+<script src="../../script/honesty.valid.js"></script>
+<script type="text/javascript">
+    var IsRead = false;
+    var HandoverID = "";
+    var NowDate = $honesty.NowDate();
+    var _TypeArr = [];
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            $honestyFlow.InitFlow({ Async: false, wapflowpage: "HRFlow/EmpHandover" });
+            var InstanceID = $honestyFlow.GetFlowInfo("instanceid");
+            if (api.pageParam.instanceid != undefined) {
+                HandoverID = InstanceID;
+            }
+            //基本信息点击展示隐藏
+            $("#liBaseMore").tap(function () {
+                $("[data-role='baseMore']").fadeToggle(200);
+                if ($("#liBaseMore").attr("data-show") == "hide") {
+                    $("#liBaseMore").children("p").html("点击收起");
+                    $("#liBaseMore").attr("data-show", "show");
+                }
+                else {
+                    $("#liBaseMore").children("p").html("点击显示详情");
+                    $("#liBaseMore").attr("data-show", "hide");
+                }
+            });
+            InitBase();
+            //$honesty.GetUserInfo({
+            //    account: $("#ContractCode").val(),
+            //    callback: function (ret) {
+            //        var _IsLeader = ret.Data.IsLeader;
+            //        alert(_IsLeader);
+
+            //    }
+            //});
+            $("#btnSlaves").tap(function () {
+                $honesty.UploadSlaves("tbSlaves");
+            });
+
+            //提交
+            $("#btnSend").unbind("tap").tap(function () {
+                if (SaveData()) {
+                    $honestyFlow.SendFlow({
+                        ExecuteType: true,
+                        Callback: function () {
+                            if ($honestyFlow.GetFlowInfo("stepname") == "店长审批" || $honestyFlow.GetFlowInfo("stepname") == "零售区域经理审批" || $honestyFlow.GetFlowInfo("stepname") == "提交工作交接申请") {
+                                if (GetSession("UserCode") != $("#ContractCode").val()) {
+                                    var _salesVolume = "";
+                                    if ($("#SalesVolume").val() == "") {
+                                        _salesVolume = "0";
+                                    }
+                                    else {
+                                        _salesVolume = $("#SalesVolume").val();
+                                    }
+                                    var EmpHandover = {
+                                        PostData: {
+                                            ITable: {
+                                                "PTI_JJXSSJ": [{
+                                                    EMPID: $("#ContractID").val(),
+                                                    ZLSDH: $honestyFlow.GetFlowInfo("sn"),
+                                                    ZLKDH: $("#LinkSN").val(),
+                                                    Z_SAPCODE: $("#ContractSapCode").val(),
+                                                    Z_LDATE: $("#LastDate").val(),
+                                                    Z_HTYPE: $("#HandType").val(),
+                                                    Z_CHANGE: '否',
+                                                    Z_DATE: "9999/12/31",
+                                                    Z_XSJE: _salesVolume,
+                                                    Z_XSMB: $("#SalesTarget").val()
+                                                }]
+                                            },
+                                            Export: [
+                                                "POC_RETURN_ID",
+                                                "POC_RETURN_DESC"
+                                            ],
+                                            FunctionName: "ZHR_FM_GZJJBD_INPUT",
+                                            Mode: "RFC"
+                                        },
+                                        async: false
+                                    };
+                                    var _result = $honesty.AjaxChannel(EmpHandover);
+                                    if (_result.Code == "1") {
+                                        if (_result.Data.Export.POC_RETURN_ID == "000") {
+                                            if ($("#HandType").val() == "调动") {
+                                                //更新调动信息
+                                                var Concent = "<?xml version=\"1.0\" encoding=\"gb2312\"?><root>";
+                                                var _parames = {
+                                                    PostData: {
+                                                        Params: {
+                                                            result: "SelectTransInfo",
+                                                            SN: $("#LinkSN").val()
+                                                        },
+                                                        ProcName: "proc_SOM_HR_UpDateTransFer",
+                                                        DataType: "DataTable",
+                                                        ExecType: "PROC",
+                                                        Mode: "MSSQL"
+                                                    },
+                                                    async: false
+                                                };
+                                                var _table = $honesty.AjaxChannel(_parames);
+                                                if (_table["Data"].length > 0) {
+                                                    $.each(_table["Data"], function (i, item) {
+                                                        var _UserID = item.TransID;
+                                                        var _OrganizeID = item.NewOrganizeID;
+                                                        var _EmpLevel = item.NewEmpLevel;
+                                                        var _LevelDesc = item.NewLevelDesc;
+                                                        var _LinkSN = item.SN;
+                                                        var _transCode = item.TransCode;
+                                                        var _transName = item.TransName;
+                                                        var _oldDeviceSN = item.TransDeviceSN;
+                                                        var _predeviceSN = item.NewDeviceSN;
+                                                        var _oldShopCode = item.TransShopCode;
+                                                        var _preShopCode = item.NewShopCode;
+                                                        var _IsShopLeader = item.IsShopLeader;
+                                                        var _Sort = item.sort;
+                                                        var _IsLeader = item.IsLeader;
+                                                        var _ContractID = item.ContractID;
+                                                        var _Leader = item.Leader;
+                                                        var _HandoverName = item.HandoverName;
+                                                        var _HandoverLeader = item.HandoverLeader
+                                                        var _TransOrganizeID = item.TransOrganizeID
+                                                        var _HandoverUserID = item.HandoverUserID
+                                                        var _LastDate = item.LastDate
+                                                        var TransJson = {
+                                                            PostData: {
+                                                                Params: {
+                                                                    transCode: _transCode,
+                                                                    transName: _transName,
+                                                                    oldDeviceSN: _oldDeviceSN,
+                                                                    predeviceSN: _predeviceSN,
+                                                                    oldShopCode: _oldShopCode,
+                                                                    preShopCode: _preShopCode
+                                                                },
+                                                                URL: "employeeInfo/moveEmployeeDataToPos",
+                                                                Mode: "ESB",
+                                                                Handle: "POST"
+                                                            },
+                                                            async: false
+                                                        };
+                                                        var _resultTrans = $honesty.AjaxChannel(TransJson);
+                                                        if (_IsShopLeader == "是") {
+                                                            var TransPower1 = {
+                                                                PostData: {
+                                                                    Params: {
+                                                                        deviceSN: _predeviceSN,
+                                                                        userCode: _transCode,
+                                                                        userName: _transName,
+                                                                        power: "18"
+                                                                    },
+                                                                    URL: "iclock/modifyManager",
+                                                                    Mode: "ESB",
+                                                                    Handle: "POST"
+                                                                },
+                                                                async: false
+                                                            };
+                                                            var _resultPower = $honesty.AjaxChannel(TransPower1);
+                                                        }
+                                                        Concent += "<Item UserID=\"" + _UserID + "\" OrganizeID=\"" + _OrganizeID + "\" EmpLevel=\"" + _EmpLevel + "\" LevelDesc=\"" + _LevelDesc + "\" LinkSN=\"" + _LinkSN + "\" IsShopLeader=\"" + _IsShopLeader + "\" Sort=\"" + _Sort + "\" HandoverLeader=\"" + _HandoverLeader + "\" HandoverUserID=\"" + _HandoverUserID + "\" TransOrganizeID=\"" + _TransOrganizeID + "\" IsLeader=\"" + _IsLeader + "\" LastDate=\"" + _LastDate + "\"/>";
+                                                    });
+                                                    Concent += "</root>";
+                                                }
+                                                var _Userdata = {
+                                                    PostData: {
+                                                        Params: {
+                                                            result: "UpdataUsersData",
+                                                            Sql: Concent
+                                                        },
+                                                        ProcName: "proc_SOM_HR_UpDateTransFer",
+                                                        DataType: "DataTable",
+                                                        ExecType: "PROC",
+                                                        Mode: "MSSQL"
+                                                    },
+                                                    async: false
+                                                };
+                                                var _resultUserdata = $honesty.AjaxChannel(_Userdata);
+                                                if (_resultUserdata.Code == "1") {
+                                                    if (_result.Data == "True") {
+                                                        $honesty.CloseWin();
+                                                    }
+                                                }
+                                            }
+                                            else {
+                                                //更新工作交接原因不为调动的信息
+                                                var _ContractDimss = "<?xml version=\"1.0\" encoding=\"gb2312\"?><root>";
+                                                var _parames = {
+                                                    PostData: {
+                                                        Params: {
+                                                            result: "SelectDimissInfo",
+                                                            SN: $("#LinkSN").val()
+                                                        },
+                                                        ProcName: "proc_SOM_HR_UpDateTransFer",
+                                                        DataType: "DataTable",
+                                                        ExecType: "PROC",
+                                                        Mode: "MSSQL"
+                                                    },
+                                                    async: false
+                                                };
+                                                var _table = $honesty.AjaxChannel(_parames);
+                                                if (_table["Data"].length > 0) {
+                                                    $.each(_table["Data"], function (i, item) {
+                                                        var _UserID = item.ContractID;
+                                                        var _LinkSN = item.LinkSN;
+                                                        var _LastDate = item.LastDate;
+                                                        var _shopCode = item.ShopCode;
+                                                        var _deviceSN = item.CardMachineNum;
+                                                        var _empCode = item.ContractCode;
+                                                        _ContractDimss += "<Item UserID=\"" + _UserID + "\" LinkSN=\"" + _LinkSN + "\" LastDate=\"" + _LastDate + "\"/>";
+                                                        var DissJson = {
+                                                            PostData: {
+                                                                Params: {
+                                                                    empCode: _empCode,
+                                                                    deviceSN: _deviceSN,
+                                                                    shopCode: _shopCode
+                                                                },
+                                                                URL: "employeeEvent/dismissionDateToPos",
+                                                                Mode: "ESB",
+                                                                Handle: "POST"
+                                                            },
+                                                            async: false
+                                                        };
+                                                        var _resultDiss = $honesty.AjaxChannel(DissJson);
+                                                    });
+                                                    _ContractDimss += "</root>";
+
+                                                    var _Userdata = {
+                                                        PostData: {
+                                                            Params: {
+                                                                result: "DeleteUser",
+                                                                Sql: _ContractDimss
+                                                            },
+                                                            ProcName: "proc_SOM_HR_UpDateTransFer",
+                                                            DataType: "DataTable",
+                                                            ExecType: "PROC",
+                                                            Mode: "MSSQL"
+                                                        },
+                                                        async: false
+                                                    };
+                                                    var _resultUserdata = $honesty.AjaxChannel(_Userdata);
+                                                    if (_resultUserdata.Code == "1") {
+                                                        if (_resultUserdata.Data == "True") {
+                                                            $honesty.CloseWin();
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        else {
+                                            $honesty.ShowMsg({ msg: _result.Data.Export.POC_RETURN_DESC, title: "警告" });
+                                            return false;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+            //暂存
+            $("#btnPause").unbind("tap").tap(function () {
+                if (SaveData()) {
+                    $honestyFlow.PauseFlow();
+                }
+            });
+            //退回
+            $("#btnBack").unbind("tap").tap(function () {
+                $honestyFlow.BackFlow({
+                    Callback: function () {
+                        var _options = {
+                            PostData: {
+                                Params: {
+                                    result: "BackHand",
+                                    SN: $honestyFlow.GetFlowInfo("sn")
+                                },
+                                ProcName: "proc_SOM_HR_EmpHandover",
+                                DataType: "Bool",
+                                ExecType: "PROC",
+                                Mode: "MSSQL"
+                            },
+                            async: false
+                        };
+                        var _result = $honesty.AjaxChannel(_options);
+                    }
+
+                });
+            });
+            //完成
+            $("#btnComplete").unbind("tap").tap(function () {
+                $honestyFlow.CompleteFlow();
+            });
+            $("#LastDate").tap(function () {
+                if ($honestyFlow.GetFlowInfo("stepname") == "店长审批" || $honestyFlow.GetFlowInfo("stepname") == "零售区域经理审批" || $honestyFlow.GetFlowInfo("stepname") == "提交工作交接申请") {
+                    if ($("#ContractCode").val() != GetSession("UserCode")) {
+                        $honesty.DateTimeSelect({
+                            Type: "Date",
+                            ControlID: "LastDate",
+                            ControlValue: $(this).val(),
+                            onchange: function (ret) {
+                                if (ret) {
+                                    if ($("#LastDate").val() != "") {
+
+                                        if (new Date($("#LastDate").val().replace(/-/g, "/")) > NowDate) {
+                                            $("#LastDate").val("");
+                                            $honesty.ShowMsg({ msg: "最后工作日不能大于当前时间！", title: "警告" });
+                                        }
+                                        else {
+                                            $("#LastDate").val(new Date($("#LastDate").val().replace(/-/g, "/")).Format("yyyy/MM/dd"));
+                                            if ($("#HandType").val() != "") {
+                                                var _parames = {
+                                                    PostData: {
+                                                        Params: {
+                                                            result: "SelectSale",
+                                                            EmpLevel: $("#ContractEmpLevel").val(),
+                                                            LastDate: $("#LastDate").val(),
+                                                            EmpID: $("#ContractID").val(),
+                                                            OrganizeID: $("#ContractOrganizeID").val()
+                                                        },
+                                                        ProcName: "proc_SOM_HR_EmpHandover",
+                                                        DataType: "DataTable",
+                                                        ExecType: "PROC",
+                                                        Mode: "MSSQL"
+                                                    },
+                                                    async: false
+                                                };
+                                                var _table = $honesty.AjaxChannel(_parames);
+                                                if (_table["Data"].length > 0) {
+                                                    $.each(_table["Data"], function (i, item) {
+                                                        $("#SalesVolume").val(item.ActualSale);
+                                                    });
+                                                }
+
+                                                var _Fault = 0;
+                                                var _IsFault = {
+                                                    PostData: {
+                                                        Params: {
+                                                            Result: "EmpFault",
+                                                            EmpID: $("#ContractID").val(),
+                                                            LastDate: $("#LastDate").val()
+                                                        },
+                                                        ProcName: "proc_SOM_HR_EmpHandover",
+                                                        DataType: "DataTable",
+                                                        ExecType: "PROC",
+                                                        Mode: "MSSQL"
+                                                    },
+                                                    async: false
+                                                };
+                                                var _resultIsDimiss = $honesty.AjaxChannel(_IsFault);
+                                                if (_resultIsDimiss.Data.length > 0) {
+                                                    $.each(_resultIsDimiss.Data, function (i, item) {
+                                                        _Fault = item.lins;
+                                                    });
+                                                }
+                                                if (_Fault > 0) {
+                                                    $honesty.ShowMsg({ msg: "当前工作交接人考勤存在异常，请确认完再提交数据，如有疑问请咨询当地HR", title: "警告" });
+                                                    $("#LastDate").val("");
+                                                }
+
+                                            }
+                                            else {
+                                                $("#LastDate").val("");
+                                                $honesty.ShowMsg({ msg: "请选择工作交接原因！", title: "警告" });
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                        });
+                    }
+                }
+            });
+            $("#SocialOverDate").tap(function () {
+                if ($honestyFlow.GetFlowInfo("stepname") == "人事确认") {
+                    $honesty.DateTimeSelect({
+                        ControlID: "SocialOverDate",
+                        ControlValue: $(this).val(),
+                        onchange: function (ret) {
+                            if (ret) {
+                                if ($("#SocialOverDate").val() != "") {
+                                    var _SocialOverDate = new Date($("#SocialOverDate").val().replace(/-/g, "/"));
+                                    $("#SocialOverDate").val(_SocialOverDate);
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+            $("#ChangeDate").tap(function () {
+                if ($honestyFlow.GetFlowInfo("stepname") == "提交工作交接申请") {
+                    $honesty.DateTimeSelect({
+                        ControlID: "ChangeDate",
+                        ControlValue: $(this).val(),
+                        onchange: function (ret) {
+                            if (ret) {
+                                if ($("#ChangeDate").val() != "") {
+                                    var _Date = new Date($("#ChangeDate").val().replace(/-/g, "/"));
+                                    var _ChangeDate = _Date.getFullYear() + "/" + (_Date.getMonth() + 1) + "/" + "01";
+                                    $("#ChangeDate").val(new Date(_ChangeDate).Format("yyyy/MM/dd"));
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+            $("#HandoverName").change(function () {
+                if ($("#HandoverName").val() == $("#ContractName").val()) {
+                    $honesty.ShowMsg({
+                        title: "警告", msg: "接收人不能为交接人！", callback: function () {
+                            $("#HandoverName").val("");
+                        }
+                    });
+                }
+                else {
+                    var _HandoverUserID = $("#HandoverName").find("option:selected").attr("title");
+                    $("#HandoverUserID").val(_HandoverUserID);
+                }
+            });
+            $("#HandoverLeader").change(function () {
+                if ($("#HandoverLeader").val() == "否") {
+                    $("#HandoverName").val("");
+                    $("#HandoverName").removeAttr("disabled", "");
+                }
+                else {
+                    if ($("#HandoverName").val() == "") {
+                        $honesty.ShowMsg({
+                            title: "警告", msg: "请重新选择接收人！", callback: function () {
+                                $("#HandoverLeader").val("");
+                            }
+                        });
+                    }
+                }
+            });
+            //$("#SalaryChange").change(function () {
+            //    if ($("#SalaryChange").val() == "是") {
+            //        $("#ChangeDateFrom").css("display", "");
+            //    }
+            //    else {
+            //        $("#ChangeDateFrom").css("display", "none");
+            //        $("#ChangeDate").html("");
+            //    }
+            //});
+            $("#HandType").change(function () {
+                if ($("#ContractCode").val() != "") {
+                    //if ($("#ContractCode").val() != GetSession("UserCode")) {
+                    //    if ($("#HandType").val() == "调动") {
+                    //        $("#SalaryChangeFrom").css("display", "");
+                    //    }
+                    //    else {
+                    //        $("#TransLeaderFrom").css("display", "none");
+                    //    }
+                    //}
+                    if ($("#HandType").val() == "") {
+                        $honesty.ShowMsg({
+                            title: "警告", msg: "请选择工作交接原因！", callback: function () {
+                                $("#LinkSN").val("");
+                            }
+                        });
+                        return false;
+                    }
+                    else {
+                        var _parames = {
+                            PostData: {
+                                Params: {
+                                    result: "SelectLinkSN",
+                                    HandType: $("#HandType").val(),
+                                    ContractID: $("#ContractID").val()
+                                },
+                                ProcName: "proc_SOM_HR_EmpHandover",
+                                DataType: "DataTable",
+                                ExecType: "PROC",
+                                Mode: "MSSQL"
+                            },
+                            async: false
+                        };
+                        var _table = $honesty.AjaxChannel(_parames);
+                        if (_table["Data"].length > 0) {
+                            $.each(_table["Data"], function (i, item) {
+                                $("#LinkSN").val(item.SN);
+                            });
+                        }
+                        else {
+                            $honesty.ShowMsg({
+                                title: "警告", msg: "该员工暂无已完成的相关流程,请重新确认！", callback: function () {
+                                    //$('#HandType option:eq(0)').attr('selected', 'selected');
+                                    $("#HandType").val("");
+                                    $("#LinkSN").val("");
+                                }
+                            });
+                        }
+                    }
+                }
+                else {
+                    $honesty.ShowMsg({ msg: "请先输入员工工号", title: "警告" });
+                    return false;
+                }
+            });
+            $("#SalesTarget").change(function () {
+                var re = /^[0-9]+[0-9]*]*$/
+                if (!re.test($("#SalesTarget").val())) {
+                    $("#SalesTarget").val("");
+                    $honesty.ShowMsg({ msg: "输入不合法，请输入正整数", title: "警告" });
+                    return false;
+                }
+                if ($("#SalesTarget").val() == 0) {
+                    $("#SalesTarget").val("");
+                    $honesty.ShowMsg({ msg: "如果没有销售目标,请输入1！", title: "警告" });
+                    return false;
+                }
+                var _KIP = Number($("#SalesVolume").val() / $("#SalesTarget").val()).toFixed(2);
+                if (_KIP > 9.99) {
+                    $("#SalesTarget").val("");
+                    $honesty.ShowMsg({ msg: "输入的目标,达成率超过10倍,请重新输入！", title: "警告" });
+                    return false;
+                }
+            });
+        })
+    };
+    //加载基础信息
+    function InitBase() {
+        if ($honestyFlow.GetFlowInfo("isread") == "false") {
+            IsRead = true;
+        }
+        if (HandoverID != "") {
+            var _options = {
+                PostData: {
+                    Params: {
+                        Result: "InitEmpHandover",
+                        ID: HandoverID
+                    },
+                    ProcName: "proc_SOM_HR_EmpHandover",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    if (_result.Data.length > 0) {
+                        $.each(_result.Data, function (i, item) {
+                            $("#InfoSN").html(item.SN);
+                            $("#InfoWriteDate").html(item.WriteDate);
+                            $("#InfoEmpCode").html(item.EmpCode);
+                            $("#InfoEmpName").html(item.EmpName);
+                            $("#InfoAreaName").html(item.AreaName);
+                            $("#InfoProvince").html(item.Province);
+                            $("#InfoShopName").html(item.ShopName);
+                            $("#InfoEmpPosition").html(item.EmpPosition);
+                            $("#InfoSapCode").html(item.SapCode);
+                            $("#ContractID").val(item.ContractID);
+                            $("#ContractCode").val(item.ContractCode);
+                            $("#ContractName").val(item.ContractName);
+                            $("#ContractPosition").val(item.ContractPosition);
+                            $("#InDate").val(item.InDate);
+                            $("#IsLeader").val(item.IsLeader);
+                            $("#ContractShopName").val(item.ContractShopName);
+                            $("#IsTry").val(item.IsTry);
+                            $("#ContractBegin").val(item.ContractBegin);
+                            $("#ContractEnd").val(item.ContractEnd);
+                            $("#ContractCompany").val(item.ContractCompany);
+                            $("#HandType").val(item.HandType);
+                            $("#SalaryChange").val(item.SalaryChange);
+                            $("#ChangeDate").val(item.ChangeDate);
+                            $("#LinkSN").val(item.LinkSN);
+                            $("#LastDate").val(item.LastDate);
+                            $("#HandoverLeader").val(item.HandoverLeader == "null" ? "" : item.HandoverLeader);
+                            $("#IsShopLeader").val(item.IsShopLeader);
+                            $("#SalesVolume").val(item.SalesVolume);
+                            $("#SalesTarget").val(item.SalesTarget);
+                            $("#KindHand").val(item.KindHand);
+                            $("#WorkPermit").val(item.WorkPermit);
+                            $("#WorkDress").val(item.WorkDress);
+                            $("#WorkFiles").val(item.WorkFiles);
+                            $("#UnWork").val(item.UnWork);
+                            $("#OtherNot").val(item.OtherNot);
+                            $("#Handover").val(item.EmpName);
+                            $("#HandoverUserID").val(item.HandoverUserID)
+                            $("#Debt").val(item.Debt);
+                            $("#Reimburse").val(item.Reimburse);
+                            $("#KindDiff").val(item.KindDiff);
+                            $("#IsProcedure").val(item.IsProcedure);
+                            $("#LeftProve").val(item.LeftProve);
+                            $("#SocialOverDate").val(item.SocialOverDate);
+                            $("#ComAssume").val(item.ComAssume);
+                            $("#UserAssume").val(item.UserAssume);
+                            $("#YearTime").val(item.YearTime);
+                            $("#ExtraTime").val(item.ExtraTime);
+                            $("#ContractSapCode").val(item.ContractSapCode);
+                            $("#ContractOrganizeID").val(item.ContractOrganizeID);
+                            $("#ContractEmpLevel").val(item.ContractEmpLevel);
+                            $("#ContractIsleader").val(item.ContractIsleader);
+                            //加载附件列表
+                            $honesty.InitSlaves({
+                                con_id: "tbSlaves", dataname: "tbSlaves", move: IsRead, files: item.Slaves
+                            });
+                            $honesty.GetUserInfo({
+                                account: $("#ContractCode").val(),
+                                callback: function (ret) {
+                                    if (ret.Code == 1) {
+                                        if ($honestyFlow.GetFlowInfo("stepname") == "提交工作交接申请" || $honestyFlow.GetFlowInfo("stepname") == "店长审批" || $honestyFlow.GetFlowInfo("stepname") == "零售区域经理审批") {
+                                            var _OrganizeID = ret.Data.OrganizeID;
+                                            var _Content = "<option value=''>请选择...</option>";
+                                            //获取所有店铺所有人员
+                                            var _People = {
+                                                PostData: {
+                                                    Params: {
+                                                        Result: "SelectPeople",
+                                                        OrganizeID: $("#ContractOrganizeID").val()
+                                                    },
+                                                    ProcName: "proc_SOM_HR_EmpHandover",
+                                                    DataType: "DataTable",
+                                                    ExecType: "PROC",
+                                                    Mode: "MSSQL"
+                                                },
+                                                async: false
+                                            };
+                                            var _result = $honesty.AjaxChannel(_People);
+                                            if (_result.Data.length > 0) {
+                                                $.each(_result.Data, function (i, item) {
+                                                    _Content += "<option title='" + item.ID + "' value='" + item.Name + "'>" + item.Name + "</option>";
+                                                });
+                                            }
+                                            $("#HandoverName").html(_Content);
+                                            $("#HandoverName").val(item.HandoverName);
+                                        }
+                                        //var sel = document.getElementById("HandoverName");
+                                        //sel.options.length = 0;
+                                        //if (sel.options.length <= 0) {
+                                        //    $("#HandoverName").html("<option selected='selected' value='" + item.HandoverName + "'>" + item.HandoverName + "</option>");
+                                        //}
+                                    }
+                                }
+                            });
+                        });
+                    }
+                    if ($honestyFlow.GetFlowInfo("stepname") != "提交工作交接申请") {
+                        $("#divMain input").attr("readonly", "readonly");
+                        $("#divMain select").attr("disabled", "disabled");
+                    }
+                    if (!IsRead) {
+                        $("#divMain input").attr("readonly", "readonly");
+                        $("#divMain select").attr("disabled", "disabled");
+                        $("#btnSlaves,#btnClear").hide();
+                    }
+                    SetpControl();
+                }
+            })
+        }
+        else {
+            HandoverID = $honestyFlow.GetFlowInfo("instanceid");
+            $("#InfoSN").html($honestyFlow.GetFlowInfo("SN"));
+            $("#InfoWriteDate").html($honesty.NowDate().Format("yyyy-MM-dd"));
+            $("#InfoEmpCode").html(GetSession("UserCode"));
+            $("#InfoEmpName").html(GetSession("UserName"));
+            $("#InfoAreaName").html(GetSession("AreaName"));
+            $("#InfoProvince").html(GetSession("Province"));
+            $("#InfoShopName").html(GetSession("ShopName"));
+            $("#InfoEmpPosition").html(GetSession("Position"));
+            $("#InfoSapCode").html(GetSession("SapCode"));
+            $("#ContractIsleader").val(GetSession("IsLeader"));
+            $("div[title='Shoplearder']").css("display", "none");
+            $("#KindHandForm").css("display", "");
+            $("#ContractCode").val(GetSession("UserCode"));
+            $("#ContractID").val(GetSession("UserID"));
+            $("#ContractName").val(GetSession("UserName"));
+            $("#ContractOrganizeID").val(GetSession("OrganizeID"));
+            $("#ContractPosition").val(GetSession("Position"));
+            $("#ContractLevelDesc").val(GetSession("LevelDesc"));
+            $("#ContractEmpLevel").val(GetSession("EmpLevel"));
+            $("#InDate").val(GetSession("CreateDate"));
+            if (GetSession("IsLeader") == 1) {
+                $("#IsLeader").val("是");
+            }
+            else {
+                $("#IsLeader").val("否");
+            }
+            $("#ContractShopName").val(GetSession("ShopName"));
+            $("#ContractBegin").val(GetSession("ContractBegin"));
+            $("#ContractEnd").val(GetSession("ContractEnd"));
+            $("#ContractCompany").val(GetSession("CompanyName"));
+            $("#Handover").val(GetSession("UserName"));
+            $("#ContractSapCode").val(GetSession("SapCode"));
+            var _Content = "<option value=''>请选择...</option>";
+            //获取所有店铺所有人员
+            var _People = {
+                PostData: {
+                    Params: {
+                        Result: "SelectPeople",
+                        UserID: GetSession("UserID"),
+                        OrganizeID: GetSession("OrganizeID")
+                    },
+                    ProcName: "proc_SOM_ISR_Meetting",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                async: false
+            };
+            var _result = $honesty.AjaxChannel(_People);
+
+            if (_result.Data.length > 0) {
+                $.each(_result.Data, function (i, item) {
+                    _Content += "<option title='" + item.UserID + "' value='" + item.Name + "'>" + item.Name + "</option>";
+                });
+            }
+            $("#HandoverName").html(_Content);
+            SetpControl();
+        }
+    }
+    function SetpControl() {
+        if ($honestyFlow.GetFlowInfo("stepname") == "提交工作交接申请" || $honestyFlow.GetFlowInfo("stepname") == "店长审批" || $honestyFlow.GetFlowInfo("stepname") == "零售区域经理审批") {
+            $("div[title='Finance']").css("display", "none");
+            $("div[title='human']").css("display", "none");
+        }
+        if ($honestyFlow.GetFlowInfo("stepname") == "提交工作交接申请") {
+            $("#IsTry,#HandType,#KindHand,#WorkPermit,#WorkDress,#OtherNot,#btnSlaves,#WorkFiles,#UnWork,#HandoverName").removeAttr("disabled", "");
+            $("#SalesTarget").removeAttr("disabled", "");
+            if ($("#ContractIsleader").val() != "1") {
+                if (GetSession("DeptName") == "人力行政部") {
+                    $("#ContractCode").removeAttr("disabled", "");
+                }
+                $("div[title='Shoplearder']").css("display", "none");
+                $("#KindHandForm").css("display", "");
+            }
+            else {
+                $("#ContractCode").removeAttr("disabled", "");
+                $("div[title='Shoplearder']").css("display", "");
+                $("#KindHandForm").css("display", "none");
+            }
+            if (GetSession("UserCode") == $("#ContractCode").val()) {
+                $("#HandType option[value='自动离职']").remove();
+                $("#HandType option[value='公司辞退']").remove();
+            }
+            else {
+                $("#HandType option[value='协商解除']").remove();
+                $("#HandType option[value='员工辞职']").remove();
+            }
+            if ($("#ContractCode").val() != GetSession("UserCode")) {
+                $("div[title='NotSee']").css("display", "");
+                //if ($("#HandType").val() == "调动") {
+                //    $("#SalaryChangeFrom").css("display", "");
+                //    $("#TransLeaderFrom").css("display", "");
+                //    if ($("#SalaryChange").val() == "是") {
+                //        $("#ChangeDateFrom").css("display", "");
+                //    }
+                //}
+                if ($("#IsLeader").val() != "是") {
+                    $("#HandoverLeaderForm").css("display", "none");
+                }
+            }
+        }
+        if ($honestyFlow.GetFlowInfo("stepname") == "店长审批" || $honestyFlow.GetFlowInfo("stepname") == "零售区域经理审批") {
+            $("#IsTry,#HandType,#KindHand,#WorkPermit,#WorkDress,#OtherNot,#btnSlaves,#WorkFiles,#UnWork,#HandoverName").attr("disabled", "disabled");
+            $("#IsShopLeader,#SalaryChange").removeAttr("disabled");
+            $("#ChangeDate").tap(function () {
+                $honesty.DateTimeSelect({
+                    Type: "Date",
+                    ControlID: "ChangeDate",
+                    ControlValue: $("#ChangeDate").val(),
+                    onchange: function (ret) {
+                        if (ret) {
+                            if ($("#ChangeDate").val() != "") {
+                                var _ChangeDate = $("#ChangeDate").val().replace(/-/g, "/");
+                                $("#ChangeDate").val(_ChangeDate);
+                            }
+                        }
+                    }
+                });
+            });
+
+
+            $("div[title='NotSee']").css("display", "");
+            //if ($("#HandType").val() == "调动") {
+            //    $("#SalaryChangeFrom").css("display", "");
+            //    $("#TransLeaderFrom").css("display", "");
+            //    if ($("#SalaryChange").val() == "是") {
+            //        $("#ChangeDateFrom").css("display", "");
+            //    }
+            //}
+            //else {
+            //    $("#TransLeaderFrom").css("display", "none");
+            //}
+            if ($("#IsLeader").val() != "是") {
+                $("#HandoverLeaderForm").css("display", "none");
+            }
+            else {
+                $("#HandoverLeaderForm").css("display", "");
+            }
+            $("#SalesTarget").removeAttr("disabled", "");
+            if ($("#ContractIsleader").val() != "1") {
+                $("div[title='Shoplearder']").css("display", "none");
+                $("#KindHandForm").css("display", "");
+            }
+            else {
+                $("div[title='Shoplearder']").css("display", "");
+                $("#KindHandForm").css("display", "none");
+            }
+        }
+        if ($honestyFlow.GetFlowInfo("stepname") == "财务确认") {
+            $("#IsTry,#HandType,#KindHand,#WorkPermit,#WorkDress,#OtherNot,#btnSlaves,#WorkFiles,#UnWork,#HandoverName").attr("disabled", "disabled");
+            $("div[title='NotSee']").css("display", "");
+            //if ($("#HandType").val() == "调动") {
+            //    $("#SalaryChangeFrom").css("display", "");
+            //    $("#TransLeaderFrom").css("display", "");
+            //    if ($("#SalaryChange").val() == "是") {
+            //        $("#ChangeDateFrom").css("display", "");
+            //    }
+            //}
+            //else {
+            //    $("#TransLeaderFrom").css("display", "none");
+            //}
+            if ($("#IsLeader").val() != "是") {
+                $("#HandoverLeaderForm").css("display", "none");
+            }
+            else {
+                $("#HandoverLeaderForm").css("display", "");
+            }
+            $("div[title='Finance']").css("display", "");
+            $("div[title='human']").css("display", "none");
+            $("#Debt,#Reimburse,#KindDiff").removeAttr("disabled", "");
+            if ($("#ContractIsleader").val() != "1") {
+                $("div[title='Shoplearder']").css("display", "none");
+                $("#KindHandForm").css("display", "");
+            }
+            else {
+                $("div[title='Shoplearder']").css("display", "");
+                $("#KindHandForm").css("display", "none");
+            }
+        }
+
+        if ($honestyFlow.GetFlowInfo("stepname") == "人事确认") {
+            $("#IsTry,#HandType,#KindHand,#WorkPermit,#WorkDress,#OtherNot,#btnSlaves,#WorkFiles,#UnWork,#HandoverName").attr("disabled", "disabled");
+            $("div[title='NotSee']").css("display", "");
+            //if ($("#HandType").val() == "调动") {
+            //    $("#SalaryChangeFrom").css("display", "");
+            //    $("#TransLeaderFrom").css("display", "");
+            //    if ($("#SalaryChange").val() == "是") {
+            //        $("#ChangeDateFrom").css("display", "");
+            //    }
+            //}
+            //else {
+            //    $("#TransLeaderFrom").css("display", "none");
+            //}
+            if ($("#IsLeader").val() != "是") {
+                $("#HandoverLeaderForm").css("display", "none");
+            }
+            else {
+                $("#HandoverLeaderForm").css("display", "");
+            }
+            if ($("#ContractIsleader").val() != "1") {
+                $("div[title='Shoplearder']").css("display", "none");
+                $("#KindHandForm").css("display", "");
+            }
+            else {
+                $("div[title='Shoplearder']").css("display", "");
+                $("#KindHandForm").css("display", "none");
+            }
+            $("#SalaryChange,#IsShopLeader,#HandoverLeader,#KindDiff").attr("disabled", "disabled");
+            var _Year = {
+                PostData: {
+                    Params: {
+                        empId: $("#ContractID").val().toUpperCase(),
+                        sn: $honestyFlow.GetFlowInfo("sn"),
+                        zYear: new Date(NowDate()).Format("yyyy"),
+                        zDays: 0,
+                        edit: ""
+                    },
+                    URL: "employeeEvent/holiday",
+                    Mode: "ESB",
+                    Handle: "GET"
+                },
+                async: false
+            };
+            var _YearTime = $honesty.AjaxChannel(_Year);
+            $.each(_YearTime["Data"], function (i, item) {
+                $("#YearTime").val(item.yearDay);
+            });
+
+            var _options = {
+                PostData: {
+                    result: "ExtraTime",
+                    EmpID: $("#ContractID").val(),
+                    SN: $honestyFlow.GetFlowInfo("sn")
+                },
+                MathType: "ExtraTime",
+                Loading: {
+                    Title: "获取调休额度...",
+                    Show: true
+                }
+            };
+            $.when($honesty.AjaxAttend(_options)).done(function (_result) {
+                if (_result.ExtraTime != "") {
+                    if (_result.ExtraTime < 0) {
+                        _result.ExtraTime = 0.0;
+                    }
+                    $("#ExtraTime").val(_result.ExtraTime);
+                }
+            });
+        }
+    }
+    function SaveData() {
+        var sel = document.getElementById("HandoverName");
+        if ($honestyFlow.GetFlowInfo("stepname") == "人事确认") {
+            if ($("#IsProcedure").val() == "") {
+                $honesty.ShowMsg({ msg: "请选择是否已办结手续", title: "警告" });
+                return false;
+            }
+            if ($("#LeftProve").val() == "") {
+                $honesty.ShowMsg({ msg: "请选择是否开具离职证明", title: "警告" });
+                return false;
+            }
+            if ($("#ComAssume").val() == "") {
+                $("#ComAssume").val(0);
+            }
+            if ($("#UserAssume").val() == "") {
+                $("#UserAssume").val(0);
+            }
+            if ($("#YearTime").val() == "") {
+                $("#YearTime").val(0);
+            }
+            if ($("#ExtraTime").val() == "") {
+                $("#ExtraTime").val(0);
+            }
+
+            var _options = {
+                PostData: {
+                    Params: {
+                        result: "UpdataEmpHandover3",
+                        ID: HandoverID,
+                        IsProcedure: $("#IsProcedure").val(),
+                        LeftProve: $("#LeftProve").val(),
+                        SocialOverDate: $("#SocialOverDate").val(),
+                        ComAssume: $("#ComAssume").val(),
+                        UserAssume: $("#UserAssume").val(),
+                        YearTime: $("#YearTime").val(),
+                        ExtraTime: $("#ExtraTime").val()
+                    },
+                    ProcName: "proc_SOM_HR_EmpHandover",
+                    DataType: "Bool",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                async: false
+            };
+            var _result = $honesty.AjaxChannel(_options);
+            if (_result.Data == "True") {
+                return true;
+            }
+            else {
+                $honesty.ShowMsg({ msg: "业务数据保存失败", title: "警告" });
+                return false;
+            }
+        }
+        if ($honestyFlow.GetFlowInfo("stepname") == "财务确认") {
+            if ($("#Debt").val() == "") {
+                $honesty.ShowMsg({ msg: "请选择欠款情况", title: "警告" });
+                return false;
+            }
+            if ($("#Reimburse").val() == "") {
+                $honesty.ShowMsg({ msg: "请选报销情况", title: "警告" });
+                return false;
+            }
+            if ($("#KindDiff").val() == "") {
+                $honesty.ShowMsg({ msg: "请选择货品差异处理情况", title: "警告" });
+                return false;
+            }
+            var _options = {
+                PostData: {
+                    Params: {
+                        result: "UpdataEmpHandover2",
+                        ID: HandoverID,
+                        Debt: $("#Debt").val(),
+                        Reimburse: $("#Reimburse").val(),
+                        KindDiff: $("#KindDiff").val()
+                    },
+                    ProcName: "proc_SOM_HR_EmpHandover",
+                    DataType: "Bool",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                async: false
+            };
+            var _result = $honesty.AjaxChannel(_options);
+            if (_result.Data == "True") {
+                return true;
+            }
+            else {
+                $honesty.ShowMsg({ msg: "业务数据保存失败", title: "警告" });
+                return false;
+            }
+        }
+
+        if ($honestyFlow.GetFlowInfo("stepname") == "店长审批" || $honestyFlow.GetFlowInfo("stepname") == "零售区域经理审批") {
+            if ($("#LastDate").val() == "") {
+                $honesty.ShowMsg({ msg: "请选择最后工作日时间", title: "警告" });
+                return false;
+            }
+            var _Fault = 0;
+            var _IsFault = {
+                PostData: {
+                    Params: {
+                        Result: "EmpFault",
+                        EmpID: $("#ContractID").val(),
+                        LastDate: $("#LastDate").val()
+                    },
+                    ProcName: "proc_SOM_HR_EmpHandover",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                async: false
+            };
+            var _resultIsDimiss = $honesty.AjaxChannel(_IsFault);
+            if (_resultIsDimiss.Data.length > 0) {
+                $.each(_resultIsDimiss.Data, function (i, item) {
+                    _Fault = item.lins;
+                });
+            }
+            if (_Fault > 0) {
+                $honesty.ShowMsg({ msg: "当前工作交接人考勤存在异常，请确认完再提交数据，如有疑问请咨询当地HR", title: "警告" });
+                return false;
+            }
+            if (sel.options.length > 2) {
+                if ($("#IsLeader").val() == "是") {
+                    if ($("#HandoverLeader").val() == "") {
+                        $honesty.ShowMsg({ msg: "请选择接收人是否为店铺临时负责人", title: "警告" });
+                        return false;
+                    }
+                }
+            }
+            if ($("#SalesTarget").val() == "" || $("#SalesTarget").val() == "0") {
+                $honesty.ShowMsg({ msg: "请填写销售目标", title: "警告" });
+                return false;
+            }
+            if ($("#HandType").val() == "调动") {
+                if ($("#IsShopLeader").val() == "") {
+                    $honesty.ShowMsg({ msg: "请选择是否为调入店领导", title: "警告" });
+                    return false;
+                }
+                //if ($("#SalaryChange").val() == "") {
+                //    $honesty.ShowMsg({ msg: "请选择基本工资是否有变更", title: "警告" });
+                //    return false;
+                //}
+                //if ($("#SalaryChange").val() == "是") {
+                //    if ($("#ChangeDate").val() == "") {
+                //        $honesty.ShowMsg({ msg: "请选择基本工资生效日期", title: "警告" });
+                //        return false;
+                //    }
+                //}
+            }
+            var _options = {
+                PostData: {
+                    Params: {
+                        result: "UpdataEmpHandover1",
+                        ID: HandoverID,
+                        LastDate: $("#LastDate").val(),
+                        HandoverLeader: $("#HandoverLeader").val(),
+                        IsShopLeader: $("#IsShopLeader").val(),
+                        SalesVolume: $("#SalesVolume").val(),
+                        SalesTarget: $("#SalesTarget").val(),
+                        SalaryChange: $("#SalaryChange").val(),
+                        HandoverName: $("#HandoverName").val(),
+                        HandoverUserID: $("#HandoverUserID").val(),
+                        ChangeDate: ($("#ChangeDate").val() == "" ? "" : new Date($("#ChangeDate").val()).Format("yyyy/MM/dd")),
+                    },
+                    ProcName: "proc_SOM_HR_EmpHandover",
+                    DataType: "Bool",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                async: false
+            };
+            var _result = $honesty.AjaxChannel(_options);
+            if (_result.Data == "True") {
+                return true;
+            }
+            else {
+                $honesty.ShowMsg({ msg: "业务数据保存失败", title: "警告" });
+                return false;
+            }
+        }
+
+        if ($honestyFlow.GetFlowInfo("stepname") == "提交工作交接申请") {
+            if ($("#IsTry").val() == "") {
+                $honesty.ShowMsg({ msg: "请选择是否是试用期!", title: "警告" });
+                return false;
+            }
+            if ($("#HandType").val() == "") {
+                $honesty.ShowMsg({ msg: "请选择工作交接原因!", title: "警告" });
+                return false;
+            }
+            if ($("#LinkSN").val() == "") {
+                $honesty.ShowMsg({ msg: "相关流程单号为空,请重新确认!", title: "警告" });
+                return false;
+            }
+            if ($("#ContractCode").val() != GetSession("UserCode")) {
+                if ($("#LastDate").val() == "") {
+                    $honesty.ShowMsg({ msg: "请选择最后工作日时间!", title: "警告" });
+                    return false;
+                }
+                var _Fault = 0;
+                var _IsFault = {
+                    PostData: {
+                        Params: {
+                            Result: "EmpFault",
+                            EmpID: $("#ContractID").val(),
+                            LastDate: $("#LastDate").val()
+                        },
+                        ProcName: "proc_SOM_HR_EmpHandover",
+                        DataType: "DataTable",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    },
+                    async: false
+                };
+                var _resultIsDimiss = $honesty.AjaxChannel(_IsFault);
+                if (_resultIsDimiss.Data.length > 0) {
+                    $.each(_resultIsDimiss.Data, function (i, item) {
+                        _Fault = item.lins;
+                    });
+                }
+                if (_Fault > 0) {
+                    $honesty.ShowMsg({ msg: "当前工作交接人考勤存在异常，请确认完再提交数据，如有疑问请咨询当地HR", title: "警告" });
+                    return false;
+                }
+                if ($("#SalesTarget").val() == "" || $("#SalesTarget").val() == "0") {
+                    $honesty.ShowMsg({ msg: "请填写销售目标!", title: "警告" });
+                    return false;
+                }
+                if ($("#HandType").val() == "调动") {
+                    if ($("#IsShopLeader").val() == "") {
+                        $honesty.ShowMsg({ msg: "请选择是否为调入店领导!", title: "警告" });
+                        return false;
+                    }
+                    //if ($("#SalaryChange").val() == "") {
+                    //    $honesty.ShowMsg({ msg: "请选择基本工资是否有变更!", title: "警告" });
+                    //    return false;
+                    //}
+                    //if ($("#SalaryChange").val() == "是") {
+                    //    if ($("#ChangeDate").val() == "") {
+                    //        $honesty.ShowMsg({ msg: "请选择基本工资生效日期!", title: "警告" });
+                    //        return false;
+                    //    }
+                    //}
+                }
+            }
+            if ($("#ContractCode").val() != GetSession("UserCode")) {
+                if (sel.options.length > 2) {
+                    if ($("#IsLeader").val() == "是") {
+                        if ($("#HandoverLeader").val() == "") {
+                            $honesty.ShowMsg({ msg: "请选择接收人是否为店铺临时负责人!", title: "警告" });
+                            return false;
+                        }
+                    }
+                }
+            }
+            if ($("#ContractIsleader").val() == 1) {
+                if ($("#WorkFiles").val() == "") {
+                    $honesty.ShowMsg({ msg: "请选择文件/书籍/手册交接!", title: "警告" });
+                    return false;
+                }
+                if (sel.options.length > 2) {
+                    if ($("#HandoverName").val() == "") {
+                        $honesty.ShowMsg({ msg: "请填写接收人!", title: "警告" });
+                        return false;
+                    }
+                }
+            }
+            else {
+                if ($("#KindHand").val() == "") {
+                    $honesty.ShowMsg({ msg: "请选择货品交接!", title: "警告" });
+                    return false;
+                }
+            }
+            if ($("#WorkPermit").val() == "") {
+                $honesty.ShowMsg({ msg: "请选择工作牌交接!", title: "警告" });
+                return false;
+            }
+            if ($("#WorkDress").val() == "") {
+                $honesty.ShowMsg({ msg: "请选择工作服交接!", title: "警告" });
+                return false;
+            }
+            if ($("#OtherNot").val() == "") {
+                $honesty.ShowMsg({ msg: "请填写特别(其他)说明事项!", title: "警告" });
+                return false;
+            }
+            var Slaves = "";
+            $.each($("#tbSlaves tr[dataname='tbSlaves']"), function (i, item) {
+                Slaves += $(item).attr("value") + "|";
+            });
+            if ($("#ContractIsleader").val() == 1) {
+                if (Slaves == "") {
+                    $honesty.ShowMsg({ msg: "请添加店长交接表!", title: "警告" });
+                    return false;
+                }
+            }
+            var _options = {
+                PostData: {
+                    Params: {
+                        result: "ModifyEmpHandover",
+                        ID: HandoverID,
+                        SN: $honestyFlow.GetFlowInfo("SN"),
+                        EmpID: GetSession("UserID"),
+                        EmpCode: GetSession("UserCode"),
+                        EmpName: GetSession("UserName"),
+                        OrganizeID: GetSession("OrganizeID"),
+                        AreaName: GetSession("AreaName"),
+                        Province: GetSession("Province"),
+                        CompanyName: GetSession("CompanyCode"),
+                        ShopCode: GetSession("ShopCode"),
+                        SapCode: GetSession("SapCode"),
+                        ShopName: GetSession("ShopName"),
+                        EmpPosition: GetSession("Position"),
+                        EmpLevel: GetSession("EmpLevel"),
+                        LevelDesc: GetSession("LevelDesc"),
+                        ContractID: $("#ContractID").val(),
+                        ContractCode: $("#ContractCode").val(),
+                        ContractName: $("#ContractName").val(),
+                        ContractOrganizeID: $("#ContractOrganizeID").val(),
+                        ContractAreaName: $("#ContractAreaName").val(),
+                        ContractEmpLevel: $("#ContractEmpLevel").val(),
+                        ContractPosition: $("#ContractPosition").val(),
+                        ContractLevelDesc: $("#ContractLevelDesc").val(),
+                        ContractIsleader: $("#ContractIsleader").val(),
+                        ContractSapCode: $("#ContractSapCode").val(),
+                        InDate: $("#InDate").val(),
+                        IsLeader: $("#IsLeader").val(),
+                        ContractShopName: $("#ContractShopName").val(),
+                        IsTry: $("#IsTry").val(),
+                        ContractBegin: $("#ContractBegin").val(),
+                        ContractEnd: $("#ContractEnd").val(),
+                        ContractCompany: $("#ContractCompany").val(),
+                        LastDate: $("#LastDate").val(),
+                        HandoverLeader: $("#HandoverLeader").val(),
+                        IsShopLeader: $("#IsShopLeader").val(),
+                        SalesTarget: $("#SalesTarget").val(),
+                        SalesVolume: $("#SalesVolume").val(),
+                        HandType: $("#HandType").val(),
+                        SalaryChange: $("#SalaryChange").val(),
+                        ChangeDate: ($("#ChangeDate").val() == "" ? "" : new Date($("#ChangeDate").val()).Format("yyyy/MM/dd")),
+                        LinkSN: $("#LinkSN").val(),
+                        KindHand: $("#KindHand").val(),
+                        WorkPermit: $("#WorkPermit").val(),
+                        WorkDress: $("#WorkDress").val(),
+                        WorkFiles: $("#WorkFiles").val(),
+                        UnWork: $("#UnWork").val(),
+                        OtherNot: $("#OtherNot").val(),
+                        HandoverName: $("#HandoverName").val(),
+                        HandoverUserID: $("#HandoverUserID").val(),
+                        Slaves: Slaves,
+                        Title: $honestyFlow.GetFlowInfo("title"),
+                    },
+                    ProcName: "proc_SOM_HR_EmpHandover",
+                    DataType: "Bool",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                },
+                async: false
+            };
+            var _result = $honesty.AjaxChannel(_options);
+            if (_result.Data == "True") {
+                return true;
+            }
+            else {
+                $honesty.ShowMsg({ msg: "业务数据保存失败", title: "警告" });
+                return false;
+            }
+
+        }
+        else {
+            return true;
+        }
+    }
+
+
+    function UserInfo() {
+
+        $("#HandType").empty();
+        $("#ContractID,#ContractIsleader,#ContractName,#ContractOrganizeID,#ContractPosition,#ContractPosition,#ContractEmpLevel,#ContractLevelDesc,#InDate,#IsLeader,#ContractShopName,#ContractBegin,#ContractEnd,#ContractCompany,#LinkSN").val("");
+        //$("#SalaryChangeFrom").css("display", "none");
+        $("#ChangeDateFrom").css("display", "none");
+
+        $honesty.GetUserInfo({
+            account: $("#ContractCode").val(),
+            callback: function (ret) {
+                if (ret.Code == 1) {
+                    //if ($("#ContractCode").val() != GetSession("UserCode")) {
+                    //    if (ret.Data.EmpLevel == GetSession("EmpLevel")) {
+                    //        $honesty.ShowMsg({ msg: "不可发起同级别岗位的工作交接,请重新选择工号！", title: "警告" });
+                    //        $("#ContractCode").val("");
+                    //        return false;
+                    //    }
+                    //}
+                    if (ret.Data.IsLeader != 1) {
+                        $("div[title='Shoplearder']").css("display", "none");
+                        $("#KindHandForm").css("display", "");
+                        $("#HandType").append("<option value=''>请选择...</option>");
+                        $("#HandType").append("<option value='公司辞退'>公司辞退</option>");
+                        $("#HandType").append("<option value='自动离职'>自动离职</option>");
+                    }
+                    else {
+                        $("div[title='Shoplearder']").css("display", "");
+                        $("#KindHandForm").css("display", "none");
+                        $("#HandType").append("<option value=''>请选择...</option>");
+                        $("#HandType").append("<option value='调动 '>调动 </option>");
+                        $("#HandType").append("<option value='员工辞职'>员工辞职</option>");
+                        $("#HandType").append("<option value='协商解除'>协商解除</option>");
+                        $("#HandType").append("<option value='合同不续签'>合同不续签</option>");
+                        $("#Handover").val(ret.Data.UserName);
+                    }
+                    $("#ContractID").val(ret.Data.UserID);
+                    $("#ContractIsleader").val(ret.Data.IsLeader);
+                    $("#ContractName").val(ret.Data.UserName);
+                    $("#ContractOrganizeID").val(ret.Data.OrganizeID);
+                    $("#ContractPosition").val(ret.Data.Position);
+                    $("#ContractLevelDesc").val(ret.Data.LevelDesc);
+                    $("#ContractEmpLevel").val(ret.Data.EmpLevel);
+                    $("#InDate").val(ret.Data.CreateDate);
+                    if (ret.Data.IsLeader == 1) {
+                        $("#IsLeader").val("是");
+                    }
+                    else {
+                        $("#IsLeader").val("否");
+                    }
+                    $("#ContractShopName").val(ret.Data.ShopName);
+                    $("#ContractBegin").val(ret.Data.ContractBegin);
+                    $("#ContractEnd").val(ret.Data.ContractEnd);
+                    $("#ContractCompany").val(ret.Data.CompanyName);
+                    $("#ContractSapCode").val(ret.Data.SapCode);
+
+                    if ($("#ContractCode").val() != GetSession("UserCode")) {
+                        $("div[title='NotSee']").css("display", "");
+                        if ($("#IsLeader").val() != "是") {
+                            $("#HandoverLeaderForm").css("display", "none");
+                        }
+                        else {
+                            var _UserID = ret.Data.UserID;
+                            var _OrganizeID = ret.Data.OrganizeID;
+                            var _Content = "<option value=''>请选择...</option>";
+                            //获取所有店铺所有人员
+                            var _People = {
+                                PostData: {
+                                    Params: {
+                                        Result: "SelectPeople",
+                                        UserID: _UserID,
+                                        OrganizeID: _OrganizeID
+                                    },
+                                    ProcName: "proc_SOM_ISR_Meetting",
+                                    DataType: "DataTable",
+                                    ExecType: "PROC",
+                                    Mode: "MSSQL"
+                                },
+                                async: false
+                            };
+                            var _result = $honesty.AjaxChannel(_People);
+                            if (_result.Data.length > 0) {
+                                $.each(_result.Data, function (i, item) {
+                                    _Content += "<option title='" + item.UserID + "' value='" + item.Name + "'>" + item.Name + "</option>";
+                                });
+                            }
+                            $("#HandoverName").html(_Content);
+                            $("#HandoverLeaderForm").css("display", "");
+                        }
+                    }
+                    else {
+                        $("div[title='NotSee']").css("display", "none");
+                        $("#LastDate,#SalesTarget,#HandoverLeader").val("");
+                    }
+
+                }
+                else {
+                    $honesty.ShowMsg({ title: "警告", msg: "该工号不存在！" });
+                    $("#TransCode").val("");
+                }
+            }
+        });
+    }
+    function loadsheet() {
+        ShowSlaves($honesty.GetSite() + '/Content/Upload/Tempite/ShopLeader.xls', "ShopLeader.xls");
+    }
+</script>
+</html>

@@ -1,0 +1,49 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>附近地址选择</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <ul class="aui-list-view" style="margin-bottom: 0px" id="AddressList">
+    </ul>
+</body>
+<script src="../../script/api.js"></script>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _AddressList;
+    apiready = function () {
+
+        $(function () {
+            _AddressList = api.pageParam.AddressList;
+            var _Content = "";
+            $.each(_AddressList, function (i, item) {
+                _Content += '<li class="aui-list-view-cell" style="padding: 10px;" tapmode  onclick=\'SelectShop(\"' + item.point.y + '\",\"' + item.point.x + '\",\"' + item.addr + '\",\"' + item.distance + '\",\"' + item.name + '\")\'>' +
+                            '<a class="aui-ellipsis-1" style="font-size: 14px">' + item.name +
+                            '<p style="font-size:13px;">' + item.addr + '</p><span class="aui-badge" style="top:18px;">' + item.distance + 'm</span></a></li>';
+            });
+            $("#AddressList").html(_Content);
+            api.parseTapmode();
+
+
+        });
+    }
+    function SelectShop(lat, lon, addrAddress, distinct, addrName) {
+        api.sendEvent({
+            name: 'Sign_AddressList',
+            extra: {
+                lat: lat,
+                lon: lon,
+                addrAddress: addrAddress,
+                distinct: distinct,
+                addrName: addrName
+            }
+        });
+        $honesty.CloseWin();
+    }
+</script>
+</html>

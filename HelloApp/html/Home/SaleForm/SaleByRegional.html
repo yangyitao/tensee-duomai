@@ -1,0 +1,424 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>大区销售</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-nav {
+            height: 40px;
+        }
+
+            .aui-nav .aui-bar-tab {
+                height: 40px;
+            }
+
+        .aui-bar-tab li {
+            height: 40px;
+            line-height: 40px;
+        }
+
+        .aui-nav .aui-bar-tab li.active {
+            color: #fff;
+            background: #16a085;
+        }
+
+        .aui-tab-nav {
+            font-size: 14px;
+            height: 40px;
+        }
+
+            .aui-tab-nav li {
+                height: 40px;
+                line-height: 40px;
+            }
+
+        table {
+            border-collapse: collapse;
+            font-size: 12px;
+            text-align: right;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="aui-tab" id="divTab">
+        <ul id="TopBar" class="aui-tab-nav">
+            <li data-power="Day" class="active" data-role="big">昨日</li>
+            <li data-power="Month" data-role="big">月份</li>
+        </ul>
+    </div>
+    <div id="divContent" class="aui-card" style="margin-top: 10px; padding: 5px">
+        <table id="tbLabel">
+            <tr>
+                <td style="width: 55px;" id="tdName">
+                    <table style="height: 100%;">
+                        <tr>
+                            <td>目标</td>
+                        </tr>
+                        <tr>
+                            <td>实际</td>
+                        </tr>
+                        <tr>
+                            <td>达成率</td>
+                        </tr>
+                        <tr>
+                            <td>单数</td>
+                        </tr>
+                        <tr>
+                            <td>件数</td>
+                        </tr>
+                        <tr>
+                            <td>客单件</td>
+                        </tr>
+                        <tr>
+                            <td>客单价</td>
+                        </tr>
+                        <tr>
+                            <td>原店同比</td>
+                        </tr>
+                        <tr>
+                            <td>环比</td>
+                        </tr>
+                        <tr>
+                            <td>VIP占比</td>
+                        </tr>
+                    </table>
+                </td>
+                <td>
+                    <div id="main" style="width: 100%; height: 200px;"></div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script src="../../../script/echarts.min.js"></script>
+<script type="text/javascript">
+    var _Data;
+    var navigationBar
+    var arrTab = new Array();
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            navigationBar = api.require('navigationBar');
+            LoadData();
+
+            $("#TopBar").find("li").tap(function () {
+                $("#TopBar").find(".active").removeClass("active");
+                $(this).addClass("active");
+
+                if ($(this).data("power") == "Day") {
+                    navigationBar.close();
+                }
+                else {
+                    var arrItems = new Array();
+                    $.each(_Data, function (i, item) {
+                        arrItems.push({ title: item.Regional, bg: '#ffffff', bgSelected: '#1abc9c' });
+                        arrTab.push(item.Regional);
+                    });
+                    navigationBar.open({
+                        y: api.frameHeight - 45,
+                        w: api.frameWidth,
+                        h: 45,
+                        itemSize: {
+                            w: (api.frameWidth / _Data.length > 90 ? api.frameWidth / _Data.length : 90)
+                        },
+                        bg: '#ffffff',
+                        items: arrItems,
+                        font: {
+                            color: '#000',
+                            size: 14,
+                            colorSelected: '#fff'
+                        },
+                        fixedOn: api.frameName,
+                        selectedIndex: 0,
+                    }, function (ret, err) {
+                        if (ret) {
+                            if (ret.eventType == "click") {
+                                ChangeType(arrTab[ret.index]);
+                            }
+                        }
+                    });
+                }
+                ChangeType(arrTab[0]);
+            });
+        });
+
+    }
+
+    function LoadData() {
+        var _options = {};
+        if (GetSession("RoleList").toString().indexOf("EFB111AA-2308-48E2-B1FC-54181EC35E3F") >= 0) {
+            _options = {
+                PostData: {
+                    Params: { "Result": "GetRegionalForm_All" },
+                    ProcName: "proc_Index_SaleForm",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+        }
+        else if (GetSession("EmpLevel") == "A" || GetSession("EmpLevel") == "B") {
+            _options = {
+                PostData: {
+                    Params: { "Result": "GetRegionalForm_Regional", "Regional": GetSession("AreaName") },
+                    ProcName: "proc_Index_SaleForm",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+        }
+        else {
+            _options = {
+                PostData: {
+                    Params: { "Result": "GetRegionalForm_Online", "UserID": GetSession("UserID") },
+                    ProcName: "proc_Index_SaleForm",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+        }
+
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    _Data = _result.Data;
+                    ChangeType(arrTab[0]);
+                }
+            }
+        });
+
+
+
+    }
+
+    function ChangeType(type) {
+        var power = $("#TopBar").find(".active").data("power");
+        if (power == "Day") {
+            $("#divContent").height(api.frameHeight - $("#divTab").height() - 20);
+            $("#main").height(api.frameHeight - $("#divTab").height() - 30);
+            $("#tdName").hide();
+            var arrLegend = new Array(),
+                arrData = new Array();
+            $.each(_Data, function (i, item) {
+                arrLegend.push(item.Regional);
+                arrData.push({ value: item.DayActualSale, name: item.Regional });
+            });
+
+            var option = {
+                color: ['#3498db', '#B5C334', '#FCCE10', '#E87C25', '#27727B',
+                        '#FE8463', '#9BCA63', '#FAD860', '#F3A43B', '#60C0DD',
+                        '#D7504B', '#C6E579', '#F4E001', '#F0805A', '#26C0C0'],
+                backgroundColor: '#fff',
+                tooltip: { trigger: 'item', formatter: "{a} <br/>{b} : {c} ({d}%)", textStyle: { fontSize: 12 } },
+                legend: { data: arrLegend, textStyle: { fontSize: 12 } },
+                series: [
+                    {
+                        name: '销售额', type: 'pie', radius: '65%', center: ['50%', '60%'],
+                        data: arrData.sort(function (a, b) { return a.value - b.value }),
+                        label: { normal: { textStyle: { fontSize: 10 } } },
+                        labelLine: { normal: { smooth: false, length: 10, length2: 5 } }
+                    }
+                ]
+            };
+
+            // 基于准备好的dom，初始化echarts实例
+            myChart = echarts.init(document.getElementById('main'));
+            myChart.setOption(option);
+
+
+        }
+        else {
+            $("#divContent").height(api.frameHeight - $("#divTab").height() - 65);
+            $("#main").height(api.frameHeight - $("#divTab").height() - 75);
+            $("#tdName").show();
+
+            option = {
+                color: ['#C1232B', '#B5C334', '#FCCE10', '#E87C25', '#27727B',
+                        '#FE8463', '#9BCA63', '#FAD860', '#F3A43B', '#60C0DD',
+                        '#D7504B', '#C6E579', '#F4E001', '#F0805A', '#26C0C0'],
+                tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+                grid: { left: '0', right: '1%', bottom: '1', top: '1', containLabel: false },
+                xAxis: [
+                    {
+                        type: 'value',
+                        axisLine: { show: false }, axisTick: { show: false }, axisLabel: { show: false }, splitLine: { show: false },
+                        max: 18203
+                    },
+                    {
+                        type: 'value',
+                        axisLine: { show: false }, axisTick: { show: false }, axisLabel: { show: false }, splitLine: { show: false },
+                        max: 18203
+                    },
+                    {
+                        type: 'value',
+                        axisLine: { show: false }, axisTick: { show: false }, axisLabel: { show: false }, splitLine: { show: false },
+                        max: 100
+                    },
+                    {
+                        type: 'value',
+                        axisLine: { show: false }, axisTick: { show: false }, axisLabel: { show: false }, splitLine: { show: false },
+                        max: 300
+                    },
+                    {
+                        type: 'value',
+                        axisLine: { show: false }, axisTick: { show: false }, axisLabel: { show: false }, splitLine: { show: false },
+                        max: 100
+                    },
+                    {
+                        type: 'value',
+                        axisLine: { show: false }, axisTick: { show: false }, axisLabel: { show: false }, splitLine: { show: false },
+                        max: 6
+                    },
+                    {
+                        type: 'value',
+                        axisLine: { show: false }, axisTick: { show: false }, axisLabel: { show: false }, splitLine: { show: false },
+                        max: 1500
+                    },
+                    {
+                        type: 'value',
+                        axisLine: { show: false }, axisTick: { show: false }, axisLabel: { show: false }, splitLine: { show: false },
+                        max: 100, min: -100
+                    },
+                    {
+                        type: 'value',
+                        axisLine: { show: false }, axisTick: { show: false }, axisLabel: { show: false }, splitLine: { show: false },
+                        max: 100, min: -100
+                    },
+                    {
+                        type: 'value',
+                        axisLine: { show: false }, axisTick: { show: false }, axisLabel: { show: false }, splitLine: { show: false },
+                        max: 100
+                    }
+                ],
+                yAxis: { type: 'category', data: ['销售数据'], axisLine: { show: false }, axisTick: { show: false }, axisLabel: { show: false }, splitLine: { show: false } },
+                series: [
+                    {
+                        name: '目标', type: 'bar', barCategoryGap: '1%',
+                        label: { normal: { show: true, position: 'insideRight' } },
+                        data: new Array()
+                    },
+                    {
+                        name: '实际', type: 'bar', xAxisIndex: 1,
+                        label: { normal: { show: true, position: 'insideRight' } },
+                        data: new Array()
+                    },
+                    {
+                        name: '达成率', type: 'bar', xAxisIndex: 2,
+                        label: { normal: { show: true, position: 'insideRight', formatter: '{c}%' } },
+                        data: new Array()
+                    },
+                    {
+                        name: '单数', type: 'bar', xAxisIndex: 3,
+                        label: { normal: { show: true, position: 'insideRight' } },
+                        data: new Array()
+                    },
+                    {
+                        name: '件数', type: 'bar', xAxisIndex: 4,
+                        label: { normal: { show: true, position: 'insideRight' } },
+                        data: new Array()
+                    },
+                    {
+                        name: '客单件', type: 'bar', xAxisIndex: 5,
+                        label: { normal: { show: true, position: 'insideRight' } },
+                        data: new Array()
+                    },
+                    {
+                        name: '客单价', type: 'bar', xAxisIndex: 6,
+                        label: { normal: { show: true, position: 'insideRight' } },
+                        data: new Array()
+                    },
+                    {
+                        name: '同比', type: 'bar', xAxisIndex: 7,
+                        label: { normal: { show: true, position: 'left', formatter: '{c}%', textStyle: { color: '#000' } } },
+                        data: new Array()
+                    },
+                    {
+                        name: '环比', type: 'bar', xAxisIndex: 8,
+                        label: { normal: { show: true, position: 'left', formatter: '{c}%', textStyle: { color: '#000' } } },
+                        data: new Array()
+                    },
+                    {
+                        name: 'VIP占比', type: 'bar', xAxisIndex: 9,
+                        label: { normal: { show: true, position: 'insideRight', formatter: '{c}%' } },
+                        data: new Array()
+                    }
+
+                ]
+            };
+            $.each(_Data, function (i, item) {
+                if (item.Regional == type) {
+                    option.xAxis[0].max = item.MonthTargetSale == "0" ? 1 : item.MonthTargetSale;
+                    option.series[0].data.push(item.MonthTargetSale);
+
+                    if (Number(item.MonthTargetSale) > Number(item.MonthActualSale)) {
+                        option.xAxis[1].max = item.MonthTargetSale;
+                    }
+                    else {
+                        option.xAxis[1].max = item.MonthActualSale;
+                    }
+                    option.series[1].data.push(item.MonthActualSale);
+
+                    if (Number(item.SaleRate) > 100) {
+                        option.xAxis[2].max = item.SaleRate;
+                    }
+                    option.series[2].data.push(item.SaleRate);
+
+                    option.xAxis[3].max = item.MonthOrderNum;
+                    option.series[3].data.push(item.MonthOrderNum);
+
+                    option.xAxis[4].max = item.MonthClothesNum;
+                    option.series[4].data.push(item.MonthClothesNum);
+
+                    option.series[5].data.push(item.UnitSingle);
+                    option.series[6].data.push(item.UnitPrice);
+
+                    if (Number(item.YearOnYear) > 100) {
+                        option.xAxis[7].max = item.YearOnYear;
+                        option.xAxis[7].min = Number(item.YearOnYear) * -1;
+                    }
+                    if (Number(item.YearOnYear) < -100) {
+                        option.xAxis[7].min = item.YearOnYear;
+                        option.xAxis[7].max = Number(item.YearOnYear) * -1;
+                    }
+                    if (Number(item.YearOnYear) < 0) {
+                        option.series[7].label.normal.position = "right";
+                    }
+                    option.series[7].data.push(item.YearOnYear);
+
+                    if (Number(item.QuarterOnQuarter) > 100) {
+                        option.xAxis[8].max = item.QuarterOnQuarter;
+                        option.xAxis[8].min = Number(item.YearOnYear) * -1;
+                    }
+                    if (Number(item.QuarterOnQuarter) < -100) {
+                        option.xAxis[8].min = item.YearOnYear;
+                        option.xAxis[8].max = Number(item.YearOnYear) * -1;
+                    }
+                    if (Number(item.QuarterOnQuarter) < 0) {
+                        option.series[8].label.normal.position = "right";
+                    }
+                    option.series[8].data.push(item.QuarterOnQuarter);
+
+                    if (Number(item.VipRate) > 100) {
+                        option.xAxis[9].max = item.VipRate;
+                    }
+                    option.series[9].data.push(item.VipRate);
+                }
+            });
+
+            // 基于准备好的dom，初始化echarts实例
+            myChart = echarts.init(document.getElementById('main'));
+            myChart.setOption(option);
+        }
+    }
+</script>
+</html>

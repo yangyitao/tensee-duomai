@@ -1,0 +1,217 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>站内通讯</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+    <link href="../../css/aui-indexed-list.css" rel="stylesheet" />
+    <style type="text/css">
+        .aui-user-view-cell {
+            padding: 10px;
+        }
+
+            .aui-user-view-cell:after {
+                border-bottom: 0;
+            }
+
+        .aui-user-view:after {
+            border-top: 0;
+        }
+
+        .aui-user-view-cell .aui-img-object.aui-pull-left {
+            margin-right: 10px;
+        }
+
+        .clear-both {
+            clear: both;
+        }
+
+        .aui-img-body {
+            position: relative;
+        }
+
+            .aui-img-body label {
+                float: right;
+                color: #808080;
+                font-size: 12px;
+            }
+
+        .aui-user-view-cell p {
+            color: #808080;
+        }
+
+        .aui-ellipsis-1 {
+            padding-right: 35px;
+        }
+
+        .aui-img-body font {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="aui-searchbar-wrap" id="divSearchBlock">
+        <div id="divSearch" class="aui-searchbar aui-border-radius">
+            <i class="aui-iconfont aui-icon-search"></i>
+            <div class="aui-searchbar-text">请输入搜索内容</div>
+        </div>
+    </div>
+    <div class="aui-content">
+        <ul id="MsgList" class="aui-user-view aui-in">
+        </ul>
+    </div>
+</body>
+<script src="../../script/api.js"></script>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _PageNum = 1, txtKey = "";
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            LoadData();
+            //下拉刷新
+            api.setRefreshHeaderInfo({
+                visible: true,
+                loadingImg: "widget://image/refresh.png",
+                bgColor: "#fff",
+                textColor: "#000",
+                textDown: "下拉刷新...",
+                textUp: "松开刷新...",
+                showTime: true
+            }, function (ret, err) {
+                $("#MsgList").html("");
+                _PageNum = 1;
+                LoadData();
+                api.refreshHeaderLoadDone();
+            });
+            api.addEventListener({
+                name: "scrolltobottom",
+                extra: {
+                    threshold: 60
+                }
+            }, function (ret, err) {
+                LoadData();
+            });
+            api.addEventListener({
+                name: "ReadMessage",
+            }, function (ret, err) {
+                if (ret) {
+                    if ($("#" + ret.value.UserID + "_count").length > 0) {
+                        $("#" + ret.value.UserID + "_count").remove();
+                    }
+                }
+            });
+
+            $("#divSearch").tap(function () {
+                var UISearchBar = api.require("UISearchBar");
+                UISearchBar.open({
+                    placeholder: "请输入搜索内容",
+                    historyCount: 10,
+                    showRecordBtn: false,
+                    texts: {
+                        cancelText: "取消",
+                        clearText: "清除搜索记录"
+                    },
+                    styles: {
+                        navBar: {
+                            bgColor: "#FFFFFF",
+                            borderColor: "#ccc"
+                        },
+                        searchBox: {
+                            bgImg: "",
+                            color: "#000",
+                            height: 35
+                        },
+                        cancel: {
+                            bg: "rgba(0,0,0,0)",
+                            color: "#696969",
+                            size: 14
+                        },
+                        list: {
+                            color: "#696969",
+                            bgColor: "#FFFFFF",
+                            borderColor: "#eee",
+                            size: 14
+                        },
+                        clear: {
+                            color: "#000000",
+                            borderColor: "#ccc",
+                            size: 14
+                        }
+                    }
+                }, function (ret, err) {
+                    if (ret) {
+                        if (ret.eventType == "search" || ret.eventType == "history") {
+                            $("#MsgList").html("");
+                            _PageNum = 1;
+                            txtKey = ret.text;
+                            LoadData();
+                        }
+                    }
+                    else {
+                        $honesty.ShowToast({ msg: "搜索错误，请重新进行搜索" });
+                    }
+                });
+            });
+        });
+    };
+    function LoadData() {
+        if (_PageNum != 0) {
+            var _options = {
+                PostData: {
+                    Params: {
+                        result: "LoadMessageList",
+                        ReceiveID: GetSession("UserID"),
+                        PageNum: _PageNum,
+                        Key: txtKey,
+                        PageSize: 15
+                    },
+                    ProcName: "proc_SOM_Other_Message",
+                    DataType: "DataTable",
+                    ExecType: "PROC",
+                    Mode: "MSSQL"
+                }
+            };
+            $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                if (_result.Code == "1") {
+                    var _Content = "";
+                    if (_result.Data.length > 0) {
+                        $.each(_result.Data, function (i, item) {
+                            _Content += '<li tapmode data-userid="' + item.UserID + '" data-name="' + item.UserName + '"><div class="aui-user-view-cell aui-img drop-div" tapmode><i class="aui-img-object aui-pull-left aui-iconfont' + (item.Sex == "女" ? " aui-icon-service aui-bg-danger" : " aui-icon-my aui-bg-info") + '" style="width: 21px !important;height: 21px !important;line-height: 21px !important;vertical-align: middle;border-radius: 50%;-webkit-border-radius: 50%;text-align: center;zoom: 2;"></i><div class="aui-img-body"><span>' + item.UserName + '</span><i class="level" style="background: #d48edc">' + item.LevelDesc + '</i><label>' + item.ShortTime + '</label><p class="aui-ellipsis-1 clear-both">' + ($honesty.DelHtml(item.MsgContent) == "" ? "附件：" + GetFileName(item.MsgSlaves) : $honesty.DelHtml(item.MsgContent)) + '</p>' + (item.CountNum > 99 ? '<font class="aui-badge aui-badge-info aui-pull-right" id="' + item.UserID + '_count">99+</font>' : item.CountNum == 0 ? "" : '<font class="aui-badge aui-badge-info aui-pull-right" id="' + item.UserID + '_count">' + item.CountNum + '</font>') + '</div></div></li>';
+                        });
+                        _PageNum++;
+                        $("#MsgList").append(_Content);
+                        api.parseTapmode();
+                        $("#MsgList li").tap(function () {
+                            var _UserID = $(this).attr("data-userid");
+                            var _UserName = $(this).attr("data-name");
+                            $honesty.OpenWin({
+                                name: "Message_MessageContent",
+                                url: "Message/MessageContent.html",
+                                title: _UserName,
+                                pageParam: {
+                                    UserID: _UserID
+                                }
+                            });
+                        });
+                    }
+                    else {
+                        if (_PageNum == 1) {
+                            $("#MsgList").html('<li style="text-align:center !important;"><div class="aui-user-view-cell aui-img drop-div">尊敬的用户，您好，无站内消息数据</div></li>')
+                        }
+                        else {
+                            $honesty.ShowToast({ msg: "没有更多的数据", location: "bottom" });
+                        }
+                        _PageNum = 0;
+                    }
+                }
+            });
+        }
+    }
+</script>
+</html>

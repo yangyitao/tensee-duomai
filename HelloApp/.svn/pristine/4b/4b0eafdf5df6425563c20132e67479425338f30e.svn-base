@@ -1,0 +1,55 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>附近店铺选择</title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <ul class="aui-list-view" style="margin-bottom: 0px" id="ShopList">
+        <!-- <li class="aui-list-view-cell" style="padding: 10px 10px;">
+            <a class="aui-ellipsis-1" style="font-size: 14px" id="ShopInfo">正在获取店铺...</a>
+
+        </li>-->
+    </ul>
+</body>
+<script src="../../script/api.js"></script>
+<script src="../../script/zepto.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _ShopList;
+    apiready = function () {
+
+        $(function () {
+            _ShopList = api.pageParam.ShopList;
+            var _Content = "";
+            $.each(_ShopList, function (i, item) {
+                _Content += '<li class="aui-list-view-cell" tapmode  onclick=\'SelectShop(\"' + item.lat + '\",\"' + item.lon + '\",\"' + item.ShopAddress + '\",\"' + item.Distinct + '\",\"' + item.ShopName + '\",\"' + item.OrganizeID + '\")\'>' +
+                            '<a class="aui-ellipsis-1" style="font-size: 14px">' + item.ShopName +
+                            '<span class="aui-badge">' + item.Distinct + 'm</span></a></li>';
+            });
+            $("#ShopList").html(_Content);
+            api.parseTapmode();
+
+
+        });
+    }
+    function SelectShop(lat, lon, shopAddress, distinct, shopName, organizeID) {
+        api.sendEvent({
+            name: 'Sign_ShopList',
+            extra: {
+                lat: lat,
+                lon: lon,
+                shopAddress: shopAddress,
+                distinct: distinct,
+                distinct: distinct,
+                shopName: shopName,
+                organizeID: organizeID
+            }
+        });
+        $honesty.CloseWin();
+    }
+</script>
+</html>

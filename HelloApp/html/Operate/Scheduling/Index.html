@@ -1,0 +1,283 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>排班列表</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div style="height: 10px;"></div>
+    <div class="aui-content aui-card">
+        <div class="aui-form">
+            <div class="aui-input-row">
+                <span class="aui-input-addon">年份</span>
+                <div class="aui-counter aui-warning aui-info aui-pull-left " style="margin-left: 10px;">
+                    <div id="btnYearMinus" class="aui-counter-minus"></div>
+                    <input id="txtYear" class="aui-counter-input" type="text" value="" style="width: 60px; text-align: center" readonly="true">
+                    <div id="btnYearPlus" class="aui-counter-plus"></div>
+                </div>
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">月份</span>
+
+                <div class="aui-counter aui-warning aui-info aui-pull-left " style="margin-left: 10px;">
+                    <div id="btnMonthMinus" class="aui-counter-minus"></div>
+                    <select id="ddlMonth" class="aui-input" style="width: 60px; text-align: center; border: 1px solid #e6e4e3; border-style: solid none;">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                        <option value="11">11</option>
+                        <option value="12">12</option>
+                    </select>
+                    <div id="btnMonthPlus" class="aui-counter-plus"></div>
+                </div>
+
+            </div>
+            <div class="aui-input-row">
+                <span class="aui-input-addon">周次</span>
+
+                <div class="aui-counter aui-warning aui-info aui-pull-left " style="margin-left: 10px;">
+                    <div id="btnWeekMinus" class="aui-counter-minus"></div>
+                    <select id="ddlWeek" class="aui-input" style="width: 60px; text-align: center; border: 1px solid #e6e4e3; border-style: solid none;">
+                    </select>
+                    <div id="btnWeekPlus" class="aui-counter-plus"></div>
+                </div>
+
+            </div>
+            <div class="aui-btn-row">
+                <div id="btnSet" class="aui-btn aui-btn-block aui-btn-info">
+                    新建排班
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="aui-content">
+        <ul class="aui-list-view" id="ulList">
+        </ul>
+    </div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _Date, _OrganizeID, _PageNum = 1;
+    ;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _Date = $honesty.NowDate();
+            _OrganizeID = api.pageParam.OrganizeID;
+            LoadData();
+
+            //下拉刷新
+            api.setRefreshHeaderInfo({
+                visible: true,
+                loadingImg: 'widget://image/refresh.png',
+                bgColor: '#fff',
+                textColor: '#000',
+                textDown: '下拉刷新...',
+                textUp: '松开刷新...',
+                showTime: true
+            }, function (ret, err) {
+                $("#ulList").html("");
+                _PageNum = 1;
+                LoadData();
+                api.refreshHeaderLoadDone();
+            });
+
+            api.addEventListener({
+                name: 'scrolltobottom',
+                extra: {
+                    threshold: 60
+                }
+            }, function (ret, err) {
+                LoadData();
+            });
+            //长按监听事件
+            //$("#SecTab").addEventListener("touchstart", showBubbleMenu);
+
+            //初始化年份
+            $("#txtYear").val(_Date.getFullYear());
+
+            //初始化月份
+            $("#ddlMonth").val(_Date.getMonth() + 1);
+
+            //初始化周次
+            GetInfoWeek($("#txtYear").val(), $("#ddlMonth").val())
+
+
+            //年份减少按钮点击
+            $("#btnYearMinus").tap(function () {
+                $("#txtYear").val(Number($("#txtYear").val()) - 1);
+                GetInfoWeek($("#txtYear").val(), $("#ddlMonth").val())
+                $("#ddlWeek").val("1");
+            });
+            //年份增加按钮点击
+            $("#btnYearPlus").tap(function () {
+                $("#txtYear").val(Number($("#txtYear").val()) + 1);
+                GetInfoWeek($("#txtYear").val(), $("#ddlMonth").val())
+                $("#ddlWeek").val("1");
+            });
+
+
+            //月份减少按钮点击
+            $("#btnMonthMinus").tap(function () {
+                if ($("#ddlMonth").val() == "1") {
+                    $("#txtYear").val(Number($("#txtYear").val()) - 1);
+                    $("#ddlMonth").val("12");
+                }
+                else {
+                    $("#ddlMonth").val(Number($("#ddlMonth").val()) - 1);
+                }
+                GetInfoWeek($("#txtYear").val(), $("#ddlMonth").val())
+                $("#ddlWeek").val("1");
+            });
+            //月份增加按钮点击
+            $("#btnMonthPlus").tap(function () {
+                if ($("#ddlMonth").val() == "12") {
+                    $("#txtYear").val(Number($("#txtYear").val()) + 1);
+                    $("#ddlMonth").val("1");
+                }
+                else {
+                    $("#ddlMonth").val(Number($("#ddlMonth").val()) + 1);
+                }
+                GetInfoWeek($("#txtYear").val(), $("#ddlMonth").val())
+                $("#ddlWeek").val("1");
+            });
+            //周次减少按钮点击
+            $("#btnWeekMinus").tap(function () {
+                if ($("#ddlWeek").val() != "1") {
+                    $("#ddlWeek").val(Number($("#ddlWeek").val()) - 1);
+                }
+            });
+            //周次增加按钮点击
+            $("#btnWeekPlus").tap(function () {
+                if ($("#ddlWeek").val() != $("#ddlWeek option").size()) {
+                    $("#ddlWeek").val(Number($("#ddlWeek").val()) + 1);
+                }
+            });
+            //新建排班
+            $("#btnSet").tap(function () {
+                var Year = $("#txtYear").val();
+                var Month = $("#ddlMonth").val();
+                var Week = $("#ddlWeek").val();
+                SelectItem(Year, Month, Week, _OrganizeID, 1);
+            });
+
+        });
+        function showBubbleMenu(event) {
+            var touch = event.touches[0];
+            var centerX = touch.clientX;
+            var centerY = touch.clientY;
+            var bubbleMenu = api.require("bubbleMenu");
+            var btnArray = [
+                {
+                    "title": "横表"
+                },
+                {
+                    "title": "纵表"
+                }
+            ];
+            bubbleMenu.open({
+                "centerX": centerX,
+                "centerY": centerY,
+                "btnArray": btnArray,
+                fixedOn: api.frameName
+            }, function (ret, err) {
+                var btn = btnArray[ret.index - 1];
+                api.toast({
+                    msg: "xdfasfasf",
+                    duration: 1000,
+                    location: "top"
+                });
+            });
+
+        }
+
+        //加载数据函数
+        function LoadData() {
+            if (_PageNum != 0) {
+                var _options = {
+                    PostData: {
+                        Params: { "result": "USelectInfo", "PageNum": _PageNum, "OrganizeID": _OrganizeID, "PageSize": 3 },
+                        ProcName: "proc_SOM_ISR_Scheduling",
+                        DataType: "DataTable",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    }
+                };
+
+                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                    if (_result.Code == "1") {
+                        if (_result.Data.length > 0) {
+                            var _Content = "";
+                            $.each(_result.Data, function (i, item) {
+                                _Content += "<li id='SecTab' class='aui-list-view-cell' tapmode onclick=\"SelectItem(\'" + item.Year + "\',\'" + item.Month + "\',\'" + item.Week + "\',\'" + _OrganizeID + "\',\'" + item.Pause + "\')\"><a class='aui-arrow-right'>" +
+                                            "<label>" + item.Year + "年" + item.Month + "月第" + item.Week + "周</label>";
+                                _Content += "<span class='aui-badge " + (item.Pause == "1" ? "aui-badge-danger" : "aui-badge-success") + "'>" +
+                                    (item.Pause == "1" ? "未完成" : "已完成") + "</span></a></li>";
+                            });
+                            $("#ulList").append(_Content);
+                            api.parseTapmode();
+                            _PageNum++;
+                        }
+                        else {
+                            _PageNum = 0;
+                            if (_PageNum == 1) {
+                                $("#ulList").html("<li style='text-align:center'>尊敬的用户，您好,暂无排班数据</li>")
+                            }
+                            else {
+                                $honesty.ShowToast({ msg: "没有更多的数据", location: "bottom" });
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        function GetInfoWeek(year, month) {
+            //var _Date = $honesty.NowDate();
+            _Date.setFullYear(year, month - 1, 1);
+            var w1 = _Date.getDay();
+            if (w1 == 0) w1 = 7;
+            _Date.setFullYear(year, month, 0);
+            var dd = _Date.getDate();
+            if (w1 != 1) d1 = 7 - w1 + 2;
+            else d1 = 1;
+            week_count = Math.ceil((dd - d1 + 1) / 7);
+            $("#ddlWeek").html("");
+            var _Content = "";
+            for (var i = 1; i <= week_count; i++) {
+                _Content += "<option value='" + i + "'>" + i + "</option>";
+            };
+            $("#ddlWeek").html(_Content);
+            //$("#ddlWeek").val(Math.ceil((new Date().getDate() + 6 - w1) / 7));
+        }
+    }
+    //行项目点击函数
+    function SelectItem(year, month, week, organizeID, pause) {
+        $honesty.OpenWin({
+            name: "Scheduling_Schedu",
+            url: "Operate/Scheduling/Schedu.html",
+            title: "店铺排班",
+            LevelNum: 2,
+            pageParam: {
+                OrganizeID: organizeID,
+                Year: year,
+                Month: month,
+                Week: week,
+                Pause: pause
+            },
+            slidBackEnabled: false
+        });
+    }
+</script>
+</html>

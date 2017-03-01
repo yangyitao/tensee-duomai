@@ -1,0 +1,149 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+        content="width = 320,minimum-scale =1,maximum-scale = 1.3 ,user-scalable =no" />
+    <meta name="format-detection" content="telephone=no" />
+    <title></title>
+    <link href="../../css/aui.css" rel="stylesheet" />
+    <style>
+        .sale-header {
+            background: url('../../image/mybg.png') no-repeat;
+            background-size: cover;
+            min-height: 100px;
+            position: relative;
+        }
+
+        .my-info {
+            position: relative;
+            padding: 20px 0;
+            width: 100%;
+            bottom: 0;
+            text-align: center;
+            vertical-align: center;
+        }
+
+            .my-info img {
+                width: 80px;
+                height: 70px;
+                border-radius: 50%;
+            }
+
+            .my-info p.nickname {
+                margin-top: 5px;
+                color: #ffffff;
+                font-size: 15px;
+            }
+
+        body {
+            background: #e9e9e9;
+            font-size: 12px;
+        }
+
+        .aui-grid-nine {
+            padding: 2.3px;
+        }
+
+            .aui-grid-nine li {
+                padding: 2.3px;
+                color: #fff;
+            }
+
+                .aui-grid-nine li div {
+                    padding: 2px 0;
+                }
+
+                .aui-grid-nine li:after {
+                    border-left: 0;
+                    border-bottom: 0;
+                }
+
+        p {
+            color: #fff;
+            font-size: 10.7px;
+        }
+
+        .aui-badge {
+            font-size: 9.23px;
+        }
+
+        .aui-list-view-cell > a {
+            margin: -15.6px -19.5px;
+        }
+
+        .aui-grid-nine li .aui-iconfont {
+            font-size: 20px;
+            margin-bottom: 3.85px;
+        }
+
+        .aui-card {
+            margin: 0 7.69px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="aui-content sale-header" style="margin-bottom: 0px;">
+        <div class="my-info">
+            <img src="../../res/img/weixin.png">
+            <p class="nickname" id="txtEmpName"></p>
+        </div>
+    </div>
+    <ul class="aui-grid-nine" style="margin-bottom: 0;">
+        <li class="aui-col-xs-6 aui-text-center">
+            <div>
+                <p style="color: black">优惠券</p>
+                <p style="color: black">4</p>
+            </div>
+        </li>
+        <li class="aui-col-xs-6 aui-text-center">
+            <div>
+                <p style="color: black">累计消费</p>
+                <p style="color: black">11568</p>
+            </div>
+        </li>
+    </ul>
+    <div id="divTitle" style="height: 3.85px; display: none"></div>
+    <div id="main" style="height: 60%; width: 100%; margin-bottom: 3.85px; background-color: white">
+        <div class="aui-content">
+            <ul class="aui-user-view">
+                <li class="aui-list-view-cell" style="height: 45px">
+                    <span class="aui-badge" onclick="test()">+添加新标签</span>
+                </li>
+            </ul>
+        </div>
+        <span class="aui-badge">消费能力较强</span>
+        <span class="aui-badge">偏好新品</span>
+        <span class="aui-badge">休闲舒适</span>
+        <span class="aui-badge">偏瘦  </span>
+        <span class="aui-badge">谨慎稳重型</span>
+    </div>
+    <div style="height: 3.85px; width: 100%"></div>
+</body>
+</html>
+
+<script src="../../script/zepto.js"></script>
+<script src="../../script/api.js"></script>
+<script src="../../script/honesty.base.js"></script>
+<script src="../../script/honesty.flow.js"></script>
+<script src="../../script/echarts.min.js"></script>
+<script type="text/javascript">
+    var textname = "";
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            textname = api.pageParam.Text;
+            $("#txtEmpName").html(textname);
+        });
+    };
+    function test() {
+        $honesty.OpenWin({
+            name: "HYFZ1_1_1_1",
+            url: "HYInfo/HYFZ1_1_1_1.html",
+            title: "",
+            slidBackEnabled: false
+        });
+    }
+
+</script>

@@ -1,0 +1,169 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>月度总结（月计划）</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="aui-tab" id="divTab">
+        <ul id="TopBar" class="aui-tab-nav">
+            <li data-value="Results" class="active">取得成绩
+            </li>
+            <li data-value="Progress">得到进步
+            </li>
+            <li data-value="Bad">发现不足
+            </li>
+            <li data-value="Improve">改善计划
+            </li>
+        </ul>
+    </div>
+    <div class="aui-content">
+        <div class="aui-form aui-input-form" data-role="block" data-value="Results">
+            <div class="aui-input-row" style="padding: 2px;">
+                <textarea id="Results" data-role="textarea" class="aui-input" style="border: 1px solid #c8c7cc; overflow-y: scroll"></textarea>
+            </div>
+        </div>
+        <div class="aui-form aui-input-form" data-role="block" data-value="Progress" style="display: none">
+            <div class="aui-input-row" style="padding: 2px;">
+                <textarea id="Progress" data-role="textarea" class="aui-input" style="border: 1px solid #c8c7cc; overflow-y: scroll"></textarea>
+            </div>
+        </div>
+        <div class="aui-form aui-input-form" data-role="block" data-value="Bad" style="display: none">
+            <div class="aui-input-row" style="padding: 2px;">
+                <textarea id="Bad" data-role="textarea" class="aui-input" style="border: 1px solid #c8c7cc; overflow-y: scroll"></textarea>
+            </div>
+        </div>
+        <div class="aui-form aui-input-form" data-role="block" data-value="Improve" style="display: none">
+            <div class="aui-input-row" style="padding: 2px;">
+                <textarea id="Improve" data-role="textarea" class="aui-input" style="border: 1px solid #c8c7cc; overflow-y: scroll"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <footer class="aui-nav" id="footer" style="padding: 5px 5px; text-align: center; border-top: 1px solid #dce1e7; display: none">
+        <div id="btnSave" class="aui-btn aui-btn-block aui-btn-warning" style="height: 45px; width: 100%; line-height: 0.9;">
+            保存
+        </div>
+    </footer>
+</body>
+</html>
+
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script src="../../../script/honesty.valid.js"></script>
+<script type="text/javascript">
+    var _MonthID, _IsLeader;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _MonthID = api.pageParam.MonthID;
+            _IsLeader = api.pageParam.IsLeader;
+
+            if (_IsLeader == "False") {
+                $(".aui-input").attr("readonly", "readonly");
+            }
+            else {
+                $("#footer").css("display", "");
+            }
+
+            $("[data-role='textarea']").height(api.frameHeight - (_IsLeader == "False" ? 0 : $("#footer").height()) - 48);
+
+            LoadData();
+
+            //Tab点击
+            $("#TopBar").children("li").tap(function () {
+                $("#TopBar").find(".active").removeClass("active");
+                $(this).addClass("active");
+                $("[data-role='block']").css("display", "none");
+                $("[data-value='" + $(this).data("value") + "']").css("display", "");
+            })
+
+            //保存按钮点击
+            $("#btnSave").tap(function () {
+                var _options = {
+                    PostData: {
+                        Params: {
+                            Result: "UpdateSummary",
+                            MonthID: _MonthID,
+                            Results: $("#Results").val().trim(),
+                            Progress: $("#Progress").val().trim(),
+                            Bad: $("#Bad").val().trim(),
+                            Improve: $("#Improve").val().trim()
+                        },
+                        ProcName: "proc_SOM_ISR_MonthSale",
+                        DataType: "Bool",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    }
+                };
+                var _isTrue = false;
+                if ($("#Results").val().trim() != "" || $("#Progress").val().trim() != "" || $("#Bad").val().trim() != "" || $("#Improve").val().trim() != "") {
+                    _isTrue = true;
+                }
+                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                    if (_result.Code == "1") {
+                        if (_result.Data == "True") {
+                            $honesty.ShowMsg({
+                                title: "提示",
+                                msg: "保存成功",
+                                callback: function () {
+                                    api.sendEvent({
+                                        name: 'Sale_MonthSale_MonthSummary',
+                                        extra: {
+                                            IsTrue: _isTrue,
+                                        }
+                                    });
+                                    api.closeWin();
+                                }
+                            });
+                        }
+                        else {
+                            $honesty.ShowMsg({ title: "错误", msg: "系统错误" });
+                        }
+                    }
+                });
+            });
+
+        });
+
+    }
+
+    //数据加载函数
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "SelectSummary",
+                    MonthID: _MonthID
+                },
+                ProcName: "proc_SOM_ISR_MonthSale",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        $("#Results").val(item.Results);
+                        $("#Progress").val(item.Progress);
+                        $("#Bad").val(item.Bad);
+                        $("#Improve").val(item.Improve);
+                    });
+                }
+
+            }
+            else {
+                $("#footer").css("display", "none");
+            }
+        });
+    }
+
+
+</script>

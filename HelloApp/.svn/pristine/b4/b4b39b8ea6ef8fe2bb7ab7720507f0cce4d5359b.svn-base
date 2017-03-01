@@ -1,0 +1,80 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>货品目标（月计划）</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-list-view-cell {
+            padding: 8px;
+            font-size: 14px;
+        }
+            .aui-list-view-cell label {
+                color:#8a8181;
+            }
+    </style>
+</head>
+<body>
+    <div style="height: 10px;"></div>
+    <div id="divList">
+    </div>
+    <div style="height: 10px;"></div>
+</body>
+</html>
+
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+
+<script type="text/javascript">
+    var _MonthID;
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _MonthID = api.pageParam.MonthID;
+            LoadData();
+        });
+
+    }
+
+    //数据加载函数
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    Result: "GetIssuedInfo",
+                    MonthID: _MonthID
+                },
+                ProcName: "proc_SOM_ISR_MS_MonthTarget",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            },
+            Loading: {
+                Title: "正在获取人员信息...",
+                Show: true
+            }
+        };
+        var content = "";
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    $.each(_result.Data, function (i, item) {
+                        content += "<div class='aui-content aui-card'>" +
+                                   "<li class='aui-list-view-cell aui-text-info' style='font-size:16px;'>品牌:" + item.BrandName + "</li>" +
+                                   "<li class='aui-list-view-cell'><label>目标:</label>" + item.TargetSale + "</li>" +
+                                   "<li class='aui-list-view-cell'><label>折扣:</label>" + item.Discount + "</li>" +
+                                   "<li class='aui-list-view-cell'><label>客单价:</label>" + item.UnitPrice + "</li>" +
+                                   "<li class='aui-list-view-cell'><label>客单件:</label>" + item.UnitSingle + "</li>" +
+                                   "<li class='aui-list-view-cell'><label>VIP占比:</label>" + item.VipRate + "%</li>" +
+                                   "<li class='aui-list-view-cell'><label>新开卡目标:</label>" + item.NVipNum + "</li>" +
+                                   "</div>";
+                    });
+                }
+                $("#divList").html(content);
+            }
+        });
+    }
+</script>

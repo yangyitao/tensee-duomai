@@ -1,0 +1,226 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>考勤异常报表</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <link href="../../../css/common.css" rel="stylesheet" />
+    <style>
+        body, html {
+            background: transparent;
+        }
+
+        .share-box {
+            margin: 0 auto;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+        }
+
+        table {
+            margin: 0 auto;
+            width: 100%;
+            text-align: center;
+            color: #fff;
+            font-size: 18px;
+        }
+
+        #tbTitle {
+            /*border-bottom: 1px solid #e6e6e6;*/
+            height: 50px;
+            color: #1abc9c;
+        }
+
+        #aui-iconfont {
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <div class="share-box">
+        <table id="tbTitle" class="aui-border-b">
+            <tr>
+                <td class="aui-iconfont aui-icon-left" style="width: 40px;" id="tdPrev"></td>
+                <td id="tdTitle">&nbsp;</td>
+                <td class="aui-iconfont aui-icon-right" style="width: 40px;" id="tdNext"></td>
+            </tr>
+        </table>
+    </div>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script type="text/javascript">
+    var _Key, _OrganizeID, _Status;
+    var UICalendar;
+    var _Date;
+    var _AttendList = new Array();
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            _Date = $honesty.NowDate();
+            _Key = api.pageParam.Key || "";
+            _OrganizeID = api.pageParam.OrganizeID || "";
+            _Status = api.pageParam.Status || "";
+
+            //日期控件         
+            UICalendar = api.require('UICalendar');
+            UICalendar.open({
+                rect: {
+                    x: 5,
+                    y: $honesty.RangeTop($(".share-box").offset().top + $("#tdTitle").height()),
+                    w: $(".share-box").width() - 10,
+                    h: $(".share-box").width()
+                },
+                styles: {
+                    bg: 'rgba(0,0,0,0)',
+                    week: {
+                        weekdayColor: '#1abc9c',
+                        weekendColor: '#e74c3c',
+                        size: 15
+                    },
+                    date: {
+                        color: '#999999',
+                        selectedColor: '#3b3b3b',
+                        selectedBg: 'widget://image/selectDate.png',
+                        size: 15
+                    },
+                    today: {
+                        color: '#999999',
+                        bg: ''
+                    },
+                    specialDate: {
+                        color: '#3b3b3b',
+                        bg: 'widget://image/DangerDate.png'
+                    }
+                },
+                fixedOn: api.frameName,
+                fixed: true
+            }, function (ret, err) {
+                if (ret) {
+                    if (ret.eventType == "switch") {
+                        _Date = new Date(ret.year + "/" + ret.month + "/01");
+                        $("#tdTitle").html(ret.year + "年" + ret.month + "月");
+                        LoadData();
+                    }
+                    if (ret.eventType == "show") {
+                        $("#tdTitle").html(_Date.getFullYear() + "年" + (_Date.getMonth() + 1) + "月");
+                        LoadData();
+                    }
+                    if (ret.eventType == "special") {
+                        $honesty.OpenWin({
+                            name: "Attend_DayAttendFault_DayAttendFaultInfo",
+                            url: "Attend/DayAttendFault/DayAttendFaultInfo.html",
+                            title: "考勤异常明细",
+                            LevelNum: 2,
+                            pageParam: {
+                                Key: _Key,
+                                OrganizeID: _OrganizeID,
+                                Status: _Status,
+                                Day: ret.year + "/" + ((ret.month).toString().length == 1 ? "0" + ret.month : ret.month) + "/" + ((ret.day).toString.length == 1 ? "0" + ret.day : ret.day)
+                            }
+                        });
+                    }
+                    if (ret.eventType == "normal") {
+                        $honesty.ShowToast({ msg: ret.day + "号无考勤异常" });
+                    }
+                }
+            });
+
+            //日期往前一个月点击
+            $("#tdPrev").tap(function () {
+                UICalendar.prevMonth(function (ret) {
+                    if (ret) {
+                        _Date = new Date(ret.year + "/" + ret.month + "/01");
+                        $("#tdTitle").html(ret.year + "年" + ret.month + "月");
+                        if (ret.eventType == undefined) {
+                            LoadData();
+                        }
+                        if (ret.eventType == "special") {
+                            $honesty.OpenWin({
+                                name: "Attend_DayAttendFault_DayAttendFaultInfo",
+                                url: "Attend/DayAttendFault/DayAttendFaultInfo.html",
+                                title: "考勤异常明细",
+                                LevelNum: 2,
+                                pageParam: {
+                                    Key: _Key,
+                                    OrganizeID: _OrganizeID,
+                                    Status: _Status,
+                                    Day: ret.year + "/" + ((ret.month).toString().length == 1 ? "0" + ret.month : ret.month) + "/" + ((ret.day).toString.length == 1 ? "0" + ret.day : ret.day)
+                                }
+                            });
+                        }
+                        if (ret.eventType == "normal") {
+                            $honesty.ShowToast({ msg: ret.day + "号无考勤异常" });
+                        }
+                    }
+                });
+            });
+
+            //日期往后一个月点击
+            $("#tdNext").tap(function () {
+                UICalendar.nextMonth(function (ret) {
+                    if (ret) {
+                        _Date = new Date(ret.year + "/" + ret.month + "/01");
+                        $("#tdTitle").html(ret.year + "年" + ret.month + "月");
+                        if (ret.eventType == undefined) {
+                            LoadData();
+                        }
+                        if (ret.eventType == "special") {
+                            $honesty.OpenWin({
+                                name: "Attend_DayAttendFault_DayAttendFaultInfo",
+                                url: "Attend/DayAttendFault/DayAttendFaultInfo.html",
+                                title: "考勤异常明细",
+                                LevelNum: 2,
+                                pageParam: {
+                                    Key: _Key,
+                                    OrganizeID: _OrganizeID,
+                                    Status: _Status,
+                                    Day: ret.year + "/" + ((ret.month).toString().length == 1 ? "0" + ret.month : ret.month) + "/" + ((ret.day).toString.length == 1 ? "0" + ret.day : ret.day)
+                                }
+                            });
+                        }
+                        if (ret.eventType == "normal") {
+                            $honesty.ShowToast({ msg: ret.day + "号无考勤异常" });
+                        }
+                    };
+                });
+            });
+        });
+
+    }
+    function LoadData() {
+        var _options = {
+            PostData: {
+                Params: {
+                    result: "InitMonthFaultList",
+                    ZYear: _Date.getFullYear(),
+                    ZMonth: _Date.getMonth() + 1,
+                    Key: _Key,
+                    OrganizeID: _OrganizeID,
+                    Status: _Status
+                },
+                ProcName: "proc_SOM_HR_EmpAttendReport",
+                DataType: "DataTable",
+                ExecType: "PROC",
+                Mode: "MSSQL"
+            }
+        };
+        $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+            if (_result.Code == "1") {
+                if (_result.Data.length > 0) {
+                    var arrDate = [];
+                    $.each(_result.Data, function (i, item) {
+                        arrDate.push({ date: new Date(_Date.getFullYear() + "/" + ((_Date.getMonth() + 1).toString().length == 1 ? "0" + (_Date.getMonth() + 1) : (_Date.getMonth() + 1)) + "/" + ((item.ZDay).toString.length == 1 ? "0" + (item.ZDay) : (item.ZDay))).Format("yyyy-MM-dd") });
+                    })
+                    UICalendar.setSpecialDates({
+                        specialDates: arrDate
+                    });
+                }
+            }
+        })
+    }
+</script>
+</html>

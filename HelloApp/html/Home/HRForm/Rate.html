@@ -1,0 +1,293 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>费率</title>
+    <link href="../../../css/aui.css" rel="stylesheet" />
+    <style>
+        .aui-nav {
+            height: 40px;
+        }
+
+            .aui-nav .aui-bar-tab {
+                height: 40px;
+            }
+
+        .aui-bar-tab li {
+            height: 40px;
+            line-height: 40px;
+        }
+
+        .aui-nav .aui-bar-tab li.active {
+            color: #fff;
+            background: #16a085;
+        }
+
+        .aui-tab-nav {
+            font-size: 14px;
+            height: 40px;
+        }
+
+            .aui-tab-nav li {
+                height: 40px;
+                line-height: 40px;
+            }
+    </style>
+</head>
+<body>
+    <div class="aui-tab" id="divTab">
+        <ul id="TopBar" class="aui-tab-nav">
+            <li data-power="Regional" class="active">大区</li>
+            <li data-power="Province">省份</li>
+        </ul>
+    </div>
+    <div id="main" style="width: 100%; height: 100%;"></div>
+    <footer class="aui-nav" id="footer">
+        <ul class="aui-bar-tab" id="BottomBar">
+            <li data-type="Front" class="active">前台</li>
+            <li data-type="Back">后台</li>
+        </ul>
+    </footer>
+</body>
+<script src="../../../script/api.js"></script>
+<script src="../../../script/zepto.js"></script>
+<script src="../../../script/honesty.base.js"></script>
+<script src="../../../script/echarts.min.js"></script>
+<script type="text/javascript">
+    var _Data = null,//大区数据
+        _DataExclude = null;//除了大区数据
+    apiready = function () {
+        api.parseTapmode();
+        $(function () {
+            $("#main").height(api.frameHeight - 80);
+            LoadData();
+
+            $("#TopBar").find("li").tap(function () {
+                $("#TopBar").find(".active").removeClass("active");
+                $(this).addClass("active");
+                var _Power = $("#TopBar").find(".active").data("power");
+                if ($("#TopBar").find(".active").data("power") == "Province") {
+                    $("#BottomBar").find(".active").removeClass("active");
+                    $("#BottomBar").find("[data-type='Front']").addClass("active");
+                    $("#BottomBar").find("[data-type='Back']").hide();
+                }
+                else {
+                    $("#BottomBar").find("[data-type='Back']").show();
+                }
+                LoadData();
+            });
+
+            $("#BottomBar").find("li").tap(function () {
+                $("#BottomBar").find(".active").removeClass("active");
+                $(this).addClass("active");
+                LoadData();
+            });
+        });
+
+    }
+
+    function LoadData() {
+        if ($("#TopBar").find(".active").data("power") == "Regional") {
+            if (_Data == null) {
+                var _options = {
+                    PostData: {
+                        Params: {
+                            result: "GetRate"
+                        },
+                        ProcName: "proc_Index_HRForm",
+                        DataType: "DataTable",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    }
+                };
+                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                    if (_result.Code == "1") {
+                        if (_result.Data.length > 0) {
+                            _Data = _result.Data;
+                            ChangeType();
+                        }
+                    }
+                    else {
+                        $honesty.CloseWin();
+                    }
+                });
+            }
+            else {
+                ChangeType();
+            }
+        }
+        else {
+            if (_DataExclude == null) {
+                var _options = {
+                    PostData: {
+                        Params: {
+                            result: "GetRate1",
+                            Regional: (GetSession("RoleList").toString().indexOf("EFB111AA-2308-48E2-B1FC-54181EC35E3F") >= 0 ? "" : GetSession("AreaName"))
+                        },
+                        ProcName: "proc_Index_HRForm",
+                        DataType: "DataTable",
+                        ExecType: "PROC",
+                        Mode: "MSSQL"
+                    }
+                };
+                $.when($honesty.AjaxChannel(_options)).done(function (_result) {
+                    if (_result.Code == "1") {
+                        if (_result.Data.length > 0) {
+                            _DataExclude = _result.Data;
+                            ChangeType();
+                        }
+                    }
+                    else {
+                        $honesty.CloseWin();
+                    }
+                });
+            }
+            else {
+                ChangeType();
+            }
+        }
+    }
+
+    function ChangeType() {
+        var _default = {};
+        var arrCategory = new Array();
+        var arrLegend = new Array();
+        var arrSeries = new Array();
+        var _Power = $("#TopBar").find(".active").data("power");
+        var _Type = $("#BottomBar").find(".active").data("type");
+
+        var _Post = "", _Class = "";
+        var exist = 0, all = 0;
+        switch (_Power) {
+            case "Regional":
+                var isFront = (_Type == "Back" ? "0" : "1");
+                $.each(_Data, function (i, item) {
+                    if (item.IsFront == isFront) {
+                        if ($.inArray(item.Regional, arrCategory) < 0) {
+                            arrCategory.push(item.Regional);
+                        }
+                        if ($.inArray(item.ZYear + "年", arrLegend) < 0) {
+                            arrLegend.push(item.ZYear + "年");
+                            arrSeries.push({
+                                name: item.ZYear + "年",
+                                type: "bar",
+                                stack: item.ZYear,
+                                label: { normal: { show: true, position: "top", textStyle: { color: "#000" }, formatter: '{c}%' } },
+                                data: [],
+                                markLine: { symbol: 'none', data: [{ type: 'average', name: '平均值', label: { normal: { position: 'start', textStyle: { fontSize: 11 }, formatter: '{c}%' } }, lineStyle: { normal: { width: 2 } } }] }
+                            });
+                        }
+                    }
+                });
+
+                for (var j = 0; j < arrSeries.length; j++) {
+                    for (var i = 0; i < arrCategory.length; i++) {
+                        arrSeries[j].data.push({ value: 0, LaborCost: 0, Amount: 0 });
+                    }
+                }
+
+                $.each(_Data, function (i, item) {
+                    if (item.IsFront == isFront) {
+                        var legendIndex = $.inArray(item.ZYear + "年", arrLegend);
+                        var categoryIndex = $.inArray(item.Regional, arrCategory);
+
+                        arrSeries[legendIndex].data[categoryIndex].LaborCost = (Number(item.LaborCost) + Number(arrSeries[legendIndex].data[categoryIndex].LaborCost)).toFixed(2);
+                        arrSeries[legendIndex].data[categoryIndex].Amount = (Number(item.Amount) + Number(arrSeries[legendIndex].data[categoryIndex].Amount)).toFixed(2);
+                        arrSeries[legendIndex].data[categoryIndex].value = (arrSeries[legendIndex].data[categoryIndex].Amount == "0" ? "0" : (Number(arrSeries[legendIndex].data[categoryIndex].LaborCost) / Number(arrSeries[legendIndex].data[categoryIndex].Amount) * 100).toFixed(2));
+                    }
+                });
+
+                _default = {
+                    color: ['rgba(0,157,217,1)', 'rgba(255,193,0,1)'],
+                    tooltip: {
+                        trigger: 'axis', axisPointer: { type: 'shadow' }, textStyle: { fontSize: 12 }
+                    },
+                    legend: { data: arrLegend, textStyle: { fontSize: 10 }, itemHeight: 14, selectedMode: false },
+                    grid: { left: '3%', right: '1%', bottom: '10', top: '30', containLabel: true },
+                    xAxis: { type: 'category', data: arrCategory },
+                    yAxis: { type: 'value', axisLabel: { formatter: '{value} %' } },
+                    series: arrSeries
+                };
+                break;
+            case "Province":
+                var arrLaborCost = new Array(),
+                    arrAmount = new Array();
+                $.each(_DataExclude, function (i, item) {
+                    if ($.inArray(item.Province, arrCategory) < 0) {
+                        arrCategory.push(item.Province);
+
+                    }
+                    if ($.inArray(item.ZYear, arrLegend) < 0) {
+                        arrLegend.push(item.ZYear);
+                        arrLaborCost.push([]);
+                        arrAmount.push([]);
+                    }
+                });
+                arrSeries.push({ name: arrLegend[arrLegend.length - 1], type: "bar", label: { normal: { show: true, position: arrCategory.length > 6 ? "insideRight" : "top", textStyle: { color: arrCategory.length > 6 ? "#fff" : "#000" }, formatter: '{c}%' } }, data: [] });
+                for (var i = 0; i < arrCategory.length; i++) {
+                    arrSeries[0].data.push({ value: 0, LastRate: 0 });
+                }
+                for (var i = 0; i < arrLegend.length; i++) {
+                    for (var j = 0; j < arrCategory.length; j++) {
+                        arrLaborCost[i].push(0);
+                        arrAmount[i].push(0);
+                    }
+                }
+
+                $.each(_DataExclude, function (i, item) {
+                    var legendIndex = $.inArray(item.ZYear, arrLegend);
+                    var categoryIndex = $.inArray(item.Province, arrCategory);
+
+                    arrLaborCost[legendIndex][categoryIndex] = Number(item.LaborCost) + Number(arrLaborCost[legendIndex][categoryIndex]);
+                    arrAmount[legendIndex][categoryIndex] = Number(item.Amount) + Number(arrAmount[legendIndex][categoryIndex]);
+                });
+
+                for (var i = 0; i < arrLaborCost.length; i++) {
+                    for (var j = 0; j < arrLaborCost[i].length; j++) {
+                        if (i == 0) {
+                            arrSeries[0].data[j].LastRate = (arrAmount[i][j] == "0" ? "0" : (Number(arrLaborCost[i][j]) / Number(arrAmount[i][j]) * 100).toFixed(2));
+                        }
+                        else {
+                            arrSeries[0].data[j].value = (arrAmount[i][j] == "0" ? "0" : (Number(arrLaborCost[i][j]) / Number(arrAmount[i][j]) * 100).toFixed(2));
+                        }
+                    }
+                }
+
+                _default = {
+                    color: ['rgb(147,185,67)'],
+                    tooltip: {
+                        trigger: 'axis', axisPointer: { type: 'shadow' }, textStyle: { fontSize: 12 },
+                        formatter: function (params, ticket, callback) {
+                            var res = "";
+                            $.each(params, function (i, item) {
+                                res += item.name + "<br>" + item.seriesName + "年:" + item.value + "%<br>" + (Number(item.seriesName) - 1) + "年:" + item.data.LastRate + "%";
+                            });
+                            setTimeout(function () { callback(ticket, res); }, 10);
+                            return 'loading';
+                        }
+                    },
+                    grid: { left: '1%', right: '20', bottom: '10', top: '10', containLabel: true },
+                    xAxis: { type: 'value', axisLabel: { formatter: '{value} %' } },
+                    yAxis: { type: 'category', data: arrCategory, axisLabel: { interval: 0 } },
+                    series: arrSeries
+                };
+
+                if (arrCategory.length <= 6) {
+                    _default.xAxis = { type: 'category', data: arrCategory, axisLabel: { interval: 0 } };
+                    _default.yAxis = { type: 'value', axisLabel: { formatter: '{value} %' } };
+                    _default.grid = { left: '1%', right: '10', bottom: '10', top: '20', containLabel: true }
+                }
+                break;
+
+            default:
+
+        }
+
+        // 基于准备好的dom，初始化echarts实例
+        myChart = echarts.init(document.getElementById('main'));
+        myChart.setOption(_default);
+    }
+</script>
+</html>
